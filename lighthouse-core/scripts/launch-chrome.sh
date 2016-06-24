@@ -15,6 +15,7 @@ launch_osx() {
   TMP_PROFILE_DIR=$(mktemp -d -t lighthouse)
   "$CHROME_CANARY_EXEC_PATH" \
     --remote-debugging-port=9222 \
+    --enable-gpu-benchmarking \
     --no-first-run \
     --user-data-dir=$TMP_PROFILE_DIR \
     $CHROME_ARGS \
@@ -34,6 +35,7 @@ launch_linux() {
   "$LIGHTHOUSE_CHROMIUM_PATH" \
     --disable-setuid-sandbox \
     --remote-debugging-port=9222 \
+    --enable-gpu-benchmarking \
     --no-first-run \
     --user-data-dir=$TMP_PROFILE_DIR \
     $CHROME_ARGS \
