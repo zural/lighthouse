@@ -8,35 +8,29 @@
     "node": ">=5"
   },
   "scripts": {
-    "//":
-    "// dependency installation",
+    "//": "// passing through tasks to core",
     "postinstall": "npm run core-install && npm run extension-install",
     "core-install": "npm --prefix ./lighthouse-core install ./lighthouse-core",
     "extension-install": "npm --prefix ./lighthouse-extension install ./lighthouse-extension",
-    "//":
-    "// global tasks",
     "lint": "eslint .",
     "smoke": "lighthouse-cli/scripts/run-smoke-tests.sh",
     "coverage": "istanbul cover -x \"**/third_party/**\" _mocha -- $(find */test -name '*.js') --timeout 60000",
     "coveralls": "npm run coverage && cat ./coverage/lcov.info | coveralls",
     "start": "node ./lighthouse-cli/index.js",
-    "//":
-    "// test",
     "test": "npm run lint --silent && npm run unit && npm run closure",
     "cli-unit": "mocha $(find lighthouse-cli/test -name '*.js') --timeout 60000",
     "unit": "npm run cli-unit && npm --prefix ./lighthouse-core run unit",
-    "//":
-    "// passing through tasks to core",
     "closure": "npm --prefix ./lighthouse-core run closure",
     "watch": "npm --prefix ./lighthouse-core run watch",
     "chrome": "npm --prefix ./lighthouse-core run chrome"
   },
   "devDependencies": {
-    "mocha": "^2.3.3",
+    "coveralls": "^2.11.9",
     "eslint": "^2.4.0",
     "eslint-config-google": "^0.4.0",
     "istanbul": "^0.4.3",
-    "coveralls": "^2.11.9"
+    "mocha": "^2.3.3",
+    "selenium-assistant": "^0.1.5"
   },
   "dependencies": {
     "yargs": "3.30.0"
