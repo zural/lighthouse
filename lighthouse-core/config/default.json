@@ -29,7 +29,7 @@
   {
     "trace": true,
     "loadPage": true,
-    "loadDataName": "scrolling",
+    "traceName": "scrolling",
     "gatherers": [
       "scrolling"
     ]
@@ -344,7 +344,7 @@
           "weight": 1
         },
         "smooth-scrolling": {
-          "value": 60,
+          "value": 1,
           "weight": 1
         }
       }

@@ -17,6 +17,8 @@
 'use strict';
 
 const Audit = require('./audit');
+const TracingProcessor = require('../lib/traces/tracing-processor');
+const TRACE_NAME = 'scrolling';
 
 class SmoothScrolling extends Audit {
   /**
@@ -36,8 +38,14 @@ class SmoothScrolling extends Audit {
    * @return {!AuditResult}
    */
   static audit(artifacts) {
+    const traceContents = artifacts.traces[TRACE_NAME].traceContents;
+    const tracingProcessor = new TracingProcessor();
+    const model = tracingProcessor.init(traceContents);
+    const smoothness = TracingProcessor.getAnimationSmoothness(model, traceContents);
+    console.log('smoothness', smoothness);
+
     return SmoothScrolling.generateAuditResult({
-      value: 0,
+      value: 0
     });
   }
 }

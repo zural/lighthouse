@@ -192,6 +192,20 @@ class TraceProcessor {
   }
 
   /**
+   * Calculates the smoothness of an animation.
+   * @param {!traceviewer.Model} model
+   * @param {!Array<!Object>} trace
+   * @param {number=} startTime Optional start time (in ms) of range of interest. Defaults to trace start.
+   * @param {number=} endTime Optional end time (in ms) of range of interest. Defaults to trace end.
+   * @return {!number}
+   */
+  static getAnimationSmoothness(model/* , trace, startTime, endTime*/) {
+    const vl = new traceviewer.metrics.ValueList();
+    const set = traceviewer.metrics.sh.responsivenessMetric(vl, model);
+    return set;
+  }
+
+  /**
    * Calculates the maximum queueing time (in ms) of high priority tasks for
    * selected percentiles within a window of the main thread.
    * @see https://docs.google.com/document/d/18gvP-CBA2BiBpi3Rz1I1ISciKGhniTSZ9TY0XCnXS7E/preview
