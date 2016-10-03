@@ -29,12 +29,22 @@ class Styles extends Gatherer {
 
   constructor() {
     super();
-    this._stylesRecorder = [];
+    this._styleHeaders = [];
+    this._styleBodies = [];
     this._onStyleSheetAdded = this.onStyleSheetAdded.bind(this);
+
   }
 
   onStyleSheetAdded(stylesheet) {
-    this._stylesRecorder.push(stylesheet);
+    this._styleHeaders.push(stylesheet);
+
+    // Remove stylesheets "injected" by extension or added in the "inspector".
+    if (stylesheet.header.origin !== 'regular') return;
+
+    const p = this.driver.sendCommand('CSS.getStyleSheetText', {
+      styleSheetId: stylesheet.header.styleSheetId
+    });
+    this._styleBodies.push(p);
   }
 
   beginStylesCollect(opts) {
@@ -46,6 +56,7 @@ class Styles extends Gatherer {
     //       })
     //       .catch(reject);
     // });
+    this.driver = opts.driver;
     opts.driver.sendCommand('DOM.enable');
     opts.driver.sendCommand('CSS.enable');
     opts.driver.on('CSS.styleSheetAdded', this._onStyleSheetAdded);
@@ -53,19 +64,10 @@ class Styles extends Gatherer {
 
   endStylesCollect(opts) {
     return new Promise((resolve, reject) => {
+
       opts.driver.off('CSS.styleSheetAdded', this._onStyleSheetAdded);
-
-      // Remove stylesheets "injected" by extension or added in the "inspector".
-      const styleHeaders = this._stylesRecorder.filter(styleHeader => {
-        return styleHeader.header.origin === 'regular';
-      }).map(styleHeader => {
-console.log(styleHeader.header.styleSheetId)
-        return opts.driver.sendCommand('CSS.getStyleSheetText', {
-          styleSheetId: styleHeader.header.styleSheetId
-        });
-      });
-
-      return Promise.all(styleHeaders).then(results => {
+      return Promise.all(this._styleBodies).then(results => {
+  console.log(results);
         opts.driver.sendCommand('CSS.disable').then(_ => {
           resolve(results);
         }, reject);
