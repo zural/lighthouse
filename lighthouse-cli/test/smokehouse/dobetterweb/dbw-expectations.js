@@ -38,7 +38,8 @@ module.exports = [
       'no-websql': false,
       'notification-on-start': false,
       'script-blocking-first-paint': false,
-      'uses-passive-event-listeners': false
+      'uses-passive-event-listeners': false,
+      'uses-single-use-event-listeners': false
     }
   }, {
     initialUrl: 'http://localhost:10200/online-only.html',
@@ -57,7 +58,8 @@ module.exports = [
       'no-old-flexbox': true,
       'no-websql': true,
       'script-blocking-first-paint': true,
-      'uses-passive-event-listeners': true
+      'uses-passive-event-listeners': true,
+      'uses-single-use-event-listeners': true
     }
   }
 ];
