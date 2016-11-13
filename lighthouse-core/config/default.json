@@ -296,6 +296,9 @@
         "uses-passive-event-listeners": {
           "expectedValue": true
         },
+        "uses-single-use-event-listeners": {
+          "expectedValue": true
+        },
         "no-mutation-events": {
           "expectedValue": false
         }
