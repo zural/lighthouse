@@ -20,7 +20,7 @@ const NetworkRecorder = require('../lib/network-recorder');
 const emulation = require('../lib/emulation');
 const Element = require('../lib/element');
 const EventEmitter = require('events').EventEmitter;
-const parseURL = require('url').parse;
+const URL = require('whatwg-url').URL;
 
 const log = require('../lib/log.js');
 
@@ -223,15 +223,13 @@ class Driver {
     }).then(_ => this.getServiceWorkerVersions()).then(data => {
       versions = data.versions;
     }).then(_ => {
-      const parsedURL = parseURL(pageUrl);
-      const origin = `${parsedURL.protocol}//${parsedURL.hostname}` +
-          (parsedURL.port ? `:${parsedURL.port}` : '');
+      const parsedURL = new URL(pageUrl);
+      const origin = parsedURL.origin;
 
       registrations
         .filter(reg => {
-          const parsedURL = parseURL(reg.scopeURL);
-          const swOrigin = `${parsedURL.protocol}//${parsedURL.hostname}` +
-              (parsedURL.port ? `:${parsedURL.port}` : '');
+          const parsedURL = new URL(reg.scopeURL);
+          const swOrigin = parsedURL.origin;
 
           return origin === swOrigin;
         })
@@ -653,9 +651,8 @@ class Driver {
   }
 
   clearDataForOrigin(url) {
-    const parsedURL = parseURL(url);
-    const origin = `${parsedURL.protocol}//${parsedURL.hostname}` +
-      (parsedURL.port ? `:${parsedURL.port}` : '');
+    const parsedURL = new URL(url);
+    const origin = parsedURL.origin;
 
     // Clear all types of storage except cookies, so the user isn't logged out.
     //   https://chromedevtools.github.io/debugger-protocol-viewer/tot/Storage/#type-StorageType

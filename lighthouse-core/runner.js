@@ -24,7 +24,8 @@ const assetSaver = require('./lib/asset-saver');
 const log = require('./lib/log');
 const fs = require('fs');
 const path = require('path');
-const url = require('url');
+const URL = require('whatwg-url').URL;
+const parseURL = require('whatwg-url').parseURL;
 
 class Runner {
   static run(connection, opts) {
@@ -38,19 +39,20 @@ class Runner {
     if (typeof opts.initialUrl !== 'string' || opts.initialUrl.length === 0) {
       return Promise.reject(new Error('You must provide a url to the driver'));
     }
-    const parsedURL = url.parse(opts.url);
-    // canonicalize URL with any trailing slashes neccessary
-    opts.url = url.format(parsedURL);
+    const parsedURL = parseURL(opts.url);
 
-    if (!parsedURL.protocol || !parsedURL.hostname) {
+    if (!parsedURL.scheme || !parsedURL.host) {
       const err = new Error('The url provided should have a proper protocol and hostname.');
       return Promise.reject(err);
     }
     // If the URL isn't https and is also not localhost complain to the user.
-    if (!parsedURL.protocol.includes('https') && parsedURL.hostname !== 'localhost') {
+    if (!parsedURL.scheme.includes('https') && parsedURL.host !== 'localhost') {
       log.warn('Lighthouse', 'The URL provided should be on HTTPS');
       log.warn('Lighthouse', 'Performance stats will be skewed redirecting from HTTP to HTTPS.');
     }
+
+    // canonicalize URL with any trailing slashes neccessary
+    opts.url = (new URL(opts.url)).href;
 
     // Check that there are passes & audits...
     const validPassesAndAudits = config.passes && config.audits;

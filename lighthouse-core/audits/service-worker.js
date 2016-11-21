@@ -17,7 +17,7 @@
 
 'use strict';
 
-const url = require('url');
+const URL = require('whatwg-url').URL;
 const Audit = require('./audit');
 
 /**
@@ -25,9 +25,7 @@ const Audit = require('./audit');
  * @return {string}
  */
 function getOrigin(targetURL) {
-  const parsedURL = url.parse(targetURL);
-  return `${parsedURL.protocol}//${parsedURL.hostname}` +
-      (parsedURL.port ? `:${parsedURL.port}` : '');
+  return (new URL(targetURL)).origin;
 }
 
 /**

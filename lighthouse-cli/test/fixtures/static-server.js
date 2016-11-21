@@ -19,12 +19,14 @@
 const http = require('http');
 const path = require('path');
 const fs = require('fs');
-const parseURL = require('url').parse;
+const URL = require('whatwg-url').URL;
 
 function requestHandler(request, response) {
-  const filePath = parseURL(request.url).pathname;
-  const queryString = parseURL(request.url).search;
+  const requestUrl = new URL(request.url);
+  const filePath = requestUrl.pathname;
+  const queryString = requestUrl.search;
   let absoluteFilePath = path.join(__dirname, filePath);
+
   if (filePath === '/promise_polyfill.js') {
     // evaluateAsync previously had a bug that LH would fail if a page polyfilled Promise.
     // We bring in a third-party Promise polyfill to ensure we don't still fail.
