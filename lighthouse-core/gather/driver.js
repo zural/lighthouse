@@ -223,13 +223,11 @@ class Driver {
     }).then(_ => this.getServiceWorkerVersions()).then(data => {
       versions = data.versions;
     }).then(_ => {
-      const parsedURL = new URL(pageUrl);
-      const origin = parsedURL.origin;
+      const origin = new URL(pageUrl).origin;
 
       registrations
         .filter(reg => {
-          const parsedURL = new URL(reg.scopeURL);
-          const swOrigin = parsedURL.origin;
+          const swOrigin = new URL(reg.scopeURL).origin;
 
           return origin === swOrigin;
         })
@@ -651,8 +649,7 @@ class Driver {
   }
 
   clearDataForOrigin(url) {
-    const parsedURL = new URL(url);
-    const origin = parsedURL.origin;
+    const origin = new URL(url).origin;
 
     // Clear all types of storage except cookies, so the user isn't logged out.
     //   https://chromedevtools.github.io/debugger-protocol-viewer/tot/Storage/#type-StorageType

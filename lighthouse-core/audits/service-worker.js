@@ -21,21 +21,13 @@ const URL = require('whatwg-url').URL;
 const Audit = require('./audit');
 
 /**
- * @param {string} targetURL
- * @return {string}
- */
-function getOrigin(targetURL) {
-  return (new URL(targetURL)).origin;
-}
-
-/**
  * @param {!Array<!ServiceWorkerVersion>} versions
  * @param {string} url
  * @return {(!ServiceWorkerVersion|undefined)}
  */
 function getActivatedServiceWorker(versions, url) {
-  const origin = getOrigin(url);
-  return versions.find(v => v.status === 'activated' && getOrigin(v.scriptURL) === origin);
+  const origin = new URL(url).origin;
+  return versions.find(v => v.status === 'activated' && new URL(v.scriptURL).origin === origin);
 }
 
 class ServiceWorker extends Audit {
