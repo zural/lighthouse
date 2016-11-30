@@ -22,7 +22,8 @@
 
 'use strict';
 
-const URL = require('whatwg-url').URL;
+const url = require('url');
+const URL = url.URL || require('whatwg-url').URL;
 const Audit = require('../audit');
 const EventHelpers = require('../../lib/event-helpers');
 const Formatter = require('../../formatters/formatter');

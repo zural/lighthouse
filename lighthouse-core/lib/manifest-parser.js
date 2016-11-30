@@ -16,7 +16,8 @@
  */
 'use strict';
 
-const URL = require('whatwg-url').URL;
+const url = require('url');
+const URL = url.URL || require('whatwg-url').URL;
 const validateColor = require('./web-inspector').Color.parse;
 
 const ALLOWED_DISPLAY_VALUES = [
