@@ -69,7 +69,7 @@ class SingleUseEventsAudit extends Audit {
       });
     }
 
-    // Filter out event listeners that should be single-use.
+    // Filter out event listeners that appear to remove themselves.
     const results = listeners.filter(loc => {
       const regex = new RegExp(`\\.removeEventListener\\(\\s*['"]${loc.type}['"]\\s*,`, 'g');
       const removesOwnListener = loc.handler.description.match(regex);
