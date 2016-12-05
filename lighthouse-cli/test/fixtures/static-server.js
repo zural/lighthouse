@@ -19,10 +19,10 @@
 const http = require('http');
 const path = require('path');
 const fs = require('fs');
-const URL = require('url').URL || require('whatwg-url').URL;
+const parseURL = require('url').parse;
 
 function requestHandler(request, response) {
-  const requestUrl = new URL(request.url);
+  const requestUrl = parseURL(request.url);
   const filePath = requestUrl.pathname;
   const queryString = requestUrl.search;
   let absoluteFilePath = path.join(__dirname, filePath);
