@@ -19,7 +19,7 @@
 const http = require('http');
 const path = require('path');
 const fs = require('fs');
-const parseURL = require('url').parse;
+const URL = require('url').URL || require('whatwg-url').URL;
 
 function requestHandler(request, response) {
   const requestUrl = new URL(request.url);

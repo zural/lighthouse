@@ -20,8 +20,7 @@ const NetworkRecorder = require('../lib/network-recorder');
 const emulation = require('../lib/emulation');
 const Element = require('../lib/element');
 const EventEmitter = require('events').EventEmitter;
-const url = require('url');
-const URL = url.URL || require('whatwg-url').URL;
+const URL = require('url').URL || require('whatwg-url').URL;
 
 const log = require('../lib/log.js');
 

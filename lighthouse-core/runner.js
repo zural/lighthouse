@@ -24,8 +24,7 @@ const assetSaver = require('./lib/asset-saver');
 const log = require('./lib/log');
 const fs = require('fs');
 const path = require('path');
-const url = require('url');
-const URL = url.URL || require('whatwg-url').URL;
+const URL = require('url').URL || require('whatwg-url').URL;
 
 class Runner {
   static run(connection, opts) {

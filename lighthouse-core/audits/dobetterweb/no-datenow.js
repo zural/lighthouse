@@ -22,8 +22,7 @@
 
 'use strict';
 
-const url = require('url');
-const URL = url.URL || require('whatwg-url').URL;
+const URL = require('url').URL || require('whatwg-url').URL;
 const Audit = require('../audit');
 const Formatter = require('../../formatters/formatter');
 
@@ -62,7 +61,17 @@ class NoDateNowAudit extends Audit {
     const pageHost = new URL(artifacts.URL.finalUrl).host;
     // Filter usage from other hosts and keep eval'd code.
     const results = artifacts.DateNowUse.usage.filter(err => {
-      return err.isEval ? err.url : new URL(err.url).host === pageHost;
+      let result = err.url;
+
+      if (!err.isEval) {
+        try {
+          result = new URL(err.url).host === pageHost;
+        } catch (err) {
+          result = false;
+        }
+      }
+
+      return result;
     }).map(err => {
       return Object.assign({
         label: `line: ${err.line}, col: ${err.col}`,

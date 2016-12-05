@@ -109,6 +109,9 @@ gulp.task('browserify-lighthouse', () => {
       bundle.transform('./dtm-transform.js', {
         global: true
       })
+      .transform('./url-transform.js', {
+        global: true
+      })
       .ignore('../lighthouse-core/lib/asset-saver.js') // relative from gulpfile location
       .ignore('source-map')
       .ignore('debug/node');
