@@ -17,7 +17,7 @@
 
 'use strict';
 
-const URL = require('url').URL || require('whatwg-url').URL;
+const URL = this.URL || require('url').URL || require('whatwg-url').URL;
 const path = require('path');
 const fs = require('fs');
 const Formatter = require('./formatter');

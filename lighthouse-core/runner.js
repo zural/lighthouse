@@ -24,7 +24,7 @@ const assetSaver = require('./lib/asset-saver');
 const log = require('./lib/log');
 const fs = require('fs');
 const path = require('path');
-const URL = require('url').URL || require('whatwg-url').URL;
+const URL = this.URL || require('url').URL || require('whatwg-url').URL;
 
 class Runner {
   static run(connection, opts) {
@@ -48,7 +48,7 @@ class Runner {
     }
 
     // If the URL isn't https and is also not localhost complain to the user.
-    if (parsedURL.protocol !== 'https' && parsedURL.hostname !== 'localhost') {
+    if (parsedURL.protocol.includes('https:') && parsedURL.hostname !== 'localhost') {
       log.warn('Lighthouse', 'The URL provided should be on HTTPS');
       log.warn('Lighthouse', 'Performance stats will be skewed redirecting from HTTP to HTTPS.');
     }

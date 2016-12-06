@@ -17,7 +17,7 @@
 
 'use strict';
 
-const URL = require('url').URL || require('whatwg-url').URL;
+const URL = this.URL || require('url').URL || require('whatwg-url').URL;
 const Audit = require('./audit');
 
 /**
