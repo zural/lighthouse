@@ -22,7 +22,7 @@
 
 'use strict';
 
-const URL = this.URL || require('url').URL || require('whatwg-url').URL;
+const URL = self.URL || require('url').URL || require('whatwg-url').URL;
 const Audit = require('../audit');
 const EventHelpers = require('../../lib/event-helpers');
 const Formatter = require('../../formatters/formatter');
@@ -67,11 +67,11 @@ class NoMutationEventsAudit extends Audit {
 
     const listeners = artifacts.EventListeners;
 
-    const pageHost = (new URL(artifacts.URL.finalUrl)).host;
+    const pageHost = new URL(artifacts.URL.finalUrl).host;
 
     const results = listeners.filter(loc => {
       const isMutationEvent = this.MUTATION_EVENTS.indexOf(loc.type) !== -1;
-      const sameHost = loc.url ? (new URL(loc.url)).host === pageHost : true;
+      const sameHost = loc.url ? new URL(loc.url).host === pageHost : true;
       return sameHost && isMutationEvent;
     }).map(EventHelpers.addFormattedCodeSnippet);
 

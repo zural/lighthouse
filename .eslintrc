@@ -3,6 +3,9 @@
   "env": {
     "node": true
   },
+  "globals": {
+    "self": true
+  },
   "rules": {
     "max-len": [2, 100, {
       "ignoreComments": true,

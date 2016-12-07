@@ -18,12 +18,13 @@
 
 require('../../compiled-check.js')('printer.js');
 
+// self is necessary when checking for URL support
+global.self = {};
+
 const Printer = require('../../printer.js');
 const assert = require('assert');
 const fs = require('fs');
 const sampleResults = require('../fixtures/sample.json');
-
-/* global describe, it */
 
 describe('Printer', () => {
   it('accepts valid output paths', () => {

@@ -15,6 +15,9 @@
  */
 'use strict';
 
+// self is necessary when checking for URL support
+global.self = {};
+
 const Audit = require('../../audits/manifest-background-color.js');
 const assert = require('assert');
 const manifestSrc = JSON.stringify(require('../fixtures/manifest.json'));

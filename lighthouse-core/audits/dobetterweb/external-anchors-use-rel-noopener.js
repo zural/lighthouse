@@ -17,7 +17,7 @@
 
 'use strict';
 
-const URL = this.URL || require('url').URL || require('whatwg-url').URL;
+const URL = self.URL || require('url').URL || require('whatwg-url').URL;
 const Audit = require('../audit');
 const Formatter = require('../../formatters/formatter');
 
@@ -47,10 +47,10 @@ class ExternalAnchorsUseRelNoopenerAudit extends Audit {
       });
     }
 
-    const pageHost = (new URL(artifacts.URL.finalUrl)).host;
+    const pageHost = new URL(artifacts.URL.finalUrl).host;
     // Filter usages to exclude anchors that are same origin
     const failingAnchors = artifacts.AnchorsWithNoRelNoopener.usages
-      .filter(anchor => (new URL(anchor.href)).host !== pageHost)
+      .filter(anchor => new URL(anchor.href).host !== pageHost)
       .map(anchor => {
         return {
           url: `<a

@@ -16,7 +16,7 @@
  */
 'use strict';
 
-const URL = this.URL || require('url').URL || require('whatwg-url').URL;
+const URL = self.URL || require('url').URL || require('whatwg-url').URL;
 const validateColor = require('./web-inspector').Color.parse;
 
 const ALLOWED_DISPLAY_VALUES = [
@@ -124,7 +124,7 @@ function parseStartUrl(jsonInput, manifestUrl, documentUrl) {
   // 8.10(4) - construct URL with raw as input and manifestUrl as the base.
   let startUrl;
   try {
-    startUrl = (new URL(raw, manifestUrl)).href;
+    startUrl = new URL(raw, manifestUrl).href;
   } catch (e) {
     // 8.10(5) - discard invalid URLs.
     return {
@@ -188,7 +188,7 @@ function parseIcon(raw, manifestUrl) {
   }
   if (src.value) {
     // 9.4(4) - construct URL with manifest URL as the base
-    src.value = (new URL(src.value, manifestUrl)).href;
+    src.value = new URL(src.value, manifestUrl).href;
   }
 
   const type = parseString(raw.type, true);
@@ -270,7 +270,7 @@ function parseApplication(raw) {
   if (appUrl.value) {
     try {
       // 10.2.(4) - attempt to construct URL.
-      appUrl.value = (new URL(appUrl.value)).href;
+      appUrl.value = new URL(appUrl.value).href;
     } catch (e) {
       appUrl.value = undefined;
       appUrl.debugString = 'ERROR: invalid application URL ${raw.url}';
