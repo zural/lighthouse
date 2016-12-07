@@ -63,7 +63,6 @@ class NoDateNowAudit extends Audit {
     const results = artifacts.DateNowUse.usage.filter(err => {
       let result = err.url;
 
-      console.log(err.url);
       if (!err.isEval) {
         try {
           result = new URL(err.url).host === pageHost;
