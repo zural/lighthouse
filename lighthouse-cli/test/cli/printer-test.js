@@ -21,6 +21,7 @@ require('../../compiled-check.js')('printer.js');
 // self is necessary when checking for URL support
 global.self = {};
 
+/* eslint-env mocha */
 const Printer = require('../../printer.js');
 const assert = require('assert');
 const fs = require('fs');
