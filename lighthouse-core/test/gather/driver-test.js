@@ -17,6 +17,9 @@
 
 'use strict';
 
+// self is necessary when checking for URL support
+global.self = {};
+
 const Driver = require('../../gather/driver.js');
 const Connection = require('../../gather/connections/connection.js');
 const Element = require('../../lib/element.js');
@@ -95,7 +98,8 @@ const req3 = {
 };
 const mockRedirects = [req1, req2, req3];
 
-/* global describe, it */
+/* eslint-env mocha */
+
 describe('Browser Driver', () => {
   it('returns null when DOM.querySelector finds no node', () => {
     return driverStub.querySelector('invalid').then(value => {

@@ -15,7 +15,8 @@
  */
 'use strict';
 
-/* eslint-env mocha */
+// self is necessary when checking for URL support
+global.self = {};
 
 const manifestParser = require('../../lib/manifest-parser');
 const assert = require('assert');
@@ -33,6 +34,8 @@ const EXAMPLE_DOC_URL = 'https://example.com/index.html';
 function noUrlManifestParser(manifestSrc) {
   return manifestParser(manifestSrc, EXAMPLE_MANIFEST_URL, EXAMPLE_DOC_URL);
 }
+
+/* eslint-env mocha */
 
 describe('Manifest Parser', function() {
   it('should not parse empty string input', function() {

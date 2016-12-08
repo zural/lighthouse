@@ -15,6 +15,9 @@
  */
 'use strict';
 
+// self is necessary when checking for URL support
+global.self = {};
+
 const PassiveEventsAudit = require('../../../audits/dobetterweb/uses-passive-event-listeners.js');
 const assert = require('assert');
 const fixtureData = require('../../fixtures/page-level-event-listeners.json');

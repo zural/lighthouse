@@ -15,6 +15,9 @@
  */
 'use strict';
 
+// self is necessary when checking for URL support
+global.self = {};
+
 const UsesHTTP2Audit = require('../../../audits/dobetterweb/uses-http2.js');
 const assert = require('assert');
 
