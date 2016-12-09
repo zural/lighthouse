@@ -16,9 +16,6 @@
 
 'use strict';
 
-// self is necessary when checking for URL support
-global.self = {};
-
 const criticalRequestChainFormatter = require('../../formatters/critical-request-chains.js');
 const assert = require('assert');
 const Handlebars = require('handlebars');

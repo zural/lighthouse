@@ -15,9 +15,6 @@
  */
 'use strict';
 
-// self is necessary when checking for URL support
-global.self = {};
-
 const NoMutationEventsAudit = require('../../../audits/dobetterweb/no-mutation-events.js');
 const assert = require('assert');
 

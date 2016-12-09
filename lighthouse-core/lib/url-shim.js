@@ -21,4 +21,7 @@
 
 'use strict';
 
-module.exports = self.URL || require('url').URL || require('whatwg-url').URL;
+/* global self */
+
+module.exports = (typeof self !== 'undefined' && self.URL) ||
+  require('url').URL || require('whatwg-url').URL;

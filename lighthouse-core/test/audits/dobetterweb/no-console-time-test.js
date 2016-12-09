@@ -15,9 +15,6 @@
  */
 'use strict';
 
-// self is necessary when checking for URL support
-global.self = {};
-
 const NoConsoleTimeAudit = require('../../../audits/dobetterweb/no-console-time.js');
 const assert = require('assert');
 

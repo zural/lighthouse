@@ -15,9 +15,6 @@
  */
 'use strict';
 
-// self is necessary when checking for URL support
-global.self = {};
-
 const ExternalAnchorsAudit =
   require('../../../audits/dobetterweb/external-anchors-use-rel-noopener.js');
 const assert = require('assert');

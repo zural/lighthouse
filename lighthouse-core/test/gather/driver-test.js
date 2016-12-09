@@ -17,9 +17,6 @@
 
 'use strict';
 
-// self is necessary when checking for URL support
-global.self = {};
-
 const Driver = require('../../gather/driver.js');
 const Connection = require('../../gather/connections/connection.js');
 const Element = require('../../lib/element.js');

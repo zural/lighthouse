@@ -15,9 +15,6 @@
  */
 'use strict';
 
-// self is necessary when checking for URL support
-global.self = {};
-
 const DateNowUseAudit = require('../../../audits/dobetterweb/no-datenow.js');
 const assert = require('assert');
 

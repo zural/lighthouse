@@ -15,9 +15,6 @@
  */
 'use strict';
 
-// self is necessary when checking for URL support
-global.self = {};
-
 const manifestParser = require('../../lib/manifest-parser');
 const assert = require('assert');
 const manifestStub = require('../fixtures/manifest.json');

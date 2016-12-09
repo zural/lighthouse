@@ -15,9 +15,6 @@
  */
 'use strict';
 
-// self is necessary when checking for URL support
-global.self = {};
-
 const Runner = require('../runner');
 const driverMock = require('./gather/fake-driver');
 const Config = require('../config/config');
