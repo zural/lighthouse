@@ -16,7 +16,7 @@
  */
 'use strict';
 
-const URL = require('../../lib/url-shim');
+const URL = require('./url-shim');
 const validateColor = require('./web-inspector').Color.parse;
 
 const ALLOWED_DISPLAY_VALUES = [

@@ -17,7 +17,7 @@
 
 'use strict';
 
-const URL = require('../../lib/url-shim');
+const URL = require('../lib/url-shim');
 const Audit = require('./audit');
 
 /**

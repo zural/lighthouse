@@ -24,7 +24,7 @@ const assetSaver = require('./lib/asset-saver');
 const log = require('./lib/log');
 const fs = require('fs');
 const path = require('path');
-const URL = require('../../lib/url-shim');
+const URL = require('./lib/url-shim');
 
 class Runner {
   static run(connection, opts) {
