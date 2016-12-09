@@ -17,7 +17,7 @@
 
 'use strict';
 
-const URL = self.URL || require('url').URL || require('whatwg-url').URL;
+const URL = require('../../lib/url-shim');
 const path = require('path');
 const fs = require('fs');
 const Formatter = require('./formatter');

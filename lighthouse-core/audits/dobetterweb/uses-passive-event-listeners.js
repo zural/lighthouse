@@ -22,7 +22,7 @@
 
 'use strict';
 
-const URL = self.URL || require('url').URL || require('whatwg-url').URL;
+const URL = require('../../lib/url-shim');
 const Audit = require('../audit');
 const EventHelpers = require('../../lib/event-helpers');
 const Formatter = require('../../formatters/formatter');

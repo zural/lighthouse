@@ -25,8 +25,7 @@
 <script src="./dbw_tester.js"></script>
 
 <template id="links-blocking-first-paint-tmpl">
-  <!-- we use a relative url to test our critical-request-chains.js formatter,
-       so we are sure new URL(resource) can handle it -->
+  <!-- we use a relative protocol url to test that `new URL(resource)` in the critical-request-chains.js formatter can handle it -->
   <link rel="stylesheet" href="//localhost:10200/dobetterweb/dbw_tester.css">
   <link rel="stylesheet" href="./dbw_disabled.css" disabled>
   <link rel="import" href="./dbw_partial_a.html">
