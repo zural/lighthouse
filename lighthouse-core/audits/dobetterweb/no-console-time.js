@@ -60,7 +60,7 @@ class NoConsoleTimeAudit extends Audit {
     const pageHost = new URL(artifacts.URL.finalUrl).host;
     // Filter usage from other hosts and keep eval'd code.
     const results = artifacts.ConsoleTimeUsage.usage.filter(err => {
-      return err.isEval ? err.url : new URL(err.url).host === pageHost;
+      return err.isEval ? !!err.url : new URL(err.url).host === pageHost;
     }).map(err => {
       return Object.assign({
         label: `line: ${err.line}, col: ${err.col}`
