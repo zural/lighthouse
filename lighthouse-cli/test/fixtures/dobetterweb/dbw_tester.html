@@ -101,6 +101,7 @@ function dateNowTest() {
   }
   helloDate();
   eval('Date.now()'); // FAIL
+  new Function('Date.now()')() // FAIL
 }
 
 function consoleTimeTest() {
