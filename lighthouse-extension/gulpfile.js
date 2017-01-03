@@ -9,12 +9,16 @@ const runSequence = require('run-sequence');
 const gulp = require('gulp');
 const browserify = require('browserify');
 const chromeManifest = require('gulp-chrome-manifest');
+const babel = require('gulp-babel');
+const sourcemaps = require('gulp-sourcemaps');
 const debug = require('gulp-debug');
 const eslint = require('gulp-eslint');
 const livereload = require('gulp-livereload');
 const tap = require('gulp-tap');
 const zip = require('gulp-zip');
 const LighthouseRunner = require('../lighthouse-core/runner');
+
+const GENERATE_SOURCEMAPS = true;
 
 const audits = LighthouseRunner.getAuditList()
     .map(f => '../lighthouse-core/audits/' + f.replace(/\.js$/, ''));
@@ -100,7 +104,7 @@ gulp.task('browserify-lighthouse', () => {
     'app/src/lighthouse-background.js'
   ], {read: false})
     .pipe(tap(file => {
-      let bundle = browserify(file.path); // , {debug: true})
+      let bundle = browserify(file.path, {debug: GENERATE_SOURCEMAPS});
       bundle = applyBrowserifyTransforms(bundle);
 
       // lighthouse-background will need some additional transforms, ignores and requires…
@@ -150,6 +154,24 @@ gulp.task('browserify-other', () => {
     .pipe(gulp.dest('app/scripts'))
     .pipe(gulp.dest('dist/scripts'));
 });
+
+gulp.task('compress', [], () => {
+  const stream = gulp.src('dist/scripts/lighthouse-background.js');
+  GENERATE_SOURCEMAPS && stream.pipe(sourcemaps.init());
+  stream.pipe(babel({
+    'comments': false,
+    'presets': ['babili']
+  }));
+  GENERATE_SOURCEMAPS && stream.pipe(sourcemaps.write());
+  return stream.pipe(gulp.dest('dist/scripts/min'));
+});
+
+gulp.task('size-report', ['compress'], () => {
+  const childProcess = require('child_process');
+  const sourceMapExplorPath = './node_modules/source-map-explorer/index.js';
+  return childProcess.execSync(`${sourceMapExplorPath} ./dist/scripts/min/lighthouse-background.js`);
+});
+
 
 gulp.task('browserify', cb => {
   runSequence('browserify-lighthouse', 'browserify-other', cb);
