@@ -263,7 +263,7 @@ function runLighthouse(url: string,
       // delete artifacts from result so reports won't include artifacts.
       const artifacts = results.artifacts;
       results.artifacts = undefined;
-      
+
       if (flags.saveArtifacts) {
         assetSaver.saveArtifacts(artifacts);
       }
