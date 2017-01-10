@@ -124,6 +124,7 @@ class Metrics {
 
   /**
    * Getter for our navigationStart trace event
+   * @return {!TraceEvent} description
    */
   get navigationStartEvt() {
     if (!this._navigationStartEvt) {
@@ -148,7 +149,7 @@ class Metrics {
    *     { "pid": 89922,"tid":1295,"ts":77176882592,"ph":"e","cat":"blink.user_timing","name":"innermeasure","args":{},"tts":1257898,"id":"0xe66c67"}
    * @param  {!Object} metric
    * @param  {number} navStartTs
-   * @return {Array} Pair of trace events (start/end)
+   * @return {!Array<!TraceEvent>} Pair of trace events (start/end)
    */
   synthesizeEventPair(metric, navStartTs) {
     if (!metric.ts || metric.id === 'navstart') {
@@ -177,7 +178,7 @@ class Metrics {
   }
 
   /**
-   * @returns {Array} User timing raw trace event pairs
+   * @returns {{!Array<!TraceEvent>} User timing raw trace event pairs
    */
   generateFakeEvents() {
     const metrics = this.gatherMetrics(this._auditResults);
