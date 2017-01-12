@@ -113,7 +113,7 @@ function validatePasses(passes, audits, rootPath) {
   if (!Array.isArray(passes)) {
     return;
   }
-  const requiredGatherers = getGatherersNeededByAudits(audits);
+  const requiredGatherers = Config.getGatherersNeededByAudits(audits);
 
   // Log if we are running gathers that are not needed by the audits listed in the config
   passes.forEach(pass => {
@@ -141,19 +141,6 @@ function validatePasses(passes, audits, rootPath) {
     }
     usedNames.add(passName);
   });
-}
-
-function getGatherersNeededByAudits(audits) {
-  // It's possible we didn't get given any audits (but existing audit results), in which case
-  // there is no need to do any work here.
-  if (!audits) {
-    return new Set();
-  }
-
-  return audits.reduce((list, audit) => {
-    audit.meta.requiredArtifacts.forEach(artifact => list.add(artifact));
-    return list;
-  }, new Set());
 }
 
 function assertValidAudit(auditDefinition, auditPath) {
@@ -278,6 +265,19 @@ class Config {
 
     // validatePasses must follow after audits are required
     validatePasses(configJSON.passes, this._audits, this._configDir);
+  }
+
+  static getGatherersNeededByAudits(audits) {
+    // It's possible we didn't get given any audits (but existing audit results), in which case
+    // there is no need to do any work here.
+    if (!audits) {
+      return new Set();
+    }
+
+    return audits.reduce((list, audit) => {
+      audit.meta.requiredArtifacts.forEach(artifact => list.add(artifact));
+      return list;
+    }, new Set());
   }
 
   /**
