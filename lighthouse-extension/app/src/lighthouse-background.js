@@ -27,6 +27,7 @@ const ReportGenerator = require('../../../lighthouse-core/report/report-generato
 
 const STORAGE_KEY = 'lighthousev2_audits';
 const SETTINGS_KEY = 'lighthouse_settings';
+const isExtension = window.chrome && chrome.runtime;
 const _flatten = arr => [].concat(...arr);
 const _uniq = arr => Array.from(new Set(arr));
 
@@ -91,11 +92,17 @@ function getConfigFromTags(config, aggregationTags) {
     }
     // Push child aggregations to top level if they are wanted but parent isn't
     if (!isAggregationSelected(aggregation) && aggregation.items.length) {
-      chosenAggregations.push(...aggregation.items);
-      return false;
+      aggregation.items.forEach(item => {
+        item.scored = false;
+        item.categorizable = false;
+        item.items = [{audits: item.audits}];
+        delete item.audits;
+        chosenAggregations.push(item);
+      });
+      return;
     };
 
-    console.error('unexpected to be ehre', aggregation);
+    log.error('unexpected to be here', aggregation);
   });
   config.aggregations = chosenAggregations;
 
@@ -107,16 +114,33 @@ function getConfigFromTags(config, aggregationTags) {
   // The `audits` property in the config is a list of paths of audits to run.
   // `requestedAuditNames` is a list of audit *names*. Map paths to names, then
   // filter out any paths of audits with names that weren't requested.
-  const auditPathToName = new Map(Config.requireAudits(config.audits)
-    .map((AuditClass, index) => {
-      const auditPath = config.audits[index];
-      const auditName = AuditClass.meta.name;
-      return [auditPath, auditName];
-    }));
+  const auditObjectsAll = Config.requireAudits(config.audits);
+  const auditPathToName = new Map(auditObjectsAll.map((AuditClass, index) => {
+    const auditPath = config.audits[index];
+    const auditName = AuditClass.meta.name;
+    return [auditPath, auditName];
+  }));
   config.audits = config.audits.filter(auditPath => {
     const auditName = auditPathToName.get(auditPath);
     return requestedAuditNames.has(auditName);
   });
+
+  const auditObjects = Config.requireAudits(config.audits);
+  const requiredGatherers = Config.getGatherersNeededByAudits(auditObjects);
+  config.passes = config.passes.filter(pass => {
+    // remove any unncessary gatherers
+    pass.gatherers = pass.gatherers.filter(gathererName => requiredGatherers.has(gathererName));
+    return pass.gatherers.length > 0;
+  });
+  if (config.passes.length === 0) {
+    if (requiredGatherers.has('traces') || requiredGatherers.has('networkRecords')) {
+      config.passes.push({
+        recordNetwork: requiredGatherers.has('networkRecords'),
+        recordTrace: requiredGatherers.has('traces'),
+        gatherers: []
+      });
+    }
+  }
 }
 
 /**
@@ -125,7 +149,7 @@ function getConfigFromTags(config, aggregationTags) {
  *     Otherwise, restore the default badge text.
  */
 function updateBadgeUI(optUrl) {
-  if (window.chrome && chrome.runtime) {
+  if (isExtension) {
     const manifest = chrome.runtime.getManifest();
 
     let title = manifest.browser_action.default_title;
@@ -392,3 +416,7 @@ if (window.chrome && chrome.runtime) {
     }
   });
 }
+
+window.getManifest = function() {
+  return isExtension && chrome.runtime.getManifest();
+};
