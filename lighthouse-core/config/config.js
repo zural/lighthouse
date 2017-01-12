@@ -270,7 +270,20 @@ class Config {
     validatePasses(configJSON.passes, this._audits, this._configDir);
   }
 
-    // Find audits required for remaining aggregations.
+  static getMapOfAuditPathToName(config) {
+    // The `audits` property in the config is a list of paths of audits to run.
+    // `requestedAuditNames` is a list of audit *names*. Map paths to names, then
+    // filter out any paths of audits with names that weren't requested.
+    const auditObjectsAll = Config.requireAudits(config.audits);
+    const auditPathToName = new Map(auditObjectsAll.map((AuditClass, index) => {
+      const auditPath = config.audits[index];
+      const auditName = AuditClass.meta.name;
+      return [auditPath, auditName];
+    }));
+    return auditPathToName;
+  }
+
+  // Find audits required for remaining aggregations.
   static getAuditsNeededByAggregations(aggregations) {
     const requestedItems = _flatten(aggregations.map(aggregation => aggregation.items));
     const requestedAudits = _flatten(requestedItems.map(item => Object.keys(item.audits)));
@@ -290,18 +303,14 @@ class Config {
     }, new Set());
   }
 
+
   static selectPassesNeededByGatherers(passes, requiredGatherers) {
     passes = passes.filter(pass => {
       // remove any unncessary gatherers
       pass.gatherers = pass.gatherers.filter(gathererName => {
-
         gathererName = GatherRunner.getGathererClass(gathererName).name;
-        console.error('ok', gathererName, requiredGatherers.has(gathererName));
-        var x = requiredGatherers.has(gathererName);
-        console.log('returning', x);
-        return x;
+        return requiredGatherers.has(gathererName);
       });
-      console.error(pass.gatherers.length > 0 ? "OH NO" : "KEEP");
       return pass.gatherers.length > 0;
     });
     // handle the perf-only case (no specific gatherers, just trace & network)
@@ -316,18 +325,12 @@ class Config {
     }
   }
 
-   /**
-   * Filter out any unrequested aggregations from the config. If any audits are
-   * no longer needed by any remaining aggregations, filter out those as well.
-   * @param {!Object} config Lighthouse config object.
-   * @param {!Array<string>} chosenTags Ids of aggregation tags to include.
-   */
-  static rebuildConfigFromTags(config, chosenTags) {
+  static getAggregationsByTags(aggregations, chosenTags) {
     // Provided a config aggregation, should it be included?
     const isAggregationSelected = agg => agg.tags.some(itemTag => chosenTags.includes(itemTag));
 
     const chosenAggregations = [];
-    config.aggregations.forEach(aggregation => {
+    aggregations.forEach(aggregation => {
       // Case #1: Simple non-parent aggregation
       if (aggregation.items.length === 1) {
         if (isAggregationSelected(aggregation)) {
@@ -360,27 +363,25 @@ class Config {
       // Case #4: We have good child items, and the parent aggregation is good
       chosenAggregations.push(aggregation);
     });
-    config.aggregations = chosenAggregations;
+    return chosenAggregations;
+  }
 
+   /**
+   * Filter out any unrequested aggregations from the config. If any audits are
+   * no longer needed by any remaining aggregations, filter out those as well.
+   * @param {!Object} config Lighthouse config object.
+   * @param {!Array<string>} chosenTags Ids of aggregation tags to include.
+   */
+  static rebuildConfigFromTags(config, chosenTags) {
+    config.aggregations = Config.getAggregationsByTags(config.aggregations, chosenTags);
     const requestedAuditNames = Config.getAuditsNeededByAggregations(config.aggregations);
 
-    // The `audits` property in the config is a list of paths of audits to run.
-    // `requestedAuditNames` is a list of audit *names*. Map paths to names, then
-    // filter out any paths of audits with names that weren't requested.
-    const auditObjectsAll = Config.requireAudits(config.audits);
-    const auditPathToName = new Map(auditObjectsAll.map((AuditClass, index) => {
-      const auditPath = config.audits[index];
-      const auditName = AuditClass.meta.name;
-      return [auditPath, auditName];
-    }));
-    config.audits = config.audits.filter(auditPath => {
-      const auditName = auditPathToName.get(auditPath);
-      return requestedAuditNames.has(auditName);
-    });
+    const auditPathToName = Config.getMapOfAuditPathToName(config);
+    config.audits = config.audits.filter(auditPath =>
+        requestedAuditNames.has(auditPathToName.get(auditPath)));
 
     const auditObjectsSelected = Config.requireAudits(config.audits);
     const requiredGatherers = Config.getGatherersNeededByAudits(auditObjectsSelected);
-    console.error('hi', requiredGatherers)
     Config.selectPassesNeededByGatherers(config.passes, requiredGatherers);
   }
 
