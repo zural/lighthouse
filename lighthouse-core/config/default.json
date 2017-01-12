@@ -60,7 +60,6 @@
     "estimated-input-latency",
     "time-to-interactive",
     "user-timings",
-    "screenshots",
     "critical-request-chains",
     "manifest-exists",
     "manifest-background-color",

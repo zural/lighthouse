@@ -85,63 +85,9 @@ function getConfigFromTags(config, aggregationTags) {
     }
     // Keep if the config's aggregation has one of the provided tags
     aggregation.items = aggregation.items.filter(isAggregationSelected);
-
-    // All items were removed, so we're uninterested in the parent aggregation
-    if (aggregation.items.length === 0) {
-      return;
-    }
-    // Push child aggregations to top level if they are wanted but parent isn't
-    if (!isAggregationSelected(aggregation) && aggregation.items.length) {
-      aggregation.items.forEach(item => {
-        item.scored = false;
-        item.categorizable = false;
-        item.items = [{audits: item.audits}];
-        delete item.audits;
-        chosenAggregations.push(item);
-      });
-      return;
-    };
-
-    log.error('unexpected to be here', aggregation);
-  });
-  config.aggregations = chosenAggregations;
-
-  // Find audits required for remaining aggregations.
-  const requestedItems = _flatten(config.aggregations.map(aggregation => aggregation.items));
-  const auditsArray = _flatten(requestedItems.map(item => Object.keys(item.audits)));
-  const requestedAuditNames = new Set(auditsArray);
-
-  // The `audits` property in the config is a list of paths of audits to run.
-  // `requestedAuditNames` is a list of audit *names*. Map paths to names, then
-  // filter out any paths of audits with names that weren't requested.
-  const auditObjectsAll = Config.requireAudits(config.audits);
-  const auditPathToName = new Map(auditObjectsAll.map((AuditClass, index) => {
-    const auditPath = config.audits[index];
-    const auditName = AuditClass.meta.name;
-    return [auditPath, auditName];
-  }));
-  config.audits = config.audits.filter(auditPath => {
-    const auditName = auditPathToName.get(auditPath);
-    return requestedAuditNames.has(auditName);
-  });
-
-  const auditObjects = Config.requireAudits(config.audits);
-  const requiredGatherers = Config.getGatherersNeededByAudits(auditObjects);
-  config.passes = config.passes.filter(pass => {
-    // remove any unncessary gatherers
-    pass.gatherers = pass.gatherers.filter(gathererName => requiredGatherers.has(gathererName));
-    return pass.gatherers.length > 0;
-  });
-  if (config.passes.length === 0) {
-    if (requiredGatherers.has('traces') || requiredGatherers.has('networkRecords')) {
-      config.passes.push({
-        recordNetwork: requiredGatherers.has('networkRecords'),
-        recordTrace: requiredGatherers.has('traces'),
-        gatherers: []
-      });
-    }
   }
 }
+
 
 /**
  * Sets the extension badge text.
@@ -185,7 +131,9 @@ window.runLighthouseForConnection = function(connection, url, options, aggregati
   // Always start with a freshly parsed default config.
   const runConfig = JSON.parse(JSON.stringify(defaultConfig));
 
-  getConfigFromTags(runConfig, aggregationTags);
+   // Change tags object to a plain array of tag strings
+  const chosenTags = aggregationTags.filter(tag => tag.value).map(tag => tag.id);
+  Config.rebuildConfigFromTags(runConfig, chosenTags);
   const config = new Config(runConfig);
 
   // Add url and config to fresh options object.
