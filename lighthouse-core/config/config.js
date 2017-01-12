@@ -26,6 +26,9 @@ const path = require('path');
 const Audit = require('../audits/audit');
 const Runner = require('../runner');
 
+const _flatten = arr => [].concat(...arr);
+const _uniq = arr => Array.from(new Set(arr));
+
 // cleanTrace is run to remove duplicate TracingStartedInPage events,
 // and to change TracingStartedInBrowser events into TracingStartedInPage.
 // This is done by searching for most occuring threads and basing new events
@@ -267,6 +270,13 @@ class Config {
     validatePasses(configJSON.passes, this._audits, this._configDir);
   }
 
+    // Find audits required for remaining aggregations.
+  static getAuditsNeededByAggregations(aggregations) {
+    const requestedItems = _flatten(aggregations.map(aggregation => aggregation.items));
+    const requestedAudits = _flatten(requestedItems.map(item => Object.keys(item.audits)));
+    return new Set(requestedAudits);
+  }
+
   static getGatherersNeededByAudits(audits) {
     // It's possible we didn't get given any audits (but existing audit results), in which case
     // there is no need to do any work here.
@@ -278,6 +288,100 @@ class Config {
       audit.meta.requiredArtifacts.forEach(artifact => list.add(artifact));
       return list;
     }, new Set());
+  }
+
+  static selectPassesNeededByGatherers(passes, requiredGatherers) {
+    passes = passes.filter(pass => {
+      // remove any unncessary gatherers
+      pass.gatherers = pass.gatherers.filter(gathererName => {
+
+        gathererName = GatherRunner.getGathererClass(gathererName).name;
+        console.error('ok', gathererName, requiredGatherers.has(gathererName));
+        var x = requiredGatherers.has(gathererName);
+        console.log('returning', x);
+        return x;
+      });
+      console.error(pass.gatherers.length > 0 ? "OH NO" : "KEEP");
+      return pass.gatherers.length > 0;
+    });
+    // handle the perf-only case (no specific gatherers, just trace & network)
+    if (passes.length === 0) {
+      if (requiredGatherers.has('traces') || requiredGatherers.has('networkRecords')) {
+        passes.push({
+          recordNetwork: requiredGatherers.has('networkRecords'),
+          recordTrace: requiredGatherers.has('traces'),
+          gatherers: []
+        });
+      }
+    }
+  }
+
+   /**
+   * Filter out any unrequested aggregations from the config. If any audits are
+   * no longer needed by any remaining aggregations, filter out those as well.
+   * @param {!Object} config Lighthouse config object.
+   * @param {!Array<string>} chosenTags Ids of aggregation tags to include.
+   */
+  static rebuildConfigFromTags(config, chosenTags) {
+    // Provided a config aggregation, should it be included?
+    const isAggregationSelected = agg => agg.tags.some(itemTag => chosenTags.includes(itemTag));
+
+    const chosenAggregations = [];
+    config.aggregations.forEach(aggregation => {
+      // Case #1: Simple non-parent aggregation
+      if (aggregation.items.length === 1) {
+        if (isAggregationSelected(aggregation)) {
+          chosenAggregations.push(aggregation);
+        }
+        return;
+      }
+
+      // Reduce the child aggregations based on our tags
+      aggregation.items = aggregation.items.filter(isAggregationSelected);
+
+      // Case #2: Child aggregations are good, but parent isn't
+      //   We push the children to top-level
+      if (aggregation.items.length && !isAggregationSelected(aggregation)) {
+        aggregation.items.forEach(item => {
+          item.scored = false;
+          item.categorizable = false;
+          item.items = [{audits: item.audits}];
+          delete item.audits;
+          chosenAggregations.push(item);
+        });
+        return;
+      };
+
+      // Case #3: All items were removed earlier, so we're uninterested in the parent aggregation
+      if (aggregation.items.length === 0) {
+        return;
+      }
+
+      // Case #4: We have good child items, and the parent aggregation is good
+      chosenAggregations.push(aggregation);
+    });
+    config.aggregations = chosenAggregations;
+
+    const requestedAuditNames = Config.getAuditsNeededByAggregations(config.aggregations);
+
+    // The `audits` property in the config is a list of paths of audits to run.
+    // `requestedAuditNames` is a list of audit *names*. Map paths to names, then
+    // filter out any paths of audits with names that weren't requested.
+    const auditObjectsAll = Config.requireAudits(config.audits);
+    const auditPathToName = new Map(auditObjectsAll.map((AuditClass, index) => {
+      const auditPath = config.audits[index];
+      const auditName = AuditClass.meta.name;
+      return [auditPath, auditName];
+    }));
+    config.audits = config.audits.filter(auditPath => {
+      const auditName = auditPathToName.get(auditPath);
+      return requestedAuditNames.has(auditName);
+    });
+
+    const auditObjectsSelected = Config.requireAudits(config.audits);
+    const requiredGatherers = Config.getGatherersNeededByAudits(auditObjectsSelected);
+    console.error('hi', requiredGatherers)
+    Config.selectPassesNeededByGatherers(config.passes, requiredGatherers);
   }
 
   /**
