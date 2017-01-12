@@ -95,7 +95,7 @@ function applyBrowserifyTransforms(bundle) {
   });
 }
 
-gulp.task('browserify-lighthouse', () => {
+gulp.task('browserify', () => {
   return gulp.src([
     'app/src/lighthouse-background.js'
   ], {read: false})
@@ -136,24 +136,15 @@ gulp.task('browserify-lighthouse', () => {
     .pipe(gulp.dest('dist/scripts'));
 });
 
-gulp.task('browserify-other', () => {
+gulp.task('copy-scripts', () => {
   return gulp.src([
     'app/src/popup.js',
     'app/src/chromereload.js',
-  ], {read: false})
-    .pipe(tap(file => {
-      let bundle = browserify(file.path); // , {debug: true})
-      bundle = applyBrowserifyTransforms(bundle);
-      // Inject the new browserified contents back into our gulp pipeline
-      file.contents = bundle.bundle();
-    }))
+  ])
     .pipe(gulp.dest('app/scripts'))
     .pipe(gulp.dest('dist/scripts'));
 });
 
-gulp.task('browserify', cb => {
-  runSequence('browserify-lighthouse', 'browserify-other', cb);
-});
 
 gulp.task('clean', () => {
   return del(['.tmp', 'dist', 'app/scripts']).then(paths =>
@@ -161,7 +152,7 @@ gulp.task('clean', () => {
   );
 });
 
-gulp.task('watch', ['lint', 'browserify', 'html'], () => {
+gulp.task('watch', ['copy-scripts', 'browserify', 'lint', 'html'], () => {
   livereload.listen();
 
   gulp.watch([
@@ -189,7 +180,7 @@ gulp.task('package', function() {
 
 gulp.task('build', cb => {
   runSequence(
-    'lint', 'browserify', 'chromeManifest',
+    'copy-scripts', 'lint', 'browserify', 'chromeManifest',
     ['html', 'images', 'css', 'extras'], cb);
 });
 
