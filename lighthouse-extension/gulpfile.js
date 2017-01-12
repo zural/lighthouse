@@ -180,7 +180,7 @@ gulp.task('package', function() {
 
 gulp.task('build', cb => {
   runSequence(
-    'copy-scripts', 'lint', 'browserify', 'chromeManifest',
+    'copy-scripts', 'browserify', 'chromeManifest', 'lint',
     ['html', 'images', 'css', 'extras'], cb);
 });
 

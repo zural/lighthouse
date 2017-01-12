@@ -33,8 +33,6 @@ const _uniq = arr => Array.from(new Set(arr));
 let lighthouseIsRunning = false;
 let latestStatusLog = [];
 
-
-
 /**
  * Sets the extension badge text.
  * @param {string=} optUrl If present, sets the badge text to "Testing <url>".
@@ -124,7 +122,7 @@ window.runLighthouseInExtension = function(options, aggregationTags) {
  * @param {!RawProtocol.Port} port
  * @param {string} url
  * @param {!Object} options Lighthouse options.
- * @param {!Object<boolean>} aggregationTags Ids of aggregation tags to include.
+ * @param {!Array<!{id: string, value: boolean}>} aggregationTags Ids of aggregation tags to include.
  * @return {!Promise}
  */
 window.runLighthouseInWorker = function(port, url, options, aggregationTags) {
