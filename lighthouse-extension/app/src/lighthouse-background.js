@@ -25,15 +25,15 @@ const log = require('../../../lighthouse-core/lib/log');
 
 const ReportGenerator = require('../../../lighthouse-core/report/report-generator');
 
-const STORAGE_KEY = 'lighthouse_audits';
+const STORAGE_KEY = 'lighthousev2_audits';
 const SETTINGS_KEY = 'lighthouse_settings';
+const _flatten = arr => [].concat(...arr);
+const _uniq = arr => Array.from(new Set(arr));
 
 let installedExtensions = [];
 let disableExtensionsDuringRun = false;
 let lighthouseIsRunning = false;
 let latestStatusLog = [];
-
-const _flatten = arr => [].concat(...arr);
 
 /**
  * Enables or disables all other installed chrome extensions. The initial list
@@ -66,23 +66,38 @@ function enableOtherChromeExtensions(enable) {
  * Filter out any unrequested aggregations from the config. If any audits are
  * no longer needed by any remaining aggregations, filter out those as well.
  * @param {!Object} config Lighthouse config object.
- * @param {!Object<boolean>} requestedAggregations
+ * @param {!Object<boolean>} aggregationTags Ids of aggregation tags to include.
  */
-function filterConfig(config, requestedAggregations) {
-  config.aggregations = config.aggregations.filter(aggregation => {
-    // First filter out single `item` aggregations, which use top level name.
+function getConfigFromTags(config, aggregationTags) {
+  // Change tags object to a plain array of tag strings
+  const chosenTags = aggregationTags.filter(tag => tag.value).map(tag => tag.id);
+  // Provided a config aggregation, should it be included?
+  const isAggregationSelected = agg => agg.tags.some(itemTag => chosenTags.includes(itemTag));
+
+  const chosenAggregations = [];
+  config.aggregations.forEach(aggregation => {
     if (aggregation.items.length === 1) {
-      return requestedAggregations[aggregation.name];
+      if (isAggregationSelected(aggregation)) {
+        chosenAggregations.push(aggregation);
+      }
+      return;
     }
+    // Keep if the config's aggregation has one of the provided tags
+    aggregation.items = aggregation.items.filter(isAggregationSelected);
 
-    // Next, filter the `items` array of aggregations with multiple sub-aggregations.
-    aggregation.items = aggregation.items.filter(item => {
-      return requestedAggregations[item.name];
-    });
+    // All items were removed, so we're uninterested in the parent aggregation
+    if (aggregation.items.length === 0) {
+      return;
+    }
+    // Push child aggregations to top level if they are wanted but parent isn't
+    if (!isAggregationSelected(aggregation) && aggregation.items.length) {
+      chosenAggregations.push(...aggregation.items);
+      return false;
+    };
 
-    // Finally, filter out any aggregations with no sub-aggregations remaining.
-    return aggregation.items.length > 0;
+    console.error('unexpected to be ehre', aggregation);
   });
+  config.aggregations = chosenAggregations;
 
   // Find audits required for remaining aggregations.
   const requestedItems = _flatten(config.aggregations.map(aggregation => aggregation.items));
@@ -139,14 +154,14 @@ function filterOutArtifacts(result) {
  * @param {!Connection} connection
  * @param {string} url
  * @param {!Object} options Lighthouse options.
- * @param {!Object<boolean>} requestedAggregations Names of aggregations to include.
+ * @param {!Object<boolean>} aggregationTags Ids of aggregation tags to include.
  * @return {!Promise}
  */
-window.runLighthouseForConnection = function(connection, url, options, requestedAggregations) {
+window.runLighthouseForConnection = function(connection, url, options, aggregationTags) {
   // Always start with a freshly parsed default config.
   const runConfig = JSON.parse(JSON.stringify(defaultConfig));
 
-  filterConfig(runConfig, requestedAggregations);
+  getConfigFromTags(runConfig, aggregationTags);
   const config = new Config(runConfig);
 
   // Add url and config to fresh options object.
@@ -171,16 +186,16 @@ window.runLighthouseForConnection = function(connection, url, options, requested
 
 /**
  * @param {!Object} options Lighthouse options.
- * @param {!Object<boolean>} requestedAggregations Names of aggregations to include.
+ * @param {!Object<boolean>} aggregationTags Ids of aggregation tags to include.
  * @return {!Promise}
  */
-window.runLighthouseInExtension = function(options, requestedAggregations) {
+window.runLighthouseInExtension = function(options, aggregationTags) {
   // Default to 'info' logging level.
   log.setLevel('info');
   const connection = new ExtensionProtocol();
   return enableOtherChromeExtensions(false)
     .then(_ => connection.getCurrentTabURL())
-    .then(url => window.runLighthouseForConnection(connection, url, options, requestedAggregations))
+    .then(url => window.runLighthouseForConnection(connection, url, options, aggregationTags))
     .then(results => {
       return enableOtherChromeExtensions(true).then(_ => {
         const blobURL = window.createReportPageAsBlob(results, 'extension');
@@ -197,14 +212,14 @@ window.runLighthouseInExtension = function(options, requestedAggregations) {
  * @param {!RawProtocol.Port} port
  * @param {string} url
  * @param {!Object} options Lighthouse options.
- * @param {!Object<boolean>} requestedAggregations Names of aggregations to include.
+ * @param {!Object<boolean>} aggregationTags Ids of aggregation tags to include.
  * @return {!Promise}
  */
-window.runLighthouseInWorker = function(port, url, options, requestedAggregations) {
+window.runLighthouseInWorker = function(port, url, options, aggregationTags) {
   // Default to 'info' logging level.
   log.setLevel('info');
   const connection = new RawProtocol(port);
-  return window.runLighthouseForConnection(connection, url, options, requestedAggregations);
+  return window.runLighthouseForConnection(connection, url, options, aggregationTags);
 };
 
 /**
@@ -230,6 +245,22 @@ window.createReportPageAsBlob = function(results, reportContext) {
   return blobURL;
 };
 
+const tagMap = {
+  'pwa': 'Progressive Web App audits',
+  'perf': 'Performance metrics & diagnostics',
+  'best_practices': 'Developer best practices'
+};
+
+window.getDefaultAggregationTags = function() {
+  return _uniq(_flatten(getDefaultAggregations().map(agg => agg.tags))).map(tag => {
+    return {
+      id: tag,
+      value: true,
+      name: tagMap[tag]
+    };
+  });
+};
+
 /**
  * Returns list of aggregation categories (each with a list of its constituent
  * audits) from the default config.
@@ -241,6 +272,9 @@ window.getDefaultAggregations = function() {
       if (aggregation.items.length === 1) {
         return {
           name: aggregation.name,
+          id: aggregation.id,
+          tags: aggregation.tags,
+          description: aggregation.description,
           audits: aggregation.items[0].audits,
         };
       }
@@ -250,6 +284,9 @@ window.getDefaultAggregations = function() {
   ).map(aggregation => {
     return {
       name: aggregation.name,
+      id: aggregation.id,
+      tags: aggregation.tags,
+      description: aggregation.description,
       audits: Object.keys(aggregation.audits)
     };
   });
@@ -257,18 +294,16 @@ window.getDefaultAggregations = function() {
 
 /**
  * Save currently selected set of aggregation categories to local storage.
- * @param {{selectedAggregations: !Array<string>, disableExtensions: boolean}} settings
+ * @param {{selectedTags: !Array<string>, disableExtensions: boolean}} settings
  */
-window.saveSettings = function(settings) {
+window.saveSettings = function(settings, selectedTags) {
   const storage = {
     [STORAGE_KEY]: {},
     [SETTINGS_KEY]: {}
   };
 
   // Stash selected aggregations.
-  window.getDefaultAggregations().forEach(audit => {
-    storage[STORAGE_KEY][audit.name] = settings.selectedAggregations.includes(audit.name);
-  });
+  storage[STORAGE_KEY] = selectedTags;
 
   // Stash disable extensionS setting.
   disableExtensionsDuringRun = settings.disableExtensions;
@@ -279,22 +314,24 @@ window.saveSettings = function(settings) {
 };
 
 /**
- * Load selected aggregation categories from local storage.
+ * Load selected aggregation categories from local storage
  * @return {!Promise<{selectedAggregations: !Object<boolean>, disableExtensions: boolean}>}
  */
 window.loadSettings = function() {
   return new Promise(resolve => {
     chrome.storage.local.get([STORAGE_KEY, SETTINGS_KEY], result => {
-      // Start with list of all default aggregations set to true so list is
-      // always up to date.
-      const defaultAggregations = {};
-      window.getDefaultAggregations().forEach(aggregation => {
-        defaultAggregations[aggregation.name] = true;
-      });
+      // start with all default tags, so the list is up to date
+      const tags = [].concat(window.getDefaultAggregationTags());
 
-      // Load saved aggregations and settings, overwriting defaults with any
-      // saved selections.
-      const savedAggregations = Object.assign(defaultAggregations, result[STORAGE_KEY]);
+      if (Array.isArray(selectedTags)) {
+        // Override the tags with anything disabled by the user
+        selectedTags.forEach(selectedTag => {
+          const setting = tags.find(t => t.id == selectedTag.id);
+          if (setting) {
+            setting.value = selectedTag.value;
+          }
+        });
+      }
 
       const defaultSettings = {
         disableExtensions: disableExtensionsDuringRun
@@ -302,9 +339,18 @@ window.loadSettings = function() {
       const savedSettings = Object.assign(defaultSettings, result[SETTINGS_KEY]);
 
       resolve({
-        selectedAggregations: savedAggregations,
+        selectedTags: tags,
         disableExtensions: savedSettings.disableExtensions
       });
+    });
+  })
+};
+
+window.loadSavedTags = function() {
+  return new Promise(resolve => {
+    chrome.storage.local.get(STORAGE_KEY, result => {
+      const tags = result && result[STORAGE_KEY];
+      resolve(Array.isArray(tags) ? tags : []);
     });
   });
 };
