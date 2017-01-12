@@ -305,24 +305,27 @@ class Config {
 
 
   static selectPassesNeededByGatherers(passes, requiredGatherers) {
-    passes = passes.filter(pass => {
+    const filteredPasses = passes.map(pass => {
       // remove any unncessary gatherers
       pass.gatherers = pass.gatherers.filter(gathererName => {
         gathererName = GatherRunner.getGathererClass(gathererName).name;
         return requiredGatherers.has(gathererName);
       });
-      return pass.gatherers.length > 0;
-    });
+      return pass;
+    // remove any passes lacking concrete gatherers
+    }).filter(pass => pass.gatherers.length > 0);
+
     // handle the perf-only case (no specific gatherers, just trace & network)
-    if (passes.length === 0) {
+    if (filteredPasses.length === 0) {
       if (requiredGatherers.has('traces') || requiredGatherers.has('networkRecords')) {
-        passes.push({
+        filteredPasses.push({
           recordNetwork: requiredGatherers.has('networkRecords'),
           recordTrace: requiredGatherers.has('traces'),
           gatherers: []
         });
       }
     }
+    return filteredPasses;
   }
 
   static getAggregationsByTags(aggregations, chosenTags) {
@@ -382,7 +385,7 @@ class Config {
 
     const auditObjectsSelected = Config.requireAudits(config.audits);
     const requiredGatherers = Config.getGatherersNeededByAudits(auditObjectsSelected);
-    Config.selectPassesNeededByGatherers(config.passes, requiredGatherers);
+    config.passes = Config.selectPassesNeededByGatherers(config.passes, requiredGatherers);
   }
 
   /**
