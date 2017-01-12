@@ -102,11 +102,14 @@
   "aggregations": [{
     "name": "Progressive Web App",
     "description": "These audits validate the aspects of a Progressive Web App.",
+    "id": "pwa_parent",
+    "tags": ["pwa"],
     "scored": true,
     "categorizable": true,
     "items": [{
       "name": "App can load on offline/flaky connections",
       "description": "Ensuring your web app can respond when the network connection is unavailable or flaky is critical to providing your users a good experience. This is achieved through use of a [Service Worker](https://developers.google.com/web/fundamentals/primers/service-worker/).",
+      "tags": ["pwa"],
       "audits": {
         "service-worker": {
           "expectedValue": true,
@@ -120,6 +123,8 @@
     },{
       "name": "Page load performance is fast",
       "description": "Users notice if sites and apps don't perform well. These top-level metrics capture the most important perceived performance concerns.",
+      "id": "perf_metrics",
+      "tags": ["pwa", "perf"],
       "audits": {
         "first-meaningful-paint": {
           "expectedValue": 100,
@@ -162,6 +167,8 @@
     }, {
       "name": "Site is progressively enhanced",
       "description": "Progressive enhancement means that everyone can access the basic content and functionality of a page in any browser, and those without certain browser features may receive a reduced but still functional experience.",
+      "id": "progressive_enhancement",
+      "tags": ["pwa"],
       "audits": {
         "without-javascript": {
           "expectedValue": true,
@@ -171,6 +178,8 @@
     }, {
       "name": "Network connection is secure",
       "description": "Security is an important part of the web for both developers and users. Moving forward, Transport Layer Security (TLS) support will be required for many APIs.",
+      "id": "network_security",
+      "tags": ["pwa"],
       "audits": {
         "is-on-https": {
           "expectedValue": true,
@@ -184,6 +193,8 @@
     }, {
       "name": "User can be prompted to Add to Homescreen",
       "description": "While users can manually add your site to their homescreen in the browser menu, the [prompt (aka app install banner)](https://developers.google.com/web/updates/2015/03/increasing-engagement-with-app-install-banners-in-chrome-for-android) will proactively prompt the user to install the app if the below requirements are met and the user has visited your site at least twice (with at least five minutes between visits).",
+      "tags": ["pwa"],
+      "id": "a2hs",
       "see": "https://github.com/GoogleChrome/lighthouse/issues/23",
       "audits": {
         "service-worker": {
@@ -210,6 +221,8 @@
     }, {
       "name": "Installed web app will launch with custom splash screen",
       "description": "A default splash screen will be constructed, but meeting these requirements guarantee a high-quality and customizable [splash screen](https://developers.google.com/web/updates/2015/10/splashscreen) the user sees between tapping the home screen icon and your app's first paint.",
+      "tags": ["pwa"],
+      "id": "splash_screen",
       "see": "https://github.com/GoogleChrome/lighthouse/issues/24",
       "audits": {
         "manifest-exists": {
@@ -236,6 +249,8 @@
     }, {
       "name": "Address bar matches brand colors",
       "description": "The browser address bar can be themed to match your site. A `theme-color` [meta tag](https://developers.google.com/web/updates/2014/11/Support-for-theme-color-in-Chrome-39-for-Android) will upgrade the address bar when a user browses the site, and the [manifest theme-color](https://developers.google.com/web/updates/2015/08/using-manifest-to-set-sitewide-theme-color) will apply the same theme site-wide once it's been added to homescreen.",
+      "tags": ["pwa"],
+      "id": "omnibox",
       "audits": {
         "manifest-exists": {
           "expectedValue": true,
@@ -253,6 +268,8 @@
     }, {
       "name": "Design is mobile-friendly",
       "description": "Users increasingly experience your app on mobile devices, so it's important to ensure that the experience can adapt to smaller screens.",
+      "id": "mobile_friendly",
+      "tags": ["pwa"],
       "audits": {
         "viewport": {
           "expectedValue": true,
@@ -267,10 +284,14 @@
   }, {
     "name": "Best Practices",
     "description": "We've compiled some recommendations for modernizing your web app and avoiding performance pitfalls. These audits do not affect your score but are worth a look.",
+    "id": "best_practices_parent",
+    "tags": ["best_practices"],
     "scored": false,
     "categorizable": true,
     "items": [{
       "name": "Using modern offline features",
+      "id": "modern_offline",
+      "tags": ["best_practices"],
       "audits": {
         "appcache-manifest": {
           "expectedValue": false
@@ -281,6 +302,8 @@
       }
     }, {
       "name": "Using modern protocols",
+      "id": "modern_network",
+      "tags": ["best_practices"],
       "audits": {
         "is-on-https": {
           "expectedValue": false
@@ -292,12 +315,16 @@
       }
     }, {
       "name": "Using bytes efficiently",
+      "id": "byte_efficiency",
+      "tags": ["best_practices"],
       "audits": {
         "unused-css-rules": {},
         "uses-optimized-images": {}
       }
     }, {
       "name": "Using modern CSS features",
+      "id": "modern_css",
+      "tags": ["best_practices"],
       "audits": {
         "no-old-flexbox": {
           "expectedValue": false
@@ -305,6 +332,8 @@
       }
     }, {
       "name": "Using modern JavaScript features",
+      "id": "modern_js",
+      "tags": ["best_practices"],
       "audits": {
         "uses-passive-event-listeners": {
           "expectedValue": true
@@ -315,6 +344,8 @@
       }
     }, {
       "name": "Avoiding APIs that harm the user experience",
+      "id": "ux_harmful_apis",
+      "tags": ["best_practices"],
       "audits": {
         "no-document-write": {
           "expectedValue": false
@@ -342,6 +373,8 @@
       }
     }, {
       "name": "Accessibility",
+      "id": "a11y",
+      "tags": ["best_practices"],
       "audits": {
         "aria-allowed-attr": {
           "expectedValue": true,
@@ -378,6 +411,8 @@
       }
     }, {
       "name": "Other",
+      "id": "other_best_practices",
+      "tags": ["best_practices"],
       "audits": {
         "manifest-short-name-length": {
           "expectedValue": true,
@@ -427,6 +462,8 @@
   }, {
     "name": "Performance Metrics",
     "description": "These encapsulate your app's performance.",
+    "id": "perf_diagnostics",
+    "tags": ["perf"],
     "scored": false,
     "categorizable": false,
     "items": [{
@@ -444,6 +481,8 @@
   }, {
     "name": "Fancier stuff",
     "description": "A list of newer features that you could be using in your app. These audits do not affect your score and are just suggestions.",
+    "id": "fancy_best_practices",
+    "tags": ["best_practices"],
     "scored": false,
     "categorizable": true,
     "items": [{

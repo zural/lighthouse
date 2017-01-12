@@ -17,6 +17,8 @@
 
   "aggregations": [{
     "name": "Perf metrics",
+    "id": "perf_metrics",
+    "tags": ["perf"],
     "description": "",
     "scored": true,
     "categorizable": true,
@@ -44,6 +46,8 @@
     }]
   },{
     "name": "Performance diagnostics",
+    "id": "perf_diagnostics",
+    "tags": ["perf"],
     "description": "",
     "scored": false,
     "categorizable": false,
