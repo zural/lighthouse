@@ -94,10 +94,10 @@ function logStatus([, message, details]) {
   statusDetailsMessageEl.textContent = details;
 }
 
-function createOptionItem(text, isChecked) {
+function createOptionItem(text, id, isChecked) {
   const input = document.createElement('input');
   input.setAttribute('type', 'checkbox');
-  input.setAttribute('value', text);
+  input.setAttribute('name', id);
   if (isChecked) {
     input.setAttribute('checked', 'checked');
   }
@@ -114,9 +114,9 @@ function createOptionItem(text, isChecked) {
 /**
  * Click event handler for Generate Report button.
  * @param {!Window} background Reference to the extension's background page.
- * @param {!Object<boolean>} selectedAggregations
+ * @param {!Object<boolean>} selectedTags
  */
-function onGenerateReportButtonClick(background, selectedAggregations) {
+function onGenerateReportButtonClick(background, selectedTags) {
   showRunningSubpage();
 
   const feedbackEl = document.querySelector('.feedback');
@@ -127,7 +127,7 @@ function onGenerateReportButtonClick(background, selectedAggregations) {
       disableCpuThrottling: true
     },
     restoreCleanState: true
-  }, selectedAggregations).catch(err => {
+  }, selectedTags).catch(err => {
     let message = err.message;
     let includeReportLink = true;
 
@@ -155,16 +155,17 @@ function onGenerateReportButtonClick(background, selectedAggregations) {
 
 /**
  * Generates a document fragment containing a list of checkboxes and labels
- * for the aggregation categories.
+ * for the aggregation tags.
  * @param {!Window} background Reference to the extension's background page.
- * @param {!Object<boolean>} selectedAggregations
+ * @param {!Object<boolean>} selectedTags
  */
-function generateOptionsList(background, selectedAggregations) {
+function generateOptionsList(background, selectedTags) {
   const frag = document.createDocumentFragment();
 
-  background.getDefaultAggregations().forEach(aggregation => {
-    const isChecked = selectedAggregations[aggregation.name];
-    frag.appendChild(createOptionItem(aggregation.name, isChecked));
+  background.getDefaultAggregationTags().forEach(defaultTag => {
+    const selectedTag = selectedTags.find(tag => tag.id === defaultTag.id);
+    const isChecked = selectedTag ? selectedTag.value : true;
+    frag.appendChild(createOptionItem(defaultTag.name, defaultTag.id, isChecked));
   });
 
   const optionsList = document.querySelector('.options__list');
@@ -189,12 +190,12 @@ function initPopup() {
 
     background.listenForStatus(logStatus);
 
-    background.loadSelectedAggregations().then(selectedAggregations => {
-      generateOptionsList(background, selectedAggregations);
+    background.resolveTags().then(tags => {
+      generateOptionsList(background, tags);
 
       const generateReportButton = document.getElementById('generate-report');
       generateReportButton.addEventListener('click', () => {
-        onGenerateReportButtonClick(background, selectedAggregations);
+        onGenerateReportButtonClick(background, tags);
       });
     });
 
@@ -207,9 +208,13 @@ function initPopup() {
     const okButton = document.getElementById('ok');
     okButton.addEventListener('click', () => {
       // Save selected aggregation categories on options page close.
-      const checkedAggregations = Array.from(optionsEl.querySelectorAll(':checked'))
-          .map(input => input.value);
-      background.saveSelectedAggregations(checkedAggregations);
+      const checkedTags = [...optionsEl.querySelectorAll('input')].map(elem => {
+        return {
+          id: elem.name,
+          value: elem.checked
+        };
+      });
+      background.saveSelectedTags(checkedTags);
 
       optionsEl.classList.remove(subpageVisibleClass);
     });
