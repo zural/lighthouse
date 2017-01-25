@@ -223,7 +223,7 @@ const tagMap = {
 };
 
 window.getDefaultAggregationTags = function() {
-  return _uniq(_flatten(getDefaultAggregations().map(agg => agg.tags))).map(tag => {
+  return _uniq(_flatten(window.getDefaultAggregations().map(agg => agg.tags))).map(tag => {
     return {
       id: tag,
       value: true,
@@ -267,14 +267,14 @@ window.getDefaultAggregations = function() {
  * Save currently selected set of aggregation categories to local storage.
  * @param {{selectedTags: !Array<string>, disableExtensions: boolean}} settings
  */
-window.saveSettings = function(settings, selectedTags) {
+window.saveSettings = function(settings) {
   const storage = {
     [STORAGE_KEY]: {},
     [SETTINGS_KEY]: {}
   };
 
   // Stash selected aggregations.
-  storage[STORAGE_KEY] = selectedTags;
+  storage[STORAGE_KEY] = settings.selectedTags;
 
   // Stash disable extensionS setting.
   disableExtensionsDuringRun = settings.disableExtensions;
