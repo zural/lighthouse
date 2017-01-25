@@ -162,7 +162,7 @@ const tagMap = {
 };
 
 window.getDefaultAggregationTags = function() {
-  return _uniq(_flatten(getDefaultAggregations().map(agg => agg.tags))).map(tag => {
+  return _uniq(_flatten(window.getDefaultAggregations().map(agg => agg.tags))).map(tag => {
     return {
       id: tag,
       value: true,
@@ -230,7 +230,7 @@ window.loadSavedTags = function() {
  * Combine saved settings with any new tags
  */
 window.resolveTags = function() {
-  return loadSavedTags().then(selectedTags => {
+  return window.loadSavedTags().then(selectedTags => {
     // start with all default tags, so the list is up to date
     const tags = [].concat(window.getDefaultAggregationTags());
 
