@@ -40,9 +40,15 @@ class ManifestShortName extends Audit {
    * @return {!AuditResult}
    */
   static audit(artifacts) {
+    if (!artifacts.Manifest) {
+      // Page has no manifest.
+      return ManifestShortName.generateAuditResult({
+        rawValue: false
+      });
+    }
+
     let hasShortName = false;
     const manifest = artifacts.Manifest.value;
-
     if (manifest) {
       hasShortName = !!(manifest.short_name.value || manifest.name.value);
     }

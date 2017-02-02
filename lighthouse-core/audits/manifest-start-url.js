@@ -40,11 +40,17 @@ class ManifestStartUrl extends Audit {
    * @return {!AuditResult}
    */
   static audit(artifacts) {
+    if (!artifacts.Manifest) {
+      // Page has no manifest.
+      return ManifestStartUrl.generateAuditResult({
+        rawValue: false
+      });
+    }
+
     let hasStartUrl = false;
     const manifest = artifacts.Manifest.value;
-
     if (manifest && manifest.start_url) {
-      hasStartUrl = (!!manifest.start_url.value);
+      hasStartUrl = !!manifest.start_url.value;
     }
 
     return ManifestStartUrl.generateAuditResult({

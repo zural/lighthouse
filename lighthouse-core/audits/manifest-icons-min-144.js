@@ -38,8 +38,14 @@ class ManifestIconsMin144 extends Audit {
    * @return {!AuditResult}
    */
   static audit(artifacts) {
-    const manifest = artifacts.Manifest.value;
+    if (!artifacts.Manifest) {
+      // Page has no manifest.
+      return ManifestIconsMin144.generateAuditResult({
+        rawValue: false
+      });
+    }
 
+    const manifest = artifacts.Manifest.value;
     if (icons.doExist(manifest) === false) {
       return ManifestIconsMin144.generateAuditResult({
         rawValue: false

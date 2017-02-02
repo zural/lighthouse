@@ -51,8 +51,14 @@ class ManifestBackgroundColor extends Audit {
    * @return {!AuditResult}
    */
   static audit(artifacts) {
-    const bgColor = ManifestBackgroundColor.getBackgroundColorValue(artifacts.Manifest.value);
+    if (!artifacts.Manifest) {
+      // Page has no manifest.
+      return ManifestBackgroundColor.generateAuditResult({
+        rawValue: false
+      });
+    }
 
+    const bgColor = ManifestBackgroundColor.getBackgroundColorValue(artifacts.Manifest.value);
     return ManifestBackgroundColor.generateAuditResult({
       rawValue: !!bgColor,
       extendedInfo: {

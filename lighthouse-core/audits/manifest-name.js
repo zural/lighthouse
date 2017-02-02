@@ -39,11 +39,17 @@ class ManifestName extends Audit {
    * @return {!AuditResult}
    */
   static audit(artifacts) {
+    if (!artifacts.Manifest) {
+      // Page has no manifest.
+      return ManifestName.generateAuditResult({
+        rawValue: false
+      });
+    }
+
     let hasName = false;
     const manifest = artifacts.Manifest.value;
-
     if (manifest && manifest.name) {
-      hasName = (!!manifest.name.value);
+      hasName = !!manifest.name.value;
     }
 
     return ManifestName.generateAuditResult({
