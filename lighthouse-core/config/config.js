@@ -271,7 +271,9 @@ class Config {
       throw new Error('config.auditResults must be an array');
     }
 
-    this._aggregations = configJSON.aggregations || null;
+    this.reportCategories = configJSON.reportCategories || null;
+    this.auditGroupTags = configJSON.auditGroupTags || null;
+    this.auditGroups = configJSON.auditGroups || null;
 
     this._audits = Config.requireAudits(configJSON.audits, this._configDir);
     this._artifacts = expandArtifacts(configJSON.artifacts);

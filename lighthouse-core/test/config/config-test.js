@@ -60,7 +60,9 @@ describe('Config', () => {
 
   it('uses the default config when no config is provided', () => {
     const config = new Config();
-    assert.deepStrictEqual(defaultConfig.aggregations, config.aggregations);
+    assert.deepStrictEqual(defaultConfig.reportCategories, config.reportCategories);
+    assert.deepStrictEqual(defaultConfig.auditGroupTags, config.auditGroupTags);
+    assert.deepStrictEqual(defaultConfig.auditGroups, config.auditGroups);
     assert.equal(defaultConfig.audits.length, config.audits.length);
   });
 
@@ -166,10 +168,12 @@ describe('Config', () => {
 
     const config = new Config(configJSON);
     assert.notEqual(config, configJSON, 'Objects are strictly different');
-    assert.ok(config.aggregations, 'Aggregations array exists');
+    assert.ok(config.auditGroups, 'Aggregations array exists');
     assert.ok(config.auditResults, 'Audits array exists');
-    assert.deepStrictEqual(config.aggregations, configJSON.aggregations, 'Aggregations match');
-    assert.notEqual(config.aggregations, configJSON.aggregations, 'Aggregations not same object');
+    assert.deepStrictEqual(defaultConfig.reportCategories, config.reportCategories);
+    assert.deepStrictEqual(defaultConfig.auditGroupTags, config.auditGroupTags);
+    assert.deepStrictEqual(config.auditGroups, configJSON.auditGroups, 'auditGroups match');
+    //assert.notEqual(config.aggregations, configJSON.aggregations, 'Aggregations not same object');
     assert.notEqual(config.auditResults, configJSON.auditResults, 'Audits not same object');
     assert.deepStrictEqual(config.auditResults, configJSON.auditResults, 'Audits match');
   });
