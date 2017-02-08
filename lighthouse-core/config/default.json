@@ -100,7 +100,7 @@
     "dobetterweb/uses-passive-event-listeners"
   ],
 
-  // The parent aggregations. Presentational and only used for reporting
+  "//": "The parent aggregations. Presentational and only used for reporting",
   "reportCategories": [
     {
       "name": "Progressive Web App",
@@ -128,15 +128,16 @@
     }
   ],
 
-  // Loose taxonomy to categorize the audit groups
+  "//": "Loose taxonomy to categorize the audit groups",
   "auditGroupTags": {
     "pwa": "Progressive Web App audits",
     "perf": "Performance metrics & diagnostics",
-    "best_practices": "Developer best practices"
-    // maybe security & accessibility later on?
+    "best_practices": "Developer best practices",
+
+    "//": "maybe security & accessibility later on?"
   },
 
-  // The primary groups of the audits
+  "//": "The primary groups of the audits",
   "auditGroups": [
     {
       "name": "New JavaScript features",
@@ -172,8 +173,11 @@
         "time-to-interactive": { "expectedValue": 100, "weight": 1 }
       }
     },
-    // below this line neeeds id, tags, category..
     {
+
+      "//": "below this line neeeds id, tags, category..",
+
+
       "name": "Site is progressively enhanced",
       "description": "Progressive enhancement means that everyone can access the basic content and functionality of a page in any browser, and those without certain browser features may receive a reduced but still functional experience.",
       "id": "progressive_enhancement",
@@ -239,11 +243,15 @@
       "audits": {
         "viewport": { "expectedValue": true, "weight": 1},
         "content-width": { "expectedValue": true, "weight": 1}
-      }
+      },
+
+      "//": "the end of the PWA set.."
     },
-    // the end of the PWA set..
-    // starting best practices
+    
     {
+      "//": "starting best practices",
+
+
       "name": "Using modern offline features",
       "id": "modern_offline",
       "tags": ["best_practices"],
@@ -323,11 +331,13 @@
       "audits": {
         "manifest-short-name-length": {},
         "manifest-display": {}
-      }
+      },
+
+      "//": "end of best practices"
     },
-    // end of best practices
-    // starting perf diagnostics
     {
+      "//": "starting perf diagnostics",
+
       "name": "Performance Diagnostics",
       "description": "These encapsulate your app's performance.",
       "id": "perf_diagnostics",
@@ -337,8 +347,9 @@
         "user-timings": {}
       }
     },
-    // end of perf diagnostics.. starting best practices again
     {
+      "//": "end of perf diagnostics.. starting best practices again",
+
       "name": "Fancier stuff",
       "description": "A list of newer features that you could be using in your app. These audits do not affect your score and are just suggestions.",
       "id": "fancy_best_practices",
@@ -348,6 +359,7 @@
         "no-console-time": {}
       }
     }
-  ] // end of auditGroups
+  ],
+  "//": " ^ end of auditGroups"
 }
 
