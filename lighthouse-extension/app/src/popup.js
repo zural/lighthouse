@@ -60,8 +60,11 @@ function hideRunningSubpage() {
 }
 
 function buildReportErrorLink(err) {
-  let qsBody = '**Lighthouse Version**: ' + getLighthouseVersion() + '\n';
-  qsBody += '**Chrome Version**: ' + getChromeVersion() + '\n';
+  let qsBody = '';
+  try {
+    qsBody += '**Lighthouse Version**: ' + getLighthouseVersion() + '\n';
+    qsBody += '**Chrome Version**: ' + getChromeVersion() + '\n';
+  } catch(e) {}
 
   if (siteURL) {
     qsBody += '**URL**: ' + siteURL + '\n';

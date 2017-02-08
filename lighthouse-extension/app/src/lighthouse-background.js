@@ -64,31 +64,6 @@ function enableOtherChromeExtensions(enable) {
 }
 
 /**
- * Filter out any unrequested aggregations from the config. If any audits are
- * no longer needed by any remaining aggregations, filter out those as well.
- * @param {!Object} config Lighthouse config object.
- * @param {!Object<boolean>} aggregationTags Ids of aggregation tags to include.
- */
-function getConfigFromTags(config, aggregationTags) {
-  // Change tags object to a plain array of tag strings
-  const chosenTags = aggregationTags.filter(tag => tag.value).map(tag => tag.id);
-  // Provided a config aggregation, should it be included?
-  const isAggregationSelected = agg => agg.tags.some(itemTag => chosenTags.includes(itemTag));
-
-  const chosenAggregations = [];
-  config.aggregations.forEach(aggregation => {
-    if (aggregation.items.length === 1) {
-      if (isAggregationSelected(aggregation)) {
-        chosenAggregations.push(aggregation);
-      }
-      return;
-    }
-    // Keep if the config's aggregation has one of the provided tags
-    aggregation.items = aggregation.items.filter(isAggregationSelected);
-  }
-}
-
-/**
  * Sets the extension badge text.
  * @param {string=} optUrl If present, sets the badge text to "Testing <url>".
  *     Otherwise, restore the default badge text.
@@ -291,6 +266,7 @@ window.saveSettings = function(settings) {
 window.loadSettings = function() {
   return new Promise(resolve => {
     chrome.storage.local.get([STORAGE_KEY, SETTINGS_KEY], result => {
+      const selectedTags = result && result[STORAGE_KEY] || [];
       // start with all default tags, so the list is up to date
       const tags = [].concat(window.getDefaultAggregationTags());
 
@@ -313,15 +289,6 @@ window.loadSettings = function() {
         selectedTags: tags,
         disableExtensions: savedSettings.disableExtensions
       });
-    });
-  })
-};
-
-window.loadSavedTags = function() {
-  return new Promise(resolve => {
-    chrome.storage.local.get(STORAGE_KEY, result => {
-      const tags = result && result[STORAGE_KEY];
-      resolve(Array.isArray(tags) ? tags : []);
     });
   });
 };
