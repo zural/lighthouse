@@ -62,11 +62,12 @@ class GatherRunner {
    * reload. We do not `waitForLoad` on about:blank since a page load event is
    * never fired on it.
    * @param {!Driver} driver
+   * @param {integer=} waitForLoadMs
    * @return {!Promise}
    */
-  static loadBlank(driver) {
+  static loadBlank(driver, waitForLoadMs = 300) {
     return driver.gotoURL('about:blank')
-      .then(_ => new Promise((resolve, reject) => setTimeout(resolve, 300)));
+      .then(_ => new Promise((resolve, reject) => setTimeout(resolve, waitForLoadMs)));
   }
 
   /**
@@ -153,7 +154,7 @@ class GatherRunner {
    * @return {!Promise}
    */
   static beforePass(options, gathererResults) {
-    const pass = GatherRunner.loadBlank(options.driver);
+    const pass = GatherRunner.loadBlank(options.driver, options._aboutBlankTimeout);
 
     return options.config.gatherers.reduce((chain, gatherer) => {
       return chain.then(_ => {
@@ -315,7 +316,7 @@ class GatherRunner {
     const gathererResults = {};
 
     return driver.connect()
-      .then(_ => GatherRunner.loadBlank(driver))
+      .then(_ => GatherRunner.loadBlank(driver, options._aboutBlankTimeout))
       .then(_ => GatherRunner.setupDriver(driver, options))
 
       // Run each pass
