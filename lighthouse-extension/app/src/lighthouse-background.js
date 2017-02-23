@@ -28,6 +28,9 @@ const ReportGenerator = require('../../../lighthouse-core/report/report-generato
 const STORAGE_KEY = 'lighthouse_audits';
 const SETTINGS_KEY = 'lighthouse_settings';
 
+const Raven = require('raven-js');
+Raven.config('https://93d9cdbb6ff445ef9b756456fc74e1bc@sentry.io/141780');
+
 // let installedExtensions = [];
 let disableExtensionsDuringRun = false;
 let lighthouseIsRunning = false;
@@ -164,8 +167,10 @@ window.runLighthouseForConnection = function(connection, url, options, requested
     })
     .catch(err => {
       lighthouseIsRunning = false;
-      updateBadgeUI();
-      throw err;
+      return new Promise(resolve => Raven.captureException(err, resolve)).then(_ => {
+        updateBadgeUI();
+        throw err;
+      });
     });
 };
 

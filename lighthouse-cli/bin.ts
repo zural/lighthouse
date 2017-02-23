@@ -36,6 +36,9 @@ import * as randomPort from './random-port';
 import {Results} from './types/types';
 const yargs = require('yargs');
 
+const Raven = require('raven');
+Raven.config('https://93d9cdbb6ff445ef9b756456fc74e1bc:006321bd0f7a4a0c976e05ac604d6369@sentry.io/141780').install();
+
 interface LighthouseError extends Error {
   code?: string
 };
@@ -301,7 +304,9 @@ function runLighthouse(url: string,
     })
     .then(() => chromeLauncher.kill())
     .catch(err => {
-      return chromeLauncher.kill().then(() => handleError(err), handleError);
+      return new Promise(resolve => Raven.captureException(err, resolve)).then(_ => {
+        return chromeLauncher.kill().then(() => handleError(err), handleError);
+      });
     });
 }
 

@@ -128,7 +128,7 @@ class Driver {
       throw new Error('connect() must be called before attempting to remove an event listener.');
     }
 
-    this._eventEmitter.removeListener(eventName, cb);
+    this._eventEmitter.remoeListener(eventName, cb);
   }
 
   /**
