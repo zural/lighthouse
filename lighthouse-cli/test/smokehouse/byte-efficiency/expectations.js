@@ -21,8 +21,8 @@
  */
 module.exports = [
   {
-    initialUrl: 'http://localhost:10200/byte-efficiency/tester.html',
-    url: 'http://localhost:10200/byte-efficiency/tester.html',
+    initialUrl: 'https://rawgit.com/GoogleChrome/lighthouse/master/lighthouse-cli/test/fixtures/byte-efficiency/tester.html',
+    url: 'https://rawgit.com/GoogleChrome/lighthouse/master/lighthouse-cli/test/fixtures/byte-efficiency/tester.html',
     audits: {
       'unused-css-rules': {
         score: false,

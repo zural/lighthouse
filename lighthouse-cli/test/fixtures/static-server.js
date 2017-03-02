@@ -77,12 +77,12 @@ function requestHandler(request, response) {
   }
 }
 
-const serverForOnline = http.createServer(requestHandler);
-const serverForOffline = http.createServer(requestHandler);
+// const serverForOnline = http.createServer(requestHandler);
+// const serverForOffline = http.createServer(requestHandler);
 
-serverForOnline.on('error', e => console.error(e.code, e));
-serverForOffline.on('error', e => console.error(e.code, e));
+// serverForOnline.on('error', e => console.error(e.code, e));
+// serverForOffline.on('error', e => console.error(e.code, e));
 
-// Listen
-serverForOnline.listen(10200);
-serverForOffline.listen(10503);
+// // Listen
+// serverForOnline.listen(9200);
+// serverForOffline.listen(9503);

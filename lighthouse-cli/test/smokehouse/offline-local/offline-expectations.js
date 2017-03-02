@@ -23,8 +23,8 @@
  */
 module.exports = [
   {
-    initialUrl: 'http://localhost:10200/online-only.html',
-    url: 'http://localhost:10200/online-only.html',
+    initialUrl: 'https://rawgit.com/GoogleChrome/lighthouse/master/lighthouse-cli/test/fixtures/online-only.html',
+    url: 'https://rawgit.com/GoogleChrome/lighthouse/master/lighthouse-cli/test/fixtures/online-only.html',
     audits: {
       'is-on-https': {
         score: false
@@ -110,8 +110,8 @@ module.exports = [
   },
 
   {
-    initialUrl: 'http://localhost:10503/offline-ready.html',
-    url: 'http://localhost:10503/offline-ready.html',
+    initialUrl: 'https://rawgit.com/GoogleChrome/lighthouse/master/lighthouse-cli/test/fixtures/offline-ready.html',
+    url: 'https://rawgit.com/GoogleChrome/lighthouse/master/lighthouse-cli/test/fixtures/offline-ready.html',
     audits: {
       'is-on-https': {
         score: false
