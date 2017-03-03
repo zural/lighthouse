@@ -19,20 +19,28 @@
 
 const Audit = require('./audit');
 
-class ManifestShortName extends Audit {
+class ManifestDisplayA2HS extends Audit {
   /**
    * @return {!AuditMeta}
    */
   static get meta() {
     return {
       category: 'Manifest',
-      name: 'manifest-short-name',
-      description: 'Manifest contains `short_name`',
-      helpText: 'The `short_name` property is a requirement for Add ' +
-          'To Homescreen. [Learn ' +
-          'more](https://developers.google.com/web/tools/lighthouse/audits/manifest-contains-short_name).',
+      name: 'manifest-display',
+      description: 'Manifest\'s `display` property is set to standalone/fullscreen',
+      helpText: 'Set the `display` property to specify how your app ' +
+          'launches from the homescreen. [Learn ' +
+          'more](https://developers.google.com/web/tools/lighthouse/audits/manifest-has-display-set).',
       requiredArtifacts: ['Manifest']
     };
+  }
+
+  /**
+   * @param {string|undefined} val
+   * @return {boolean}
+   */
+  static hasChromeA2HSValue(val) {
+    return ['fullscreen', 'standalone'].includes(val);
   }
 
   /**
@@ -42,17 +50,21 @@ class ManifestShortName extends Audit {
   static audit(artifacts) {
     if (!artifacts.Manifest || !artifacts.Manifest.value) {
       // Page has no manifest or was invalid JSON.
-      return ManifestShortName.generateAuditResult({
+      return ManifestDisplayA2HS.generateAuditResult({
         rawValue: false
       });
     }
 
     const manifest = artifacts.Manifest.value;
-    return ManifestShortName.generateAuditResult({
-      // When no shortname can be found we look for a name.
-      rawValue: !!(manifest.short_name.value && manifest.name.value)
-    });
+    const displayValue = manifest.display.value;
+    const hasRecommendedValue = ManifestDisplayA2HS.hasChromeA2HSValue(displayValue);
+
+    const auditResult = {
+      rawValue: hasRecommendedValue,
+      displayValue
+    };
+    return ManifestDisplayA2HS.generateAuditResult(auditResult);
   }
 }
 
-module.exports = ManifestShortName;
+module.exports = ManifestDisplayA2HS;
