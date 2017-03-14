@@ -1,0 +1,44 @@
+{
+  "passes": [{
+    "passName": "defaultPass",
+    "recordNetwork": true,
+    "useThrottling": false,
+    "gatherers": [
+      "url"
+    ]
+  },
+  {
+    "passName": "offlinePass",
+    "recordNetwork": true,
+    "useThrottling": false,
+    "gatherers": [
+      "service-worker",
+      "offline"
+    ]
+  }
+  ],
+
+  "audits": [
+    "service-worker",
+    "works-offline"
+  ],
+
+  "aggregations": [{
+    "name": "Service Worker State",
+    "description": "",
+    "scored": false,
+    "categorizable": false,
+    "items": [{
+      "audits": {
+        "service-worker": {
+          "expectedValue": true,
+          "weight": 1
+        },
+        "works-offline": {
+          "expectedValue": true,
+          "weight": 1
+        }
+      }
+    }]
+  }]
+}

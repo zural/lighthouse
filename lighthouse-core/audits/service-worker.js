@@ -20,6 +20,8 @@
 const URL = require('../lib/url-shim');
 const Audit = require('./audit');
 
+const Formatter = require('../report/formatter');
+
 /**
  * @param {!Array<!ServiceWorkerVersion>} versions
  * @param {string} url
@@ -56,8 +58,13 @@ class ServiceWorker extends Audit {
     const version = getActivatedServiceWorker(
         artifacts.ServiceWorker.versions, artifacts.URL.finalUrl);
 
+
     return {
-      rawValue: !!version
+      rawValue: !!version,
+      extendedInfo: {
+        formatter: Formatter.SUPPORTED_FORMATS.NULL,
+        value: artifacts.ServiceWorker.versions
+      }
     };
   }
 }
