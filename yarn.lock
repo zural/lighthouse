@@ -416,13 +416,13 @@ chalk@^1.0.0, chalk@^1.1.0, chalk@^1.1.1, chalk@^1.1.3:
     strip-ansi "^3.0.0"
     supports-color "^2.0.0"
 
-chrome-devtools-frontend@1.0.401423:
-  version "1.0.401423"
-  resolved "https://registry.yarnpkg.com/chrome-devtools-frontend/-/chrome-devtools-frontend-1.0.401423.tgz#32a89b8d04e378a494be3c8d63271703be1c04ea"
+chrome-devtools-frontend@1.0.445684:
+  version "1.0.445684"
+  resolved "https://registry.yarnpkg.com/chrome-devtools-frontend/-/chrome-devtools-frontend-1.0.445684.tgz#8540131836024df2b70fe90d0322af368931d762"
 
-chrome-devtools-frontend@1.0.422034:
-  version "1.0.422034"
-  resolved "https://registry.yarnpkg.com/chrome-devtools-frontend/-/chrome-devtools-frontend-1.0.422034.tgz#071c8ce14466b7653032fcd1ad1a4a68d5e3cbd9"
+chrome-devtools-frontend@1.0.449852:
+  version "1.0.449852"
+  resolved "https://registry.yarnpkg.com/chrome-devtools-frontend/-/chrome-devtools-frontend-1.0.449852.tgz#36d69a913ae7f1b75f2ab88d871ccc714f8d959c"
 
 circular-json@^0.3.0:
   version "0.3.1"
@@ -679,11 +679,11 @@ detect-indent@^3.0.1:
     minimist "^1.1.0"
     repeating "^1.1.0"
 
-devtools-timeline-model@1.1.6:
-  version "1.1.6"
-  resolved "https://registry.yarnpkg.com/devtools-timeline-model/-/devtools-timeline-model-1.1.6.tgz#7be51a73b55d727b597bb30dd1ed2e8e210639a5"
+devtools-timeline-model@1.3.0:
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/devtools-timeline-model/-/devtools-timeline-model-1.3.0.tgz#a53c3147ac512c9eeae2d80740027a5e1bf45922"
   dependencies:
-    chrome-devtools-frontend "1.0.401423"
+    chrome-devtools-frontend "1.0.445684"
     resolve "1.1.7"
 
 diff@1.4.0:
