@@ -420,9 +420,9 @@ chrome-devtools-frontend@1.0.445684:
   version "1.0.445684"
   resolved "https://registry.yarnpkg.com/chrome-devtools-frontend/-/chrome-devtools-frontend-1.0.445684.tgz#8540131836024df2b70fe90d0322af368931d762"
 
-chrome-devtools-frontend@1.0.449852:
-  version "1.0.449852"
-  resolved "https://registry.yarnpkg.com/chrome-devtools-frontend/-/chrome-devtools-frontend-1.0.449852.tgz#36d69a913ae7f1b75f2ab88d871ccc714f8d959c"
+chrome-devtools-frontend@1.0.457951:
+  version "1.0.457951"
+  resolved "https://registry.yarnpkg.com/chrome-devtools-frontend/-/chrome-devtools-frontend-1.0.457951.tgz#e2fada0c34a39db2189cdcd9f65b319b9d408d03"
 
 circular-json@^0.3.0:
   version "0.3.1"
