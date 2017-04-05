@@ -26,6 +26,10 @@ const MEDIUM = 'Medium';
 const LOW = 'Low';
 const VERY_LOW = 'VeryLow';
 
+const describe = (s, fn) => fn;
+const it = (s, fn) => fn;
+
+
 function mockTracingData(prioritiesList, edges) {
   const networkRecords = prioritiesList.map((priority, index) =>
       ({requestId: index.toString(),
@@ -33,13 +37,13 @@ function mockTracingData(prioritiesList, edges) {
           _category: 'fake'
         },
         priority: () => priority,
-        initiatorRequest: () => null
+        _initiator: null
       }));
 
   // add mock initiator information
   edges.forEach(edge => {
     const initiator = networkRecords[edge[0]];
-    networkRecords[edge[1]].initiatorRequest = () => initiator;
+    networkRecords[edge[1]]._initiator = initiator;
   });
 
   return networkRecords;
@@ -62,8 +66,34 @@ function constructEmptyRequest() {
   };
 }
 
+testGetCriticalChain({
+    priorityList: [HIGH, MEDIUM, VERY_HIGH, HIGH],
+    edges: [[0, 1], [1, 2], [2, 3]],
+    expected: {
+      0: {
+        request: constructEmptyRequest(),
+        children: {
+          1: {
+            request: constructEmptyRequest(),
+            children: {
+              2: {
+                request: constructEmptyRequest(),
+                children: {
+                  3: {
+                    request: constructEmptyRequest(),
+                    children: {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  })
+  
 describe('CriticalRequestChain gatherer: getCriticalChain function', () => {
-  it('returns correct data for chain of four critical requests', () =>
+  it.only('returns correct data for chain of four critical requests', () =>
     testGetCriticalChain({
       priorityList: [HIGH, MEDIUM, VERY_HIGH, HIGH],
       edges: [[0, 1], [1, 2], [2, 3]],

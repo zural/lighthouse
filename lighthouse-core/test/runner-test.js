@@ -25,6 +25,24 @@ const computedArtifacts = require('../gather/gather-runner').instantiateComputed
 
 /* eslint-env mocha */
 
+// const url = 'https://example.com';
+// const config = new Config({
+//   audits: [
+//     'critical-request-chains'
+//   ],
+
+//   artifacts: {
+//     performanceLog: path.join(__dirname, '/fixtures/perflog.json')
+//   }
+// });
+
+// return Runner.run({}, {url, config}).then(results => {
+//   const audits = results.audits;
+//   assert.equal(audits['critical-request-chains'].displayValue, 9);
+//   assert.equal(audits['critical-request-chains'].rawValue, false);
+// });
+
+
 describe('Runner', () => {
   it('expands gatherers', () => {
     const url = 'https://example.com';
@@ -252,7 +270,7 @@ describe('Runner', () => {
     });
   });
 
-  it('accepts performance logs as an artifact', () => {
+  it.only('accepts performance logs as an artifact', () => {
     const url = 'https://example.com';
     const config = new Config({
       audits: [
