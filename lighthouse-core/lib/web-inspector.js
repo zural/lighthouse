@@ -211,28 +211,9 @@ module.exports = (function() {
   requireval('chrome-devtools-frontend/front_end/common/ResourceType.js');
   requireval('chrome-devtools-frontend/front_end/sdk/Target.js');
   requireval('chrome-devtools-frontend/front_end/sdk/TargetManager.js');
-  requireval('chrome-devtools-frontend/front_end/sdk/LayerTreeBase.js');
   requireval('chrome-devtools-frontend/front_end/sdk/NetworkManager.js');
   requireval('chrome-devtools-frontend/front_end/sdk/NetworkRequest.js');
 
-  requireval('chrome-devtools-frontend/front_end/common/SegmentedRange.js');
-  requireval('chrome-devtools-frontend/front_end/bindings/TempFile.js');
-
-  requireval('chrome-devtools-frontend/front_end/sdk/TracingModel.js');
-  requireval('chrome-devtools-frontend/front_end/sdk/ProfileTreeModel.js');
-  requireval('chrome-devtools-frontend/front_end/timeline/TimelineUIUtils.js');
-  requireval('chrome-devtools-frontend/front_end/timeline_model/TimelineJSProfile.js');
-  requireval('chrome-devtools-frontend/front_end/sdk/CPUProfileDataModel.js');
-  requireval('chrome-devtools-frontend/front_end/layers/LayerTreeModel.js');
-  requireval('chrome-devtools-frontend/front_end/timeline_model/TimelineModel.js');
-  requireval('chrome-devtools-frontend/front_end/timeline_model/TimelineModelFilter.js');
-  requireval('chrome-devtools-frontend/front_end/data_grid/SortableDataGrid.js');
-
-  requireval('chrome-devtools-frontend/front_end/timeline/TimelineTreeView.js');
-  requireval('chrome-devtools-frontend/front_end/timeline_model/TimelineProfileTree.js');
-  requireval('chrome-devtools-frontend/front_end/sdk/FilmStripModel.js');
-  requireval('chrome-devtools-frontend/front_end/timeline_model/TimelineIRModel.js');
-  requireval('chrome-devtools-frontend/front_end/timeline_model/TimelineFrameModel.js');
 
   // DevTools makes a few assumptions about using backing storage to hold traces.
   global.Bindings.DeferredTempFile = function() {};

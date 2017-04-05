@@ -22,15 +22,8 @@ const assert = require('assert');
 
 /* global describe, it */
 describe('Web Inspector lib', function() {
-  it('WebInspector exported is the real one', () => {
-    assert.equal(typeof WebInspector, 'object');
-    assert.ok(WebInspector.TimelineModel);
-    assert.ok(WebInspector.TimelineUIUtils);
-    assert.ok(WebInspector.FilmStripModel);
-    assert.ok(WebInspector.TimelineProfileTree);
-    assert.ok(WebInspector.TimelineAggregator);
-    assert.ok(WebInspector.NetworkManager);
-    assert.ok(WebInspector.Color);
+  it('DevTools module is loaded exported is the real one', () => {
+    assert.ok(Object.keys(global.Common).length > 10);
   });
 
   // Our implementation of using DevTools doesn't sandbox natives
