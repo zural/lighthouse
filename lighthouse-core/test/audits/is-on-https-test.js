@@ -27,10 +27,10 @@ describe('Security: HTTPS audit', () => {
 
   it('fails when there is more than one insecure record', () => {
     const result = Audit.audit(getArtifacts([
-      {url: 'https://google.com/', scheme: 'https', domain: 'google.com'},
-      {url: 'http://insecure.com/image.jpeg', scheme: 'http', domain: 'insecure.com'},
-      {url: 'http://insecure.com/image2.jpeg', scheme: 'http', domain: 'insecure.com'},
-      {url: 'https://google.com/', scheme: 'https', domain: 'google.com'},
+      {_url: 'https://google.com/', scheme: 'https', domain: 'google.com'},
+      {_url: 'http://insecure.com/image.jpeg', scheme: 'http', domain: 'insecure.com'},
+      {_url: 'http://insecure.com/image2.jpeg', scheme: 'http', domain: 'insecure.com'},
+      {_url: 'https://google.com/', scheme: 'https', domain: 'google.com'},
     ]));
     assert.strictEqual(result.rawValue, false);
     assert.ok(result.displayValue.includes('requests found'));
@@ -39,9 +39,9 @@ describe('Security: HTTPS audit', () => {
 
   it('fails when there is one insecure record', () => {
     const result = Audit.audit(getArtifacts([
-      {url: 'https://google.com/', scheme: 'https', domain: 'google.com'},
-      {url: 'http://insecure.com/image.jpeg', scheme: 'http', domain: 'insecure.com'},
-      {url: 'https://google.com/', scheme: 'https', domain: 'google.com'},
+      {_url: 'https://google.com/', scheme: 'https', domain: 'google.com'},
+      {_url: 'http://insecure.com/image.jpeg', scheme: 'http', domain: 'insecure.com'},
+      {_url: 'https://google.com/', scheme: 'https', domain: 'google.com'},
     ]));
     assert.strictEqual(result.rawValue, false);
     assert.ok(result.displayValue.includes('request found'));
@@ -50,9 +50,9 @@ describe('Security: HTTPS audit', () => {
 
   it('passes when all records are secure', () => {
     const result = Audit.audit(getArtifacts([
-      {url: 'https://google.com/', scheme: 'https', domain: 'google.com'},
-      {url: 'http://localhost/image.jpeg', scheme: 'http', domain: 'localhost'},
-      {url: 'https://google.com/', scheme: 'https', domain: 'google.com'},
+      {_url: 'https://google.com/', scheme: 'https', domain: 'google.com'},
+      {_url: 'http://localhost/image.jpeg', scheme: 'http', domain: 'localhost'},
+      {_url: 'https://google.com/', scheme: 'https', domain: 'google.com'},
     ]));
 
     assert.strictEqual(result.rawValue, true);

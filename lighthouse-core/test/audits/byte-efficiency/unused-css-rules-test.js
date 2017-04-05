@@ -134,7 +134,7 @@ describe('Best Practices: unused css rules audit', () => {
     const networkRecords = {
       defaultPass: [
         {
-          url: 'file://a.css',
+          _url: 'file://a.css',
           transferSize: 10 * 1024,
           _resourceType: {_name: 'stylesheet'}
         },

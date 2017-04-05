@@ -127,7 +127,7 @@ class ImageUsage extends Gatherer {
     const indexedNetworkRecords = traceData.networkRecords.reduce((map, record) => {
       if (/^image/.test(record._mimeType)) {
         map[record._url] = {
-          url: record.url,
+          url: record._url,
           resourceSize: record.resourceSize,
           startTime: record.startTime,
           endTime: record.endTime,

@@ -17,7 +17,9 @@
 
 'use strict';
 
+/* global TimelineModel SDK Bindings Timeline TimelineModelTreeView */
 require('../web-inspector');
+
 const Timeline = global.Timeline;
 
 const ConsoleQuieter = require('../console-quieter');
@@ -79,7 +81,8 @@ class TimelineModel {
     return this.topDownGroupBy(Timeline.AggregatedTimelineTreeView.GroupBy.None);
   }
 
-  topDownGroupBy(grouping) {
+  _buildTree(direction, grouping) {
+    // from Timeline.AggregatedTimelineTreeView constructor()
     const filters = [];
     filters.push(Timeline.TimelineUIUtils.visibleEventsFilter());
     filters.push(new TimelineModel.ExcludeTopLevelFilter());
@@ -91,15 +94,18 @@ class TimelineModel {
     filters.push(new TimelineModel.ExclusiveNameFilter(nonessentialEvents));
 
     const groupingAggregator = this._createGroupingFunction(Timeline.AggregatedTimelineTreeView.GroupBy[grouping]);
-    const topDownGrouped = TimelineModel.TimelineProfileTree.buildTopDown(this._timelineModel.mainThreadEvents(),
-        filters, /* startTime */ 0, /* endTime */ Infinity, groupingAggregator);
 
-    // from Timeline.CallTreeTimelineTreeView._buildTree()
-    if (grouping !== Timeline.AggregatedTimelineTreeView.GroupBy.None)
-      new TimelineModel.TimelineAggregator().performGrouping(topDownGrouped); // group in-place
+    const treeConstructorName = direction === 'topdown' ? 'TopDownRootNode' : direction === 'bottomup' ? 'BottomUpRootNode' : '___';
+    const tree = new TimelineModel.TimelineProfileTree[treeConstructorName](this._timelineModel.mainThreadEvents(),
+      filters, /* startTime */ 0, /* endTime */ Infinity, groupingAggregator);
 
-    new TimelineModelTreeView(topDownGrouped).sortingChanged('total', 'desc');
-    return topDownGrouped;
+    return tree;
+  }
+
+  topDownGroupBy(grouping) {
+    const tree = this._buildTree('topdown', grouping);
+    new TimelineModelTreeView(tree).sortingChanged('total', 'desc');
+    return tree;
   }
 
   bottomUp() {
@@ -111,14 +117,12 @@ class TimelineModel {
    * @return {!TimelineModel.TimelineProfileTree.Node} A grouped and sorted tree
    */
   bottomUpGroupBy(grouping) {
-    const topDown = this.topDownGroupBy(grouping);
-
-    const bottomUpGrouped = TimelineModel.TimelineProfileTree.buildBottomUp(topDown);
-    new TimelineModelTreeView(bottomUpGrouped).sortingChanged('self', 'desc');
+    const tree = this._buildTree('bottomup', grouping);
+    new TimelineModelTreeView(tree).sortingChanged('self', 'desc');
 
     // todo: understand why an empty key'd entry is created here
-    bottomUpGrouped.children.delete('');
-    return bottomUpGrouped;
+    tree.children().delete('');
+    return tree;
   }
 
   frameModel() {

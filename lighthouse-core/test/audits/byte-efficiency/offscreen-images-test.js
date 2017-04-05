@@ -37,7 +37,7 @@ function generateSize(width, height, prefix = 'client') {
 }
 
 function generateImage(size, coords, networkRecord, src = 'https://google.com/logo.png') {
-  Object.assign(networkRecord || {}, {url: src});
+  Object.assign(networkRecord || {}, {_url: src});
 
   const x = coords[0];
   const y = coords[1];

@@ -17,10 +17,6 @@
 'use strict';
 
 /* eslint-env mocha */
-const describe = (s, fn) => fn();
-const it = (s, fn) => fn();
-
-
 const Gatherer = require('../../gather/gatherers/gatherer');
 const GatherRunner = require('../../gather/gather-runner');
 const assert = require('assert');
@@ -582,19 +578,19 @@ describe('GatherRunner', function() {
   describe('#assertPageLoaded', () => {
     it('passes when the page is loaded', () => {
       const url = 'http://the-page.com';
-      const records = [{url}];
+      const records = [{_url: url}];
       GatherRunner.assertPageLoaded(url, {online: true}, records);
     });
 
     it('passes when the page is loaded, ignoring any fragment', () => {
       const url = 'http://example.com/#/page/list';
-      const records = [{url: 'http://example.com'}];
+      const records = [{_url: 'http://example.com'}];
       GatherRunner.assertPageLoaded(url, {online: true}, records);
     });
 
     it('throws when page fails to load', () => {
       const url = 'http://the-page.com';
-      const records = [{url, failed: true, localizedFailDescription: 'foobar'}];
+      const records = [{_url: url, failed: true, localizedFailDescription: 'foobar'}];
       assert.throws(() => {
         GatherRunner.assertPageLoaded(url, {online: true}, records);
       }, /Unable.*foobar/);

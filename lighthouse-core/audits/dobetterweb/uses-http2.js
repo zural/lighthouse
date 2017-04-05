@@ -59,7 +59,7 @@ class UsesHTTP2Audit extends Audit {
     }).map(record => {
       return {
         protocol: record.protocol,
-        url: record.url // .url is a getter and not copied over for the assign.
+        url: record._url
       };
     });
 

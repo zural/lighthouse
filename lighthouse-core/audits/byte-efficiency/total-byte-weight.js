@@ -64,7 +64,7 @@ class TotalByteWeight extends Audit {
         }
 
         const result = {
-          url: URL.getDisplayName(record.url),
+          url: URL.getDisplayName(record._url),
           totalBytes: record.transferSize,
           totalKb: this.bytesToKbString(record.transferSize),
           totalMs: this.bytesToMsString(record.transferSize, networkThroughput),

@@ -44,7 +44,9 @@ class CriticalRequestChains extends ComputedArtifact {
         (request.parsedURL && request.parsedURL.lastPathComponent === 'favicon.ico')) {
       return false;
     }
-
+    // TODO: sort out why there are requests without a priority
+    if (!request.priority) return false;
+    
     return ['VeryHigh', 'High', 'Medium'].includes(request.priority());
   }
 

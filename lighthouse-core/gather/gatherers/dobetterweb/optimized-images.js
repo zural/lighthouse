@@ -103,7 +103,7 @@ class OptimizedImages extends Gatherer {
    * @return {!Promise<{originalSize: number, jpegSize: number, webpSize: number}>}
    */
   calculateImageStats(driver, networkRecord) {
-    let uriPromise = Promise.resolve(networkRecord.url);
+    let uriPromise = Promise.resolve(networkRecord._url);
 
     // For cross-origin images, circumvent canvas CORS policy by getting image directly from protocol
     if (!networkRecord.isSameOrigin && !networkRecord.isBase64DataUri) {

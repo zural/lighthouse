@@ -205,12 +205,13 @@ module.exports = (function() {
 
   // Dependencies for network-recorder
   requireval('chrome-devtools-frontend/front_end/common/Object.js');
-  requireval('chrome-devtools-frontend/front_end/common/ParsedURL.js');
-  requireval('chrome-devtools-frontend/front_end/common/ResourceType.js');
-  requireval('chrome-devtools-frontend/front_end/common/UIString.js');
   requireval('chrome-devtools-frontend/front_end/platform/utilities.js');
+  requireval('chrome-devtools-frontend/front_end/common/ParsedURL.js');
+  requireval('chrome-devtools-frontend/front_end/common/UIString.js');
+  requireval('chrome-devtools-frontend/front_end/common/ResourceType.js');
   requireval('chrome-devtools-frontend/front_end/sdk/Target.js');
   requireval('chrome-devtools-frontend/front_end/sdk/TargetManager.js');
+  requireval('chrome-devtools-frontend/front_end/sdk/LayerTreeBase.js');
   requireval('chrome-devtools-frontend/front_end/sdk/NetworkManager.js');
   requireval('chrome-devtools-frontend/front_end/sdk/NetworkRequest.js');
 
@@ -222,7 +223,9 @@ module.exports = (function() {
   requireval('chrome-devtools-frontend/front_end/timeline/TimelineUIUtils.js');
   requireval('chrome-devtools-frontend/front_end/timeline_model/TimelineJSProfile.js');
   requireval('chrome-devtools-frontend/front_end/sdk/CPUProfileDataModel.js');
+  requireval('chrome-devtools-frontend/front_end/layers/LayerTreeModel.js');
   requireval('chrome-devtools-frontend/front_end/timeline_model/TimelineModel.js');
+  requireval('chrome-devtools-frontend/front_end/timeline_model/TimelineModelFilter.js');
   requireval('chrome-devtools-frontend/front_end/data_grid/SortableDataGrid.js');
 
   requireval('chrome-devtools-frontend/front_end/timeline/TimelineTreeView.js');

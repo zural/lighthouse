@@ -16,7 +16,6 @@
 'use strict';
 
 /* eslint-env mocha */
-
 const GathererClass = require('../../../gather/computed/critical-request-chains');
 const assert = require('assert');
 const Gatherer = new GathererClass();

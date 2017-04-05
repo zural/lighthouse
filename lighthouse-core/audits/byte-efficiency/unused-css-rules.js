@@ -47,7 +47,7 @@ class UnusedCSSRules extends Audit {
     const indexedNetworkRecords = networkRecords
         .filter(record => record._resourceType && record._resourceType._name === 'stylesheet')
         .reduce((indexed, record) => {
-          indexed[record.url] = record;
+          indexed[record._url] = record;
           return indexed;
         }, {});
     return styles.reduce((indexed, stylesheet) => {

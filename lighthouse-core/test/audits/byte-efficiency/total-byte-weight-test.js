@@ -22,7 +22,7 @@ const assert = require('assert');
 
 function generateRequest(url, size, baseUrl = 'http://google.com/') {
   return {
-    url: `${baseUrl}${url}`,
+    _url: `${baseUrl}${url}`,
     finished: true,
     transferSize: size * 1024,
     responseReceivedTime: 1000,

@@ -68,7 +68,7 @@ class UsesResponsiveImages extends Audit {
     return {
       url,
       preview: {
-        url: image.networkRecord.url,
+        url: image.networkRecord._url,
         mimeType: image.networkRecord.mimeType
       },
       totalBytes,

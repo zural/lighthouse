@@ -139,8 +139,8 @@ class GatherRunner {
    */
   static assertPageLoaded(url, driver, networkRecords) {
     const mainRecord = networkRecords.find(record => {
-      // record.url is actual request url, so needs to be compared without any URL fragment.
-      return URL.equalWithExcludedFragments(record.url, url);
+      // record._url is actual request url, so needs to be compared without any URL fragment.
+      return URL.equalWithExcludedFragments(record._url, url);
     });
     if (driver.online && (!mainRecord || mainRecord.failed)) {
       const message = mainRecord ? mainRecord.localizedFailDescription : 'timeout reached';
