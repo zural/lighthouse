@@ -51,7 +51,7 @@ class FirstMeaningfulPaint extends Audit {
    * @return {!Promise<!AuditResult>} The score from the audit, ranging from 0-100.
    */
   static audit(artifacts) {
-    const trace = artifacts.traces[this.DEFAULT_PASS];
+    const trace = artifacts.traces[Audit.DEFAULT_PASS];
     return artifacts.requestTraceOfTab(trace).then(tabTrace => {
       if (!tabTrace.firstMeaningfulPaintEvt) {
         throw new Error('No usable `firstMeaningfulPaint(Candidate)` events found in trace');
@@ -63,7 +63,7 @@ class FirstMeaningfulPaint extends Audit {
         throw new Error('No `navigationStart` event found in trace');
       }
 
-      const result = this.calculateScore({
+      const result = FirstMeaningfulPaint.calculateScore({
         navigationStart: tabTrace.navigationStartEvt,
         firstMeaningfulPaint: tabTrace.firstMeaningfulPaintEvt,
         firstContentfulPaint: tabTrace.firstContentfulPaintEvt
@@ -74,7 +74,7 @@ class FirstMeaningfulPaint extends Audit {
         rawValue: parseFloat(result.duration),
         displayValue: `${result.duration}ms`,
         debugString: result.debugString,
-        optimalValue: this.meta.optimalValue,
+        optimalValue: FirstMeaningfulPaint.meta.optimalValue,
         extendedInfo: {
           value: result.extendedInfo,
           formatter: Formatter.SUPPORTED_FORMATS.NULL
@@ -83,6 +83,10 @@ class FirstMeaningfulPaint extends Audit {
     });
   }
 
+  /**
+   * @param {{navigationStart: !TraceEvent, firstMeaningfulPaint: !TraceEvent, firstContentfulPaint: TraceEvent}} evts
+   * @return {{duration: string, score: number, rawValue: number, extendedInfo: !Object}}
+   */
   static calculateScore(evts) {
     const getTs = evt => evt && evt.ts;
     const getTiming = evt => {
@@ -111,7 +115,7 @@ class FirstMeaningfulPaint extends Audit {
     //   < 1100ms: score≈100
     //   4000ms: score=50
     //   >= 14000ms: score≈0
-    const firstMeaningfulPaint = getTiming(evts.firstMeaningfulPaint);
+    const firstMeaningfulPaint = /** @type {number} */ (getTiming(evts.firstMeaningfulPaint));
     const distribution = TracingProcessor.getLogNormalDistribution(SCORING_MEDIAN,
         SCORING_POINT_OF_DIMINISHING_RETURNS);
     let score = 100 * distribution.computeComplementaryPercentile(firstMeaningfulPaint);

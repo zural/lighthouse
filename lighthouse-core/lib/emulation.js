@@ -70,8 +70,13 @@ const CPU_THROTTLE_METRICS = {
   rate: 4.5
 };
 
+/**
+ * // TODO(bckenny): update when driver added to closure compilation
+ * @param {{sendCommand: function(string, !Object=): !Promise}} driver
+ * @return {!Promise}
+ */
 function enableNexus5X(driver) {
-  /**
+  /*
    * Finalizes touch emulation by enabling `"ontouchstart" in window` feature detect
    * to work. Messy hack, though copied verbatim from DevTools' emulation/TouchModel.js
    * where it's been working for years. addScriptToEvaluateOnLoad runs before any of the
@@ -80,7 +85,7 @@ function enableNexus5X(driver) {
   /* eslint-disable no-proto */ /* global window, document */ /* istanbul ignore next */
   const injectedTouchEventsFunction = function() {
     const touchEvents = ['ontouchstart', 'ontouchend', 'ontouchmove', 'ontouchcancel'];
-    const recepients = [window.__proto__, document.__proto__];
+    const recepients = /** @type {!Array<!Object>} */ ([window.__proto__, document.__proto__]);
     for (let i = 0; i < touchEvents.length; ++i) {
       for (let j = 0; j < recepients.length; ++j) {
         if (!(touchEvents[i] in recepients[j])) {
@@ -113,22 +118,42 @@ function enableNexus5X(driver) {
   ]);
 }
 
+/**
+ * @param {{sendCommand: function(string, !Object=): !Promise}} driver
+ * @return {!Promise}
+ */
 function enableNetworkThrottling(driver) {
   return driver.sendCommand('Network.emulateNetworkConditions', TYPICAL_MOBILE_THROTTLING_METRICS);
 }
 
+/**
+ * @param {{sendCommand: function(string, !Object=): !Promise}} driver
+ * @return {!Promise}
+ */
 function disableNetworkThrottling(driver) {
   return driver.sendCommand('Network.emulateNetworkConditions', NO_THROTTLING_METRICS);
 }
 
+/**
+ * @param {{sendCommand: function(string, !Object=): !Promise}} driver
+ * @return {!Promise}
+ */
 function goOffline(driver) {
   return driver.sendCommand('Network.emulateNetworkConditions', OFFLINE_METRICS);
 }
 
+/**
+ * @param {{sendCommand: function(string, !Object=): !Promise}} driver
+ * @return {!Promise}
+ */
 function enableCPUThrottling(driver) {
   return driver.sendCommand('Emulation.setCPUThrottlingRate', CPU_THROTTLE_METRICS);
 }
 
+/**
+ * @param {{sendCommand: function(string, !Object=): !Promise}} driver
+ * @return {!Promise}
+ */
 function disableCPUThrottling(driver) {
   return driver.sendCommand('Emulation.setCPUThrottlingRate', NO_CPU_THROTTLE_METRICS);
 }

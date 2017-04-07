@@ -22,6 +22,6 @@
 /** @type {string} */
 var __dirname = '';
 
-/** @type {!Object} */
+/** @const */
 var global = {};
 

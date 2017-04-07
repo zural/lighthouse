@@ -154,7 +154,7 @@ class TTIMetric extends Audit {
         score,
         rawValue: parseFloat(timeToInteractive.toFixed(1)),
         displayValue: `${parseFloat(timeToInteractive.toFixed(1))}ms`,
-        optimalValue: this.meta.optimalValue,
+        optimalValue: TTIMetric.meta.optimalValue,
         extendedInfo: {
           value: extendedInfo,
           formatter: Formatter.SUPPORTED_FORMATS.NULL

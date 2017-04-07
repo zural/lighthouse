@@ -263,6 +263,9 @@ class Driver {
     });
   }
 
+  /**
+   * @return {!Promise<!ServiceWorkerArtifact>}
+   */
   getServiceWorkerVersions() {
     return new Promise((resolve, reject) => {
       this.once('ServiceWorker.workerVersionUpdated', data => {
@@ -780,7 +783,7 @@ class Driver {
    * Keeps track of calls to a JS function and returns a list of {url, line, col}
    * of the usage. Should be called before page load (in beforePass).
    * @param {string} funcName The function name to track ('Date.now', 'console.time').
-   * @return {function(): !Promise<!Array<{url: string, line: number, col: number}>>}
+   * @return {function(): !Promise<!Array<!FunctionUsageInfo>>}
    *     Call this method when you want results.
    */
   captureFunctionCallSites(funcName) {

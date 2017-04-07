@@ -64,5 +64,5 @@ TraceEvent.prototype.bind_id;
  */
 function Trace() {}
 
-/** @type {{traceEvents: !Array<!TraceEvent>}} */
+/** @type {!Array<!TraceEvent>} */
 Trace.prototype.traceEvents;

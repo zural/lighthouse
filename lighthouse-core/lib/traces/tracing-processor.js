@@ -51,6 +51,9 @@ global.HTMLImportsLoader.hrefToAbsolutePath = function(path) {
 };
 
 require('../../third_party/traceviewer-js/');
+/**
+ * @type {!tr}
+ */
 const traceviewer = global.tr;
 
 class TraceProcessor {
@@ -66,7 +69,11 @@ class TraceProcessor {
     return 'Load';
   }
 
-  // Create the importer and import the trace contents to a model.
+  /**
+   * Create the importer and import the trace contents to a model.
+   * @param {!Trace} trace
+   * @return {!tr.Model} [description]
+   */
   init(trace) {
     const io = new traceviewer.importer.ImportOptions();
     io.showImportWarnings = false;
@@ -83,10 +90,10 @@ class TraceProcessor {
   /**
    * Find a main thread from supplied model with matching processId and
    * threadId.
-   * @param {!Object} model TraceProcessor Model
+   * @param {!tr.Model} model TraceProcessor Model
    * @param {number} processId
    * @param {number} threadId
-   * @return {!Object}
+   * @return {!tr.model.mainThread}
    * @private
    */
   static _findMainThreadFromIds(model, processId, threadId) {
@@ -172,8 +179,8 @@ class TraceProcessor {
    * Calculates the maximum queueing time (in ms) of high priority tasks for
    * selected percentiles within a window of the main thread.
    * @see https://docs.google.com/document/d/1b9slyaB9yho91YTOkAQfpCdULFkZM9LqsipcX3t7He8/preview
-   * @param {!traceviewer.Model} model
-   * @param {{traceEvents: !Array<!Object>}} trace
+   * @param {!tr.Model} model
+   * @param {!Trace} trace
    * @param {number=} startTime Optional start time (in ms) of range of interest. Defaults to trace start.
    * @param {number=} endTime Optional end time (in ms) of range of interest. Defaults to trace end.
    * @param {!Array<number>=} percentiles Optional array of percentiles to compute. Defaults to [0.5, 0.75, 0.9, 0.99, 1].
@@ -198,17 +205,17 @@ class TraceProcessor {
 
   /**
    * Provides durations of all main thread top-level events
-   * @param {!traceviewer.Model} model
-   * @param {{traceEvents: !Array<!Object>}} trace
+   * @param {!tr.Model} model
+   * @param {!Trace} trace
    * @param {number} startTime Optional start time (in ms) of range of interest. Defaults to trace start.
    * @param {number} endTime Optional end time (in ms) of range of interest. Defaults to trace end.
    * @return {{durations: !Array<number>, clippedLength: number}}
    */
   static getMainThreadTopLevelEventDurations(model, trace, startTime, endTime) {
     // Find the main thread via the first TracingStartedInPage event in the trace
-    const startEvent = trace.traceEvents.find(event => {
+    const startEvent = /** @type {!TraceEvent} */ (trace.traceEvents.find(event => {
       return event.name === 'TracingStartedInPage';
-    });
+    }));
     const mainThread = TraceProcessor._findMainThreadFromIds(model, startEvent.pid, startEvent.tid);
 
     // Find durations of all slices in range of interest.
@@ -257,7 +264,7 @@ class TraceProcessor {
    * distribution.
    * @param {number} median
    * @param {number} falloff
-   * @return {!Statistics.LogNormalDistribution}
+   * @return {!tr.b.Statistics.LogNormalDistribution}
    */
   static getLogNormalDistribution(median, falloff) {
     const location = Math.log(median);

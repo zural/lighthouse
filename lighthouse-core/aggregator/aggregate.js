@@ -21,9 +21,9 @@ class Aggregate {
 
   /**
    * @private
-   * @param {!Array<!AuditResult>} results
+   * @param {!Array<!AuditFullResult>} results
    * @param {!AggregationCriteria} expected
-   * @return {!Array<!AuditResult>}
+   * @return {!Array<!AuditFullResult>}
    */
   static _filterResultsByAuditNames(results, expected) {
     const expectedNames = Object.keys(expected);
@@ -43,8 +43,8 @@ class Aggregate {
 
   /**
    * @private
-   * @param {!Array<!AuditResult>} results
-   * @return {!Object<!AuditResult>}
+   * @param {!Array<!AuditFullResult>} results
+   * @return {!Object<!AuditFullResult>}
    */
   static _remapResultsByName(results) {
     const remapped = {};
@@ -61,7 +61,7 @@ class Aggregate {
   /**
    * Converts each raw audit output to a weighted value for the aggregation.
    * @private
-   * @param {!AuditResult} result The audit's output value.
+   * @param {!AuditFullResult} result The audit's output value.
    * @param {!AggregationCriterion} expected The aggregation's expected value and weighting for this result.
    * @param {!string} name The name of the audit.
    * @return {number} The weighted result.
@@ -145,7 +145,7 @@ class Aggregate {
 
   /**
    * Compares the set of audit results to the expected values.
-   * @param {!Array<!AuditResult>} results The audit results.
+   * @param {!Array<!AuditFullResult>} results The audit results.
    * @param {!Array<!AggregationItem>} items The aggregation's expected values and weighting.
    * @return {!Array<!AggregationResultItem>} The aggregation score.
    */
@@ -202,7 +202,7 @@ class Aggregate {
   /**
    * Aggregates all the results.
    * @param {!Aggregation} aggregation
-   * @param {!Array<!AuditResult>} auditResults
+   * @param {!Array<!AuditFullResult>} auditResults
    * @return {!AggregationResult}
    */
   static aggregate(aggregation, auditResults) {

@@ -66,7 +66,7 @@ class OffscreenImages extends Audit {
   /**
    * @param {!Object} image
    * @param {{innerWidth: number, innerHeight: number}} viewportDimensions
-   * @return {?Object}
+   * @return {Error|{url: string, preview: {url: string, mimeType: string}}}
    */
   static computeWaste(image, viewportDimensions) {
     const url = URL.getDisplayName(image.src, {preserveQuery: true});
@@ -97,7 +97,7 @@ class OffscreenImages extends Audit {
   /**
    * @param {!Artifacts} artifacts
    * @return {{results: !Array<Object>, tableHeadings: Object,
-   *     passes: boolean=, debugString: string=}}
+   *     passes: (boolean|undefined), debugString: (string|undefined)}}
    */
   static audit_(artifacts) {
     const images = artifacts.ImageUsage;

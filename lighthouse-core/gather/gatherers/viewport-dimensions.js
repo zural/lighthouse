@@ -38,7 +38,7 @@ class ViewportDimensions extends Gatherer {
 
   /**
    * @param {!Object} options
-   * @return {!Promise<{innerWidth: number, outerWidth: number, devicePixelRatio: number}>}
+   * @return {!Promise<{innerWidth: number, innerHeight: number, outerWidth: number, devicePixelRatio: number}>}
    */
   afterPass(options) {
     const driver = options.driver;

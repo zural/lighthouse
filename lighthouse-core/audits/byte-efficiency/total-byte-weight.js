@@ -38,7 +38,7 @@ class TotalByteWeight extends Audit {
     return {
       category: 'Network',
       name: 'total-byte-weight',
-      optimalValue: this.bytesToKbString(OPTIMAL_VALUE),
+      optimalValue: TotalByteWeight.bytesToKbString(OPTIMAL_VALUE),
       description: 'Avoids enormous network payloads',
       informative: true,
       helpText:
@@ -66,8 +66,8 @@ class TotalByteWeight extends Audit {
         const result = {
           url: URL.getDisplayName(record.url),
           totalBytes: record.transferSize,
-          totalKb: this.bytesToKbString(record.transferSize),
-          totalMs: this.bytesToMsString(record.transferSize, networkThroughput),
+          totalKb: TotalByteWeight.bytesToKbString(record.transferSize),
+          totalMs: TotalByteWeight.bytesToMsString(record.transferSize, networkThroughput),
         };
 
         totalBytes += result.totalBytes;
@@ -86,7 +86,7 @@ class TotalByteWeight extends Audit {
 
       return {
         rawValue: totalBytes,
-        optimalValue: this.meta.optimalValue,
+        optimalValue: TotalByteWeight.meta.optimalValue,
         displayValue: `Total size was ${Audit.bytesToKbString(totalBytes)}`,
         score: Math.round(Math.max(0, Math.min(score, 100))),
         extendedInfo: {

@@ -40,6 +40,11 @@ class ChromeConsoleMessages extends Gatherer {
     return options.driver.sendCommand('Log.enable');
   }
 
+  /**
+   * [afterPass description]
+   * @param {!Object} options
+   * @return {!Promise<!ChromeConsoleMessagesArtifact>}
+   */
   afterPass(options) {
     options.driver.off('Log.entryAdded', this._onConsoleEntryAdded);
     return options.driver.sendCommand('Log.disable')

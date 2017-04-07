@@ -124,9 +124,9 @@ class CriticalRequestChains extends Audit {
       }
 
       return {
-        rawValue: chainCount <= this.meta.optimalValue,
+        rawValue: chainCount <= CriticalRequestChains.meta.optimalValue,
         displayValue: chainCount,
-        optimalValue: this.meta.optimalValue,
+        optimalValue: CriticalRequestChains.meta.optimalValue,
         extendedInfo: {
           formatter: Formatter.SUPPORTED_FORMATS.CRITICAL_REQUEST_CHAINS,
           value: {

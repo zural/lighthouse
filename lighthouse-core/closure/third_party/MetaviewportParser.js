@@ -1,6 +1,5 @@
 /**
- * @license
- * Copyright 2016 Google Inc. All rights reserved.
+ * Copyright 2017 Google Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,26 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-'use strict';
 
-const Gatherer = require('./gatherer');
+/**
+ * Typing externs file for the `metaviewport-parser` module.
+ * @externs
+ */
 
-class ServiceWorker extends Gatherer {
-  /**
-   * [beforePass description]
-   * @param {!Object} options
-   * @return {!Promise<!ServiceWorkerArtifact>}
-   */
-  beforePass(options) {
-    const driver = options.driver;
-    return driver
-      .getServiceWorkerVersions()
-      .then(data => {
-        return {
-          versions: data.versions
-        };
-      });
-  }
-}
+/**
+ * @const
+ */
+const MetaviewportParser = {};
 
-module.exports = ServiceWorker;
+/**
+ * @param {string} text
+ * @return {!MetaviewportParser.ParsedContent}
+ */
+MetaviewportParser.parseMetaViewPortContent = function(text) {};
+
+/** @typedef
+  {{
+    validProperties: !Object<string, (string|number)>,
+    unknownProperties: !Object<string, (string|number)>,
+    invalidValues: !Object<string, (string|number)>
+  }} */
+MetaviewportParser.ParsedContent;

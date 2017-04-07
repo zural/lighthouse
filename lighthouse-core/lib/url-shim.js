@@ -74,10 +74,10 @@ URL.originsMatch = function originsMatch(urlA, urlB) {
 
 /**
  * @param {string} url
- * @param {{numPathParts: number, preserveQuery: boolean, preserveHost: boolean}=} options
+ * @param {{numPathParts: (number|undefined), preserveQuery: (boolean|undefined), preserveHost: (boolean|undefined)}} options
  * @return {string}
  */
-URL.getDisplayName = function getDisplayName(url, options) {
+URL.getDisplayName = function getDisplayName(url, options = {}) {
   options = Object.assign({
     numPathParts: 2,
     preserveQuery: true,
@@ -145,18 +145,18 @@ function rewriteChromeInternalUrl(url) {
 }
 
 /**
- * Determine if url1 equals url2, ignoring URL fragments.
- * @param {string} url1
- * @param {string} url2
+ * Determine if href1 equals href2, ignoring URL fragments.
+ * @param {string} href1
+ * @param {string} href2
  * @return {boolean}
  */
-URL.equalWithExcludedFragments = function(url1, url2) {
-  [url1, url2] = [url1, url2].map(rewriteChromeInternalUrl);
+URL.equalWithExcludedFragments = function(href1, href2) {
+  [href1, href2] = [href1, href2].map(rewriteChromeInternalUrl);
 
-  url1 = new URL(url1);
+  const url1 = new URL(href1);
   url1.hash = '';
 
-  url2 = new URL(url2);
+  const url2 = new URL(href2);
   url2.hash = '';
 
   return url1.href === url2.href;

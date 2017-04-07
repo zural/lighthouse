@@ -38,6 +38,9 @@ AggregationCriterion.prototype.category;
 /** @type {string|undefined} */
 AggregationCriterion.prototype.description;
 
+/** @type {boolean|number|undefined} */
+AggregationCriterion.prototype.expectedValue;
+
 /**
  * @typedef {!Object<!AggregationCriterion>}
  */
@@ -79,6 +82,9 @@ Aggregation.prototype.categorizable;
 /** @type {!Array<!AggregationItem>} */
 Aggregation.prototype.items;
 
+/** @type {boolean} */
+Aggregation.prototype.additional;
+
 /**
  * @struct
  * @record
@@ -117,3 +123,6 @@ AggregationResult.prototype.categorizable;
 
 /** @type {!Array<!AggregationResultItem>} */
 AggregationResult.prototype.score;
+
+/** @type {boolean} */
+AggregationResult.prototype.additional;

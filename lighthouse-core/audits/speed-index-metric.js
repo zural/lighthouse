@@ -49,7 +49,7 @@ class SpeedIndexMetric extends Audit {
    * @return {!Promise<!AuditResult>} The score from the audit, ranging from 0-100.
    */
   static audit(artifacts) {
-    const trace = artifacts.traces[this.DEFAULT_PASS];
+    const trace = artifacts.traces[Audit.DEFAULT_PASS];
 
     // run speedline
     return artifacts.requestSpeedline(trace).then(speedline => {
@@ -99,7 +99,7 @@ class SpeedIndexMetric extends Audit {
       return {
         score: Math.round(score),
         rawValue: Math.round(speedline.perceptualSpeedIndex),
-        optimalValue: this.meta.optimalValue,
+        optimalValue: SpeedIndexMetric.meta.optimalValue,
         extendedInfo: {
           formatter: Formatter.SUPPORTED_FORMATS.SPEEDLINE,
           value: extendedInfo

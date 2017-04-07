@@ -71,8 +71,8 @@ function filterStylesheetsByUsage(stylesheets, propName, propVal) {
  * Returns a formatted snippet of CSS and the location of its use.
  *
  * @param {!string} content CSS text content.
- * @param {!Object} parsedContent The parsed version content.
- * @return {{styleRule: string, location: string}} Formatted output.
+ * @param {!StylesArtifactParsedContent} parsedContent The parsed version content.
+ * @return {{styleRule: string, startLine: number, location: string}} Formatted output.
  */
 function getFormattedStyleRule(content, parsedContent) {
   const lines = content.split('\n');
@@ -110,8 +110,8 @@ function getFormattedStyleRule(content, parsedContent) {
 /**
  * Returns an array of all CSS prefixes and the default CSS style names.
  *
- * @param {string|Array<string>=} propNames CSS property names.
- * @return {Array<string>=} CSS property names with and without vendor prefixes.
+ * @param {string|!Array<string>} propsNames CSS property names.
+ * @return {!Array<string>} CSS property names with and without vendor prefixes.
  */
 function addVendorPrefixes(propsNames) {
   const vendorPrefixes = ['-o-', '-ms-', '-moz-', '-webkit-'];

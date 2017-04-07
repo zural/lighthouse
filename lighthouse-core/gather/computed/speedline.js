@@ -26,7 +26,7 @@ class Speedline extends ComputedArtifact {
   }
 
   /**
-   * @return {!Promise}
+   * @return {!Promise<!SpeedlineArtifact>}
    */
   compute_(trace) {
     // speedline() may throw without a promise, so we resolve immediately

@@ -126,7 +126,7 @@ class EventListeners extends Gatherer {
 
   /**
    * @param {!Object} options
-   * @return {!Promise<!Array<!Object>>}
+   * @return {!Promise<!EventListenersArtifact>}
    */
   afterPass(options) {
     return this.unlistenForScriptParsedEvents()

@@ -28,8 +28,8 @@ const Gatherer = require('./gatherer');
 const log = require('../../lib/log.js');
 
 /**
- * @param {!gonzales.AST} parseTree
- * @return {!Array}
+ * @param {!Gonzales.Node} parseTree
+ * @return {!Array<!StylesArtifactParsedContent>}
  */
 function getCSSPropsInStyleSheet(parseTree) {
   const results = [];
@@ -89,6 +89,10 @@ class Styles extends Gatherer {
       .then(_ => driver.sendCommand('CSS.enable'));
   }
 
+  /**
+   * @param {!Object} driver
+   * @return {!Promise<!StylesArtifact>}
+   */
   endStylesCollect(driver) {
     return new Promise((resolve, reject) => {
       if (!this._activeStyleSheetIds.length) {
@@ -133,6 +137,10 @@ class Styles extends Gatherer {
     return this.beginStylesCollect(options.driver);
   }
 
+  /**
+   * @param {!Object} options
+   * @return {!Promise<!StylesArtifact>}
+   */
   afterPass(options) {
     return this.endStylesCollect(options.driver)
       .then(stylesheets => {

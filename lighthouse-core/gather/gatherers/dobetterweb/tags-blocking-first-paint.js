@@ -152,7 +152,7 @@ class TagsBlockingFirstPaint extends Gatherer {
   /**
    * @param {!Object} options
    * @param {{networkRecords: !Array<!NetworkRecord>}} tracingData
-   * @return {!Array<{tag: string, transferSize: number, startTime: number, endTime: number}>}
+   * @return {!Promise<!Array<{tag: string, transferSize: number, startTime: number, endTime: number}>>}
    */
   afterPass(options, tracingData) {
     return TagsBlockingFirstPaint

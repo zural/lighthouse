@@ -51,7 +51,7 @@ class UsesResponsiveImages extends Audit {
   /**
    * @param {!Object} image
    * @param {number} DPR devicePixelRatio
-   * @return {?Object}
+   * @return {!Object}
    */
   static computeWaste(image, DPR) {
     const url = URL.getDisplayName(image.src);
@@ -81,7 +81,7 @@ class UsesResponsiveImages extends Audit {
   /**
    * @param {!Artifacts} artifacts
    * @return {{results: !Array<Object>, tableHeadings: Object,
-   *     passes: boolean=, debugString: string=}}
+   *     passes: (boolean|undefined), debugString: (string|undefined)}}
    */
   static audit_(artifacts) {
     const images = artifacts.ImageUsage;

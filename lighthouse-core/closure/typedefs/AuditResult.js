@@ -40,6 +40,15 @@ AuditResult.prototype.score;
 AuditResult.prototype.displayValue;
 
 /**
+ * Optional property indicating that some error occurred either in generating an
+ * artifact required by this audit or within the audit itself and so the audit
+ * is un-scoreable. Audits should not set this value directly; instead create an
+ * error by simply throwing an exception in the audit.
+ * @type {(boolean|undefined)}
+ */
+AuditResult.prototype.error;
+
+/**
  * Optional error string for helping the user figure out why they failed here.
  * @type {(string|undefined)}
  */
@@ -69,9 +78,6 @@ AuditFullResult.prototype.displayValue;
 AuditFullResult.prototype.rawValue;
 
 /**
- * Optional property indicating that some error occurred either in generating an
- * artifact required by this audit or within the audit itself and so the audit
- * is un-scoreable. Audits can create an error by simply throwing an exception.
  * @type {(boolean|undefined)}
  */
 AuditFullResult.prototype.error;

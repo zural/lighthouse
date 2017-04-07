@@ -35,10 +35,10 @@ class Formatter {
    * Getter that returns a list of supported formatters, mapping an all-caps
    * name to the basename of the available formatter partials
    * (e.g. `CRITICAL_REQUEST_CHAINS` to `critical-request-chains).
-   * @return {!Object<string, string>}
+   * @return {!SupportedFormats}
    */
   static get SUPPORTED_FORMATS() {
-    return formatters;
+    return /** @type {!SupportedFormats} */ (formatters);
   }
 }
 

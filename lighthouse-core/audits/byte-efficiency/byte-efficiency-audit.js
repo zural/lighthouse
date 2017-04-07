@@ -23,7 +23,7 @@ const KB_IN_BYTES = 1024;
 const WASTEFUL_THRESHOLD_IN_BYTES = 20 * KB_IN_BYTES;
 
 /**
- * @overview Used as the base for all byte efficiency audits. Computes total bytes
+ * @fileoverview Used as the base for all byte efficiency audits. Computes total bytes
  *    and estimated time saved. Subclass and override `audit_` to return results.
  */
 class UnusedBytes extends Audit {
@@ -41,7 +41,7 @@ class UnusedBytes extends Audit {
    * @return {string}
    */
   static toSavingsString(bytes = 0, percent = 0) {
-    const kbDisplay = this.bytesToKbString(bytes);
+    const kbDisplay = UnusedBytes.bytesToKbString(bytes);
     const percentDisplay = Math.round(percent).toLocaleString() + '%';
     return `${kbDisplay} _${percentDisplay}_`;
   }
@@ -62,15 +62,15 @@ class UnusedBytes extends Audit {
   static audit(artifacts) {
     const networkRecords = artifacts.networkRecords[Audit.DEFAULT_PASS];
     return artifacts.requestNetworkThroughput(networkRecords).then(networkThroughput => {
-      return Promise.resolve(this.audit_(artifacts, networkRecords)).then(result => {
-        return this.createAuditResult(result, networkThroughput);
+      return Promise.resolve(UnusedBytes.audit_(artifacts)).then(result => {
+        return UnusedBytes.createAuditResult(result, networkThroughput);
       });
     });
   }
 
   /**
-   * @param {!{debugString: string=, passes: boolean=, tableHeadings: !Object,
-   *    results: !Array<!Object>}} result
+   * @param {{debugString: (string|undefined), passes: (boolean|undefined),
+   *     tableHeadings: !Object, results: !Array<!Object>}} result
    * @param {number} networkThroughput
    * @return {!AuditResult}
    */
@@ -78,11 +78,11 @@ class UnusedBytes extends Audit {
     const debugString = result.debugString;
     const results = result.results
         .map(item => {
-          item.wastedKb = this.bytesToKbString(item.wastedBytes);
-          item.wastedMs = this.bytesToMsString(item.wastedBytes, networkThroughput);
-          item.totalKb = this.bytesToKbString(item.totalBytes);
-          item.totalMs = this.bytesToMsString(item.totalBytes, networkThroughput);
-          item.potentialSavings = this.toSavingsString(item.wastedBytes, item.wastedPercent);
+          item.wastedKb = UnusedBytes.bytesToKbString(item.wastedBytes);
+          item.wastedMs = UnusedBytes.bytesToMsString(item.wastedBytes, networkThroughput);
+          item.totalKb = UnusedBytes.bytesToKbString(item.totalBytes);
+          item.totalMs = UnusedBytes.bytesToMsString(item.totalBytes, networkThroughput);
+          item.potentialSavings = UnusedBytes.toSavingsString(item.wastedBytes, item.wastedPercent);
           return item;
         })
         .sort((itemA, itemB) => itemB.wastedBytes - itemA.wastedBytes);
@@ -91,8 +91,8 @@ class UnusedBytes extends Audit {
 
     let displayValue = result.displayValue || '';
     if (typeof result.displayValue === 'undefined' && wastedBytes) {
-      const wastedKbDisplay = this.bytesToKbString(wastedBytes);
-      const wastedMsDisplay = this.bytesToMsString(wastedBytes, networkThroughput);
+      const wastedKbDisplay = UnusedBytes.bytesToKbString(wastedBytes);
+      const wastedMsDisplay = UnusedBytes.bytesToMsString(wastedBytes, networkThroughput);
       displayValue = `Potential savings of ${wastedKbDisplay} (~${wastedMsDisplay})`;
     }
 
@@ -109,14 +109,16 @@ class UnusedBytes extends Audit {
     };
   }
 
+  /* eslint-disable no-unused-vars */
   /**
    * @param {!Artifacts} artifacts
    * @return {{results: !Array<Object>, tableHeadings: Object,
-   *     passes: boolean=, debugString: string=}}
+   *     passes: (boolean|undefined), debugString: (string|undefined)}}
    */
-  static audit_() {
+  static audit_(artifacts) {
     throw new Error('audit_ unimplemented');
   }
+  /* eslint-enable no-unused-vars */
 }
 
 module.exports = UnusedBytes;

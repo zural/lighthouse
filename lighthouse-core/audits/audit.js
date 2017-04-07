@@ -27,6 +27,7 @@ class Audit {
   }
 
   /**
+   * @return {!AuditMeta}
    * @throws {Error}
    */
   static get meta() {
@@ -34,20 +35,20 @@ class Audit {
   }
 
   /**
-   * @param {!Audit} audit
+   * @param {{meta: !AuditMeta}} audit
    * @param {string} debugString
    * @return {!AuditFullResult}
    */
   static generateErrorAuditResult(audit, debugString) {
-    return Audit.generateAuditResult(audit, {
+    return Audit.generateAuditResult(audit, /** @type {!AuditResult} */ ({
       rawValue: null,
       error: true,
       debugString
-    });
+    }));
   }
 
   /**
-   * @param {!Audit} audit
+   * @param {{meta: !AuditMeta}} audit
    * @param {!AuditResult} result
    * @return {!AuditFullResult}
    */

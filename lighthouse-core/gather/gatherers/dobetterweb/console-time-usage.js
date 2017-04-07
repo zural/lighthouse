@@ -30,7 +30,7 @@ class ConsoleTimeUsage extends Gatherer {
   }
 
   /**
-   * @return {!Promise<!Array<{url: string, line: number, col: number}>>}
+   * @return {!Promise<!Array<!FunctionUsageInfo>>}
    */
   afterPass() {
     return this.collectUsage();

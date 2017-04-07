@@ -165,7 +165,7 @@ class UnusedCSSRules extends Audit {
   /**
    * @param {!Artifacts} artifacts
    * @return {{results: !Array<Object>, tableHeadings: Object,
-   *     passes: boolean=, debugString: string=}}
+   *     passes: (boolean|undefined), debugString: (string|undefined)}}
    */
   static audit_(artifacts) {
     const styles = artifacts.Styles;

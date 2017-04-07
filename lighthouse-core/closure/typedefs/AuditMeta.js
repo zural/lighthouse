@@ -40,3 +40,9 @@ AuditMeta.prototype.optimalValue;
 
 /** @type {!Array<string>} */
 AuditMeta.prototype.requiredArtifacts;
+
+/** @type {boolean|undefined} */
+AuditMeta.prototype.informative;
+
+/** @type {string|undefined} */
+AuditMeta.prototype.helpText;

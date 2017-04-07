@@ -34,7 +34,7 @@ class GeolocationOnStart extends Gatherer {
 
   /**
    * @param {!Object} options
-   * @return {!Promise<!Array<{url: string, line: number, col: number}>>}
+   * @return {!Promise<!Array<!FunctionUsageInfo>>}
    */
   afterPass(options) {
     return options.driver.evaluateAsync('(function(){return window.isSecureContext;})()')

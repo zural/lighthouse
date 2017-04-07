@@ -99,20 +99,21 @@ class UserTimings extends Audit {
     return userTimings;
   }
 
-  /*
+  /**
    * @return {!Array<string>}
+   * @private
    */
-  static get blacklistedPrefixes() {
+  static _getBlacklistedPrefixes() {
     return ['goog_'];
   }
 
   /**
    * We remove mark/measures entered by third parties not of interest to the user
-   * @param {!UserTimingsExtendedInfo} artifacts
+   * @param {!UserTimingsExtendedInfo} timing
    * @return {boolean}
    */
   static excludeBlacklisted(timing) {
-    return UserTimings.blacklistedPrefixes.every(prefix => !timing.name.startsWith(prefix));
+    return UserTimings._getBlacklistedPrefixes().every(prefix => !timing.name.startsWith(prefix));
   }
 
   /**
@@ -122,7 +123,7 @@ class UserTimings extends Audit {
   static audit(artifacts) {
     const trace = artifacts.traces[Audit.DEFAULT_PASS];
     return artifacts.requestTraceOfTab(trace).then(tabTrace => {
-      const userTimings = this.filterTrace(tabTrace).filter(UserTimings.excludeBlacklisted);
+      const userTimings = UserTimings.filterTrace(tabTrace).filter(UserTimings.excludeBlacklisted);
 
       return {
         rawValue: true,

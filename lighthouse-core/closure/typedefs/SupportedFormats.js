@@ -1,5 +1,4 @@
 /**
- * @license
  * Copyright 2017 Google Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,27 +14,37 @@
  * limitations under the License.
  */
 
-'use strict';
+/**
+ * Typing externs file for supported formatters.
+ * @externs
+ */
 
-const ComputedArtifact = require('./computed-artifact');
-const TracingProcessor = require('../../lib/traces/tracing-processor');
+/**
+ * @struct
+ * @record
+ */
+function SupportedFormats() {}
 
-class TracingModel extends ComputedArtifact {
+/** @type {string} */
+SupportedFormats.prototype.ACCESSIBILITY;
 
-  get name() {
-    return 'TracingModel';
-  }
+/** @type {string} */
+SupportedFormats.prototype.CARDS;
 
-  /**
-   * Return catapult traceviewer model
-   * @param {{traceEvents: !Array}} trace
-   * @return {!tr.Model}
-   */
-  compute_(trace) {
-    const tracingProcessor = new TracingProcessor();
-    return tracingProcessor.init(trace);
-  }
+/** @type {string} */
+SupportedFormats.prototype.CRITICAL_REQUEST_CHAINS;
 
-}
+/** @type {string} */
+SupportedFormats.prototype.NULL;
 
-module.exports = TracingModel;
+/** @type {string} */
+SupportedFormats.prototype.SPEEDLINE;
+
+/** @type {string} */
+SupportedFormats.prototype.TABLE;
+
+/** @type {string} */
+SupportedFormats.prototype.URL_LIST;
+
+/** @type {string} */
+SupportedFormats.prototype.USER_TIMINGS;

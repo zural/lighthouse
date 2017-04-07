@@ -30,6 +30,10 @@ class NotificationOnStart extends Gatherer {
         'Notification.requestPermission');
   }
 
+  /**
+   * @param {!Object} options
+   * @return {!Promise<!Array<!FunctionUsageInfo>>}
+   */
   afterPass(options) {
     return options.driver.queryPermissionState('notifications')
       .then(state => {

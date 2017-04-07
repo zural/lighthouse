@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/*
+/**
  * @fileoverview This audit determines if the images used are sufficiently larger
  * than Lighthouse optimized versions of the images (as determined by the gatherer).
  * Audit will fail if one of the conditions are met:
@@ -64,7 +64,7 @@ class UsesOptimizedImages extends Audit {
   /**
    * @param {!Artifacts} artifacts
    * @return {{results: !Array<Object>, tableHeadings: Object,
-   *     passes: boolean=, debugString: string=}}
+   *     passes: (boolean|undefined), debugString: (string|undefined)}}
    */
   static audit_(artifacts) {
     const images = artifacts.OptimizedImages;
@@ -97,7 +97,8 @@ class UsesOptimizedImages extends Audit {
           hasAllEfficientImages = false;
         }
         if (jpegSavings.bytes > IGNORE_THRESHOLD_IN_BYTES) {
-          jpegSavingsLabel = this.toSavingsString(jpegSavings.bytes, jpegSavings.percent);
+          jpegSavingsLabel =
+              UsesOptimizedImages.toSavingsString(jpegSavings.bytes, jpegSavings.percent);
         }
       }
 
@@ -109,7 +110,7 @@ class UsesOptimizedImages extends Audit {
         preview: {url: image.url, mimeType: image.mimeType},
         totalBytes: image.originalSize,
         wastedBytes: webpSavings.bytes,
-        webpSavings: this.toSavingsString(webpSavings.bytes, webpSavings.percent),
+        webpSavings: UsesOptimizedImages.toSavingsString(webpSavings.bytes, webpSavings.percent),
         jpegSavings: jpegSavingsLabel
       });
       return results;

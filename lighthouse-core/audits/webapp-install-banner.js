@@ -57,7 +57,7 @@ class WebappInstallBanner extends Audit {
       'hasPWADisplayValue',
       'hasIconsAtLeast192px'
     ];
-    manifestValues.allChecks
+    manifestValues.allCheck
       .filter(item => bannerCheckIds.includes(item.id))
       .forEach(item => {
         if (!item.passing) {

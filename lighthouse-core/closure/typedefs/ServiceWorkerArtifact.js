@@ -28,10 +28,7 @@
  */
 function ServiceWorkerArtifact() {}
 
-/** @type {(string|undefined)} */
-ServiceWorkerArtifact.prototype.debugString;
-
-/** @type {(!Array<!ServiceWorkerVersion>|undefined)} */
+/** @type {!Array<!ServiceWorkerVersion>} */
 ServiceWorkerArtifact.prototype.versions;
 
 /**

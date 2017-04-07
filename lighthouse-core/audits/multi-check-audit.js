@@ -48,12 +48,14 @@ class MultiCheckAudit extends Audit {
     };
   }
 
+  /* eslint-disable no-unused-vars */
   /**
    * @param {!Artifacts} artifacts
    */
-  static audit_() {
+  static audit_(artifacts) {
     throw new Error('audit_ unimplemented');
   }
+  /* eslint-enable no-unused-vars */
 }
 
 module.exports = MultiCheckAudit;

@@ -22,26 +22,45 @@ const gulp = require('gulp');
 const gutil = require('gulp-util');
 const replace = require('gulp-replace');
 
+const js = [
+  // 'audits/**/*.js',
+  'lib/event-helpers.js',
+  'lib/icons.js',
+  'lib/styles-helpers.js',
+  'lib/url-shim.js',
+  'aggregator/**/*.js',
+  'report/formatter.js',
+  'lib/traces/tracing-processor.js',
+  'lib/emulation.js',
+];
+
+const externs = [
+  'closure/typedefs/*.js',
+  'closure/third_party/*.js'
+];
+
+// Files to explicitly ignore
+const ignoreFiles = [
+  '!audits/byte-efficiency/unused-css-rules.js',
+];
+
 /* eslint-disable camelcase */
 gulp.task('js-compile', function() {
-  return gulp.src([
-    'closure/typedefs/*.js',
-    'closure/third_party/*.js',
-    'audits/**/*.js',
-    'lib/event-helpers.js',
-    'lib/icons.js',
-    'lib/styles-helpers.js',
-    'lib/url-shim.js',
-    'aggregator/**/*.js'
-  ])
+  const files = js.concat(externs, ignoreFiles);
+
+  return gulp.src(files)
     // Hack to remove `require`s that Closure currently can't resolve.
     .pipe(replace('require(\'../lib/web-inspector\').Color.parse;',
         'WebInspector.Color.parse;'))
-    .pipe(replace('require(\'../lib/traces/tracing-processor\');', '/** @type {?} */ (null);'))
-    .pipe(replace('require(\'../lib/traces/devtools-timeline-model\');',
-        'DevtoolsTimelineModel'))
-    .pipe(replace('require(\'speedline\');', 'function(arg) {};'))
-    .pipe(replace(/require\('(\.\.\/)*report\/formatter'\);/g, '{};'))
+    .pipe(replace('require(\'gl-matrix\')', '/** @type{!Object<string, *>} */({})'))
+    .pipe(replace('require(\'whatwg-url\').URL', 'self.URL'))
+    .pipe(replace(/require\('(\.\.\/)*third_party\/traceviewer-js\/'\);/g, '{};'))
+    .pipe(replace('require(\'metaviewport-parser\')', 'MetaviewportParser'))
+    // .pipe(replace('require(\'../lib/traces/tracing-processor\');', '/** @type {?} */ (null);'))
+    // .pipe(replace('require(\'../lib/traces/devtools-timeline-model\');',
+    //     'DevtoolsTimelineModel'))
+    // .pipe(replace('require(\'speedline\');', 'function(arg) {};'))
+    // .pipe(replace(/require\('(\.\.\/)*report\/formatter'\);/g, '{};'))
 
     // Replace any non-local import (e.g. not starting with .) with a dummy type. These are likely
     // the built-in Node modules. But not always, so TODO(samthor): Fix this.
@@ -49,6 +68,7 @@ gulp.task('js-compile', function() {
 
     .pipe(closureCompiler({
       compilation_level: 'SIMPLE',
+      module_resolution: 'NODE',
       process_common_js_modules: true,
       new_type_inf: true,
       checks_only: true,
@@ -71,8 +91,26 @@ gulp.task('js-compile', function() {
         'strictModuleDepCheck',
         'typeInvalidation',
         'undefinedNames',
-        'visibility'
+        'visibility',
+
+        'missingProvide',
+        'checkDebuggerStatement',
+        'externsValidation',
+        'uselessCode',
+        'ambiguousFunctionDecl',
+        'checkTypes',
+        'es3',
+        'es5Strict',
+        'globalThis',
+        'nonStandardJsDocs',
+        'strictMissingRequire',
+        'suspiciousCode',
+        'unknownDefines'
       ],
+      jscomp_off: [
+        'newCheckTypesExtraChecks'
+      ],
+      hide_warnings_for: 'synthetic',
       conformance_configs: 'closure/conformance_config.textproto'
     }))
     .on('error', error => {
