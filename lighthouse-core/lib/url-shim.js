@@ -29,6 +29,9 @@ const ELLIPSIS = '\u2026';
 // https://github.com/GoogleChrome/lighthouse/issues/1186
 const URL = (typeof self !== 'undefined' && self.URL) || require('whatwg-url').URL;
 
+/**
+ * @const {string}
+ */
 URL.INVALID_URL_DEBUG_STRING =
     'Lighthouse was unable to determine the URL of some script executions. ' +
     'It\'s possible a Chrome extension or other eval\'d code is the source.';
@@ -73,17 +76,14 @@ URL.originsMatch = function originsMatch(urlA, urlB) {
 };
 
 /**
+ * TODO(bckenny): suppressed error on name.split.filter (see internal thread).
+ * @suppress {reportUnknownTypes}
  * @param {string} url
- * @param {{numPathParts: number, preserveQuery: boolean, preserveHost: boolean}=} options
+ * @param {{numPathParts: (number|undefined), preserveQuery: (boolean|undefined), preserveHost: (boolean|undefined)}=} options
  * @return {string}
  */
-URL.getDisplayName = function getDisplayName(url, options) {
-  options = Object.assign({
-    numPathParts: 2,
-    preserveQuery: true,
-    preserveHost: false,
-  }, options);
-
+URL.getDisplayName = function getDisplayName(url,
+    {numPathParts = 2, preserveQuery = true, preserveHost = false} = {}) {
   const parsed = new URL(url);
 
   let name;
@@ -94,14 +94,14 @@ URL.getDisplayName = function getDisplayName(url, options) {
   } else {
     name = parsed.pathname;
     const parts = name.split('/').filter(part => part.length);
-    if (options.numPathParts && parts.length > options.numPathParts) {
-      name = ELLIPSIS + parts.slice(-1 * options.numPathParts).join('/');
+    if (numPathParts && parts.length > numPathParts) {
+      name = ELLIPSIS + parts.slice(-1 * numPathParts).join('/');
     }
 
-    if (options.preserveHost) {
+    if (preserveHost) {
       name = `${parsed.host}/${name.replace(/^\//, '')}`;
     }
-    if (options.preserveQuery) {
+    if (preserveQuery) {
       name = `${name}${parsed.search}`;
     }
   }
@@ -136,27 +136,33 @@ URL.getDisplayName = function getDisplayName(url, options) {
   return name;
 };
 
-// There is fancy URL rewriting logic for the chrome://settings page that we need to work around.
-// Why? Special handling was added by Chrome team to allow a pushState transition between chrome:// pages.
-// As a result, the network URL (chrome://chrome/settings/) doesn't match the final document URL (chrome://settings/).
+/**
+ * There is fancy URL rewriting logic for the chrome://settings page that we
+ * need to work around. Why? Special handling was added by Chrome team to allow
+ * a pushState transition between chrome:// pages. As a result, the network URL
+ * (chrome://chrome/settings/) doesn't match the final document URL
+ * (chrome://settings/).
+ * @param {string} url
+ * @return {string}
+ */
 function rewriteChromeInternalUrl(url) {
   if (!url.startsWith('chrome://')) return url;
   return url.replace(/^chrome:\/\/chrome\//, 'chrome://');
 }
 
 /**
- * Determine if url1 equals url2, ignoring URL fragments.
- * @param {string} url1
- * @param {string} url2
+ * Determine if href1 equals href2, ignoring URL fragments.
+ * @param {string} href1
+ * @param {string} href2
  * @return {boolean}
  */
-URL.equalWithExcludedFragments = function(url1, url2) {
-  [url1, url2] = [url1, url2].map(rewriteChromeInternalUrl);
+URL.equalWithExcludedFragments = function(href1, href2) {
+  [href1, href2] = [href1, href2].map(rewriteChromeInternalUrl);
   try {
-    url1 = new URL(url1);
+    const url1 = new URL(href1);
     url1.hash = '';
 
-    url2 = new URL(url2);
+    const url2 = new URL(href2);
     url2.hash = '';
 
     return url1.href === url2.href;

@@ -35,6 +35,9 @@ const colors = {
 // whitelist non-red/yellow colors for debug()
 debug.colors = [colors.cyan, colors.green, colors.blue, colors.magenta];
 
+/**
+ * @private
+ */
 class Emitter extends EventEmitter {
   /**
    * Fires off all status updates. Listen with
@@ -59,20 +62,35 @@ class Emitter extends EventEmitter {
   }
 }
 
+const logEmitter = new Emitter();
+
+/**
+ * @const {!Object<string, !debug.logger>}
+ */
 const loggersByTitle = {};
+
 const loggingBufferColumns = 25;
 
 class Log {
-
+  /**
+   * @param {string} title
+   * @param {!Array<*>} argsArray
+   * @private
+   */
   static _logToStdErr(title, argsArray) {
     const log = Log.loggerfn(title);
     log(...argsArray);
   }
 
+  /**
+   * @param {string} title
+   * @return {function(...*)}
+   * @private
+   */
   static loggerfn(title) {
     let log = loggersByTitle[title];
     if (!log) {
-      log = debug(title);
+      log = debug.debug(title);
       loggersByTitle[title] = log;
       // errors with red, warnings with yellow.
       if (title.endsWith('error')) {
@@ -81,9 +99,12 @@ class Log {
         log.color = colors.yellow;
       }
     }
-    return log;
+    return /** @type {function(...*)} */ (log);
   }
 
+  /**
+   * @param {string} level
+   */
   static setLevel(level) {
     switch (level) {
       case 'silent':
@@ -103,7 +124,7 @@ class Log {
   /**
    * A simple formatting utility for event logging.
    * @param {string} prefix
-   * @param {!Object} data A JSON-serializable object of event data to log.
+   * @param {{method: string, params: *}} data A JSON-serializable object of event data to log.
    * @param {string=} level Optional logging level. Defaults to 'log'.
    */
   static formatProtocol(prefix, data, level) {
@@ -115,23 +136,46 @@ class Log {
     Log._logToStdErr(`${prefix}:${level || ''}`, [data.method, snippet]);
   }
 
+  /**
+   * @param {string} title
+   * @param {...*} args
+   */
   static log(title, ...args) {
-    Log.events.issueStatus(title, args);
-    return Log._logToStdErr(title, args);
+    logEmitter.issueStatus(title, args);
+    Log._logToStdErr(title, args);
   }
 
+  /**
+   * @param {string} title
+   * @param {...*} args
+   */
   static warn(title, ...args) {
-    Log.events.issueWarning(title, args);
-    return Log._logToStdErr(`${title}:warn`, args);
+    logEmitter.issueWarning(title, args);
+    Log._logToStdErr(`${title}:warn`, args);
   }
 
+  /**
+   * @param {string} title
+   * @param {...*} args
+   */
   static error(title, ...args) {
-    return Log._logToStdErr(`${title}:error`, args);
+    Log._logToStdErr(`${title}:error`, args);
   }
 
+  /**
+   * @param {string} title
+   * @param {...*} args
+   */
   static verbose(title, ...args) {
-    Log.events.issueStatus(title, args);
-    return Log._logToStdErr(`${title}:verbose`, args);
+    logEmitter.issueStatus(title, args);
+    Log._logToStdErr(`${title}:verbose`, args);
+  }
+
+  /**
+   * @return {!EventEmitter}
+   */
+  static get events() {
+    return logEmitter;
   }
 
   /**
@@ -152,67 +196,110 @@ class Log {
     return `${Log.red}${str}${Log.reset}`;
   }
 
+  /**
+   * @return {string}
+   */
   static get green() {
     return '\x1B[32m';
   }
 
+  /**
+   * @return {string}
+   */
   static get red() {
     return '\x1B[31m';
   }
 
+  /**
+   * @return {string}
+   */
   static get yellow() {
     return '\x1b[33m';
   }
 
+  /**
+   * @return {string}
+   */
   static get purple() {
     return '\x1b[95m';
   }
 
+  /**
+   * @return {string}
+   */
   static get reset() {
     return '\x1B[0m';
   }
 
+  /**
+   * @return {string}
+   */
   static get bold() {
     return '\x1b[1m';
   }
 
+  /**
+   * @return {string}
+   */
   static get tick() {
     return isWindows ? '\u221A' : '✓';
   }
 
+  /**
+   * @return {string}
+   */
   static get cross() {
     return isWindows ? '\u00D7' : '✘';
   }
 
+  /**
+   * @return {string}
+   */
   static get whiteSmallSquare() {
     return isWindows ? '\u0387' : '▫';
   }
 
+  /**
+   * @return {string}
+   */
   static get heavyHorizontal() {
     return isWindows ? '\u2500' : '━';
   }
 
+  /**
+   * @return {string}
+   */
   static get heavyVertical() {
     return isWindows ? '\u2502 ' : '┃ ';
   }
 
+  /**
+   * @return {string}
+   */
   static get heavyUpAndRight() {
     return isWindows ? '\u2514' : '┗';
   }
 
+  /**
+   * @return {string}
+   */
   static get heavyVerticalAndRight() {
     return isWindows ? '\u251C' : '┣';
   }
 
+  /**
+   * @return {string}
+   */
   static get heavyDownAndHorizontal() {
     return isWindows ? '\u252C' : '┳';
   }
 
+  /**
+   * @return {string}
+   */
   static get doubleLightHorizontal() {
     return '──';
   }
 }
-
-Log.events = new Emitter();
 
 module.exports = Log;

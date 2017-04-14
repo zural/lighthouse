@@ -17,12 +17,20 @@
 'use strict';
 
 class Element {
-
+  // TODO(bckenny): remove driver typing when driver added
+  /**
+   * @param {{nodeId: string}} element
+   * @param {{sendCommand: function(string, !Object): !Promise, getObjectProperty: function(string, string): !Promise<string>}} driver
+   */
   constructor(element, driver) {
     if (!element || !driver) {
       throw Error('Driver and element required to create Element');
     }
+    /**
+     * @const {{sendCommand: function(string, !Object): !Promise, getObjectProperty: function(string, string): !Promise<string>}}
+     */
     this.driver = driver;
+    /** @const {{nodeId: string}} */
     this.element = element;
   }
 
@@ -35,22 +43,21 @@ class Element {
       .sendCommand('DOM.getAttributes', {
         nodeId: this.element.nodeId
       })
-      /**
-       * @param {!{attributes: !Array<!string>}} resp The element attribute names & values are interleaved
-       */
-      .then(resp => {
+      .then(/** @type {function({attributes: !Array<string>})} */ (resp => {
+        // TODO(bckenny): remove when protocol is typed
+        // The element attribute names and values are interleaved.
         const attrIndex = resp.attributes.indexOf(name);
         if (attrIndex === -1) {
           return null;
         }
 
         return resp.attributes[attrIndex + 1];
-      });
+      }));
   }
 
   /**
    * @param {!string} propName Property name
-   * @return {!Promise<?string>} The property value
+   * @return {!Promise<?string>} The property value, or null if not found
    */
   getProperty(propName) {
     return this.driver
@@ -58,7 +65,8 @@ class Element {
         nodeId: this.element.nodeId
       })
       .then(resp => {
-        return this.driver.getObjectProperty(resp.object.objectId, propName);
+        // TODO(bckenny): remove when protocol is typed
+        return this.driver.getObjectProperty(/** @type {{object: {objectId: string}}} */(resp).object.objectId, propName);
       });
   }
 }

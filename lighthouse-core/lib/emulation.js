@@ -70,6 +70,11 @@ const CPU_THROTTLE_METRICS = {
   rate: 4.5
 };
 
+// TODO(bckenny): remove driver typing when driver added
+/**
+ * @param {{sendCommand: function(string, !Object=): !Promise}} driver
+ * @return {!Promise}
+ */
 function enableNexus5X(driver) {
   /**
    * Finalizes touch emulation by enabling `"ontouchstart" in window` feature detect
@@ -78,6 +83,7 @@ function enableNexus5X(driver) {
    * page's JavaScript executes.
    */
   /* eslint-disable no-proto */ /* global window, document */ /* istanbul ignore next */
+  /** @suppress {checkTypes, checkVars} */
   const injectedTouchEventsFunction = function() {
     const touchEvents = ['ontouchstart', 'ontouchend', 'ontouchmove', 'ontouchcancel'];
     const recepients = [window.__proto__, document.__proto__];
@@ -113,36 +119,72 @@ function enableNexus5X(driver) {
   ]);
 }
 
+/**
+ * @param {{sendCommand: function(string, !Object): !Promise}} driver
+ * @return {!Promise}
+ */
 function enableNetworkThrottling(driver) {
   return driver.sendCommand('Network.emulateNetworkConditions', TYPICAL_MOBILE_THROTTLING_METRICS);
 }
 
+/**
+ * @param {{sendCommand: function(string, !Object): !Promise}} driver
+ * @return {!Promise}
+ */
 function disableNetworkThrottling(driver) {
   return driver.sendCommand('Network.emulateNetworkConditions', NO_THROTTLING_METRICS);
 }
 
+/**
+ * @param {{sendCommand: function(string, !Object): !Promise}} driver
+ * @return {!Promise}
+ */
 function goOffline(driver) {
   return driver.sendCommand('Network.emulateNetworkConditions', OFFLINE_METRICS);
 }
 
+/**
+ * @param {{sendCommand: function(string, !Object): !Promise}} driver
+ * @return {!Promise}
+ */
 function enableCPUThrottling(driver) {
   return driver.sendCommand('Emulation.setCPUThrottlingRate', CPU_THROTTLE_METRICS);
 }
 
+/**
+ * @param {{sendCommand: function(string, !Object): !Promise}} driver
+ * @return {!Promise}
+ */
 function disableCPUThrottling(driver) {
   return driver.sendCommand('Emulation.setCPUThrottlingRate', NO_CPU_THROTTLE_METRICS);
 }
 
+/**
+ * @return {{deviceEmulation: string, cpuThrottling: string, networkThrottling: string}}
+ */
 function getEmulationDesc() {
   const {latency, downloadThroughput, uploadThroughput} = TYPICAL_MOBILE_THROTTLING_METRICS;
   const byteToMbit = bytes => (bytes / 1024 / 1024 * 8).toFixed(1);
   return {
-    'deviceEmulation': 'Nexus 5X',
-    'cpuThrottling': `${CPU_THROTTLE_METRICS.rate}x slowdown`,
-    'networkThrottling': `${latency}ms RTT, ${byteToMbit(downloadThroughput)}Mbps down, ` +
+    deviceEmulation: 'Nexus 5X',
+    cpuThrottling: `${CPU_THROTTLE_METRICS.rate}x slowdown`,
+    networkThrottling: `${latency}ms RTT, ${byteToMbit(downloadThroughput)}Mbps down, ` +
         `${byteToMbit(uploadThroughput)}Mbps up`
   };
 }
+
+/**
+ * @const
+ */
+const settings = {
+  NEXUS5X_EMULATION_METRICS,
+  NEXUS5X_USERAGENT,
+  TYPICAL_MOBILE_THROTTLING_METRICS,
+  OFFLINE_METRICS,
+  NO_THROTTLING_METRICS,
+  NO_CPU_THROTTLE_METRICS,
+  CPU_THROTTLE_METRICS
+};
 
 module.exports = {
   enableNexus5X,
@@ -152,13 +194,5 @@ module.exports = {
   disableCPUThrottling,
   goOffline,
   getEmulationDesc,
-  settings: {
-    NEXUS5X_EMULATION_METRICS,
-    NEXUS5X_USERAGENT,
-    TYPICAL_MOBILE_THROTTLING_METRICS,
-    OFFLINE_METRICS,
-    NO_THROTTLING_METRICS,
-    NO_CPU_THROTTLE_METRICS,
-    CPU_THROTTLE_METRICS
-  }
+  settings
 };

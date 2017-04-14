@@ -22,58 +22,125 @@ const gulp = require('gulp');
 const gutil = require('gulp-util');
 const replace = require('gulp-replace');
 
+const js = [
+  // 'lib/network-recorder.js',
+  'lib/emulation.js',
+  'lib/element.js',
+  'lib/url-shim.js',
+  'lib/log.js',
+  'gather/devtools-log.js',
+  // 'gather/driver.js',
+  // 'audits/**/*.js',
+  // 'lib/event-helpers.js',
+  // 'lib/icons.js',
+  // 'lib/styles-helpers.js',
+  // 'lib/url-shim.js',
+  // 'aggregator/**/*.js',
+  // 'report/formatter.js',
+  // 'lib/traces/tracing-processor.js',
+];
+
+const externs = [
+  'closure/typedefs/*.js',
+  'closure/third_party/*.js',
+  'closure/third_party/nodejs/*.js',
+];
+
+const additionalExterns = [
+  // --> // 'third_party/devtools-protocol/protocol_externs.js',
+];
+
+// Files to explicitly ignore
+const ignoreFiles = [
+  '!audits/byte-efficiency/unused-css-rules.js',
+];
+
+const PRINT_AST = true;
+
 /* eslint-disable camelcase */
 gulp.task('js-compile', function() {
-  return gulp.src([
-    'closure/typedefs/*.js',
-    'closure/third_party/*.js',
-    'audits/**/*.js',
-    'lib/event-helpers.js',
-    'lib/icons.js',
-    'lib/styles-helpers.js',
-    'lib/url-shim.js',
-    'aggregator/**/*.js'
-  ])
+  const files = js.concat(externs, ignoreFiles);
+
+  return gulp.src(files)
     // Hack to remove `require`s that Closure currently can't resolve.
-    .pipe(replace('require(\'../lib/web-inspector\').Color.parse;',
-        'WebInspector.Color.parse;'))
-    .pipe(replace('require(\'../lib/traces/tracing-processor\');', '/** @type {?} */ (null);'))
-    .pipe(replace('require(\'../lib/traces/devtools-timeline-model\');',
-        'DevtoolsTimelineModel'))
-    .pipe(replace('require(\'speedline\');', 'function(arg) {};'))
-    .pipe(replace(/require\('(\.\.\/)*report\/formatter'\);/g, '{};'))
+    .pipe(replace(/^const URL = .*require\('whatwg-url'\)\.URL;$/m, ''))
+    .pipe(replace('require(\'events\')', 'events'))
+    .pipe(replace(/^const debug = require\('debug'\);$/m, ''))
+    .pipe(replace(/require\('\.\/web-inspector'\)\.NetworkManager;$/m, '{}'))
+
+    // old
+    // .pipe(replace('require(\'../lib/web-inspector\').Color.parse;',
+        // 'WebInspector.Color.parse;'))
+    // .pipe(replace('require(\'../lib/traces/tracing-processor\');', '/** @type {?} */ (null);'))
+    // .pipe(replace('require(\'../lib/traces/devtools-timeline-model\');',
+        // 'DevtoolsTimelineModel'))
+    // .pipe(replace('require(\'speedline\');', 'function(arg) {};'))
+    // .pipe(replace(/require\('(\.\.\/)*report\/formatter'\);/g, '{};'))
 
     // Replace any non-local import (e.g. not starting with .) with a dummy type. These are likely
     // the built-in Node modules. But not always, so TODO(samthor): Fix this.
-    .pipe(replace(/require\(\'[^\.].*?\'\)/g, '/** @type {*} */ ({})'))
+    // .pipe(replace(/require\(\'[^\.].*?\'\)/g, '/** @type {*} */ ({})'))
 
     .pipe(closureCompiler({
       compilation_level: 'SIMPLE',
+      use_types_for_optimization: true,
+      module_resolution: 'NODE',
       process_common_js_modules: true,
       new_type_inf: true,
       checks_only: true,
       language_in: 'ECMASCRIPT6_STRICT',
       language_out: 'ECMASCRIPT5_STRICT',
+      env: 'CUSTOM',
+      // externs: additionalExterns,
       warning_level: process.env.CI ? 'QUIET' : 'VERBOSE',
       jscomp_error: [
         'checkTypes',
-        'conformanceViolations'
       ],
       jscomp_warning: [
         // https://github.com/google/closure-compiler/wiki/Warnings
         'accessControls',
         'checkRegExp',
         'const',
-        // 'reportUnknownTypes',
+        'reportUnknownTypes',
         'missingProperties',
         'missingReturn',
-        'newCheckTypes',
         'strictModuleDepCheck',
         'typeInvalidation',
         'undefinedNames',
-        'visibility'
+        'visibility',
+
+        'missingProvide',
+        'checkDebuggerStatement',
+        'externsValidation',
+        'uselessCode',
+        'ambiguousFunctionDecl',
+        'checkTypes',
+        'es3',
+        'es5Strict',
+        'globalThis',
+        'nonStandardJsDocs',
+        'strictMissingRequire',
+        'suspiciousCode',
+        'unknownDefines',
+        'checkVars',
+        'tooManyTypeParams',
+
+        'conformanceViolations',
+
+        // only if you want new_type_inf
+        // 'newCheckTypes',
       ],
-      conformance_configs: 'closure/conformance_config.textproto'
+      jscomp_off: [
+        // 'newCheckTypesExtraChecks'
+      ],
+      hide_warnings_for: 'synthetic',
+      conformance_configs: 'closure/conformance_config.textproto',
+
+      // print_tree: PRINT_AST,
+      // js_output_file: '../closure-tree.txt',
+      js_output_file: 'closure-out.js',
+      formatting: 'PRETTY_PRINT',
+      preserve_type_annotations: true,
     }))
     .on('error', error => {
       gutil.log('Closure compilation failed. Check `closure-error.log` for details.');
@@ -81,7 +148,8 @@ gulp.task('js-compile', function() {
     })
     .on('end', () => {
       gutil.log('Closure compilation successful.');
-    });
+    })
+    .pipe(gulp.dest('../'));
 });
 /* eslint-enable */
 

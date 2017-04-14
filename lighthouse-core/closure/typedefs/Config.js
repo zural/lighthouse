@@ -37,5 +37,3 @@ PassConfig.prototype.loadDataName;
 
 /** type {!Array<!string>} */
 PassConfig.prototype.gatherers;
-
-

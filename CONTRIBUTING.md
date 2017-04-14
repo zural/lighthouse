@@ -46,6 +46,19 @@ git -C "./third_party/src/catapult/" pull
 node scripts/build-traceviewer-module.js
 ```
 
+## Updating devtools-protocol externs
+
+```sh
+cd lighthouse-core
+# if not already there, clone devtools-protocol
+git clone --depth=1 https://github.com/ChromeDevTools/devtools-protocol.git third_party/src/devtools-protocol
+# pull for latest
+git -C "./third_party/src/devtools-protocol/" pull
+# copy license and externs over
+cp third_party/src/devtools-protocol/LICENSE third_party/devtools-protocol/
+cp third_party/src/devtools-protocol/externs/protocol_externs.js third_party/devtools-protocol/
+```
+
 ## Release guide
 
 ```sh

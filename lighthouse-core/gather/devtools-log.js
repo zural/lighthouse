@@ -16,6 +16,13 @@
  */
 'use strict';
 
+// TODO(bckenny): update when driver and protocol is typed
+/** @typedef {{
+  method: string,
+  params: !Object
+  }} */
+let ProtocolMessage; // eslint-disable-line no-unused-vars
+
 /**
  * @fileoverview This class saves all protocol messages whose method match a particular
  *    regex filter. Used when saving assets for later analysis by another tool such as
@@ -23,16 +30,21 @@
  */
 class DevtoolsLog {
   /**
-   * @param {RegExp=} regexFilter
+   * @param {!RegExp=} regexFilter
    */
-  constructor(regexFilter) {
+  constructor(regexFilter = /.*/) {
+    /** @const {!RegExp} */
     this._filter = regexFilter;
+
+    /** @type {!Array<!ProtocolMessage>} */
     this._messages = [];
+
+    /** @type {boolean} */
     this._isRecording = false;
   }
 
   /**
-   * @return {!Array<{method: string, params: !Object}>}
+   * @return {!Array<!ProtocolMessage>}
    */
   get messages() {
     return this._messages;
@@ -52,7 +64,7 @@ class DevtoolsLog {
 
   /**
    * Records a message if method matches filter and recording has been started.
-   * @param {{method: string, params: !Object}} message
+   * @param {!ProtocolMessage} message
    */
   record(message) {
     if (this._isRecording && (!this._filter || this._filter.test(message.method))) {

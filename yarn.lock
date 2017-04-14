@@ -1247,9 +1247,9 @@ glogg@^1.0.0:
   dependencies:
     sparkles "^1.0.0"
 
-google-closure-compiler@^20161201.0.0:
-  version "20161201.0.0"
-  resolved "https://registry.yarnpkg.com/google-closure-compiler/-/google-closure-compiler-20161201.0.0.tgz#2bcf0206060ad4f4031f64f73eaab7119ff76738"
+google-closure-compiler@20170218.0.0:
+  version "20170218.0.0"
+  resolved "https://registry.yarnpkg.com/google-closure-compiler/-/google-closure-compiler-20170218.0.0.tgz#059c7f91cf1cb2c1a66b4c95f745f5efd0fb4ba4"
   dependencies:
     chalk "^1.0.0"
     vinyl "^1.2.0"

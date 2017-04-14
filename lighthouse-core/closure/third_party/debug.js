@@ -1,6 +1,5 @@
 /**
- * @license
- * Copyright 2016 Google Inc. All rights reserved.
+ * Copyright 2017 Google Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +15,33 @@
  */
 
 /**
+ * @fileoverview externs file for module `debug`.
+ * @see https://www.npmjs.com/package/debug
  * @externs
  */
 
-/** @type {string} */
-var __dirname = '';
+/**
+ * @const
+ */
+var debug = {};
 
-/** @type {!Object} */
-var global = {};
+/**
+ * @typedef {{color: (string|number)}}
+ */
+debug.logger;
 
+/**
+ * @param {string} title
+ * @return {!debug.logger}
+ */
+debug.debug = function(title) {};
+
+/**
+ * @type {!Array<string|number>}
+ */
+debug.colors;
+
+/**
+ * @param {string} namespaces
+ */
+debug.enable = function(namespaces) {};

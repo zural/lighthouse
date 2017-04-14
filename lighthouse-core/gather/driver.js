@@ -573,7 +573,7 @@ class Driver {
   }
 
   /**
-   * @param {{additionalTraceCategories: string=}=} flags
+   * @param {{additionalTraceCategories: (string|undefined)}=} flags
    */
   beginTrace(flags) {
     const additionalCategories = (flags && flags.additionalTraceCategories &&
