@@ -295,11 +295,6 @@ class Config {
     this._configDir = configPath ? path.dirname(configPath) : undefined;
 
     this._passes = configJSON.passes || null;
-    this._auditResults = configJSON.auditResults || null;
-    if (this._auditResults && !Array.isArray(this._auditResults)) {
-      throw new Error('config.auditResults must be an array');
-    }
-
     this._aggregations = configJSON.aggregations || null;
 
     this._audits = Config.requireAudits(configJSON.audits, this._configDir);
@@ -523,6 +518,10 @@ class Config {
     });
   }
 
+  removePasses() {
+    this._passes = undefined;
+  }
+
   /** @type {string} */
   get configDir() {
     return this._configDir;
@@ -536,11 +535,6 @@ class Config {
   /** @type {Array<!Audit>} */
   get audits() {
     return this._audits;
-  }
-
-  /** @type {Array<!AuditResult>} */
-  get auditResults() {
-    return this._auditResults;
   }
 
   /** @type {Array<!Artifacts>} */
