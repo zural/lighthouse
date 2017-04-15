@@ -75,7 +75,7 @@ class Runner {
 
     if (!willGatherArtifacts && !willProcessSavedArtifacts) {
       const err = Error(
-          'The config must provide passes and audits or artifacts and audits.');
+          'The config must provide gather passes or saved artifacts.');
       return Promise.reject(err);
     }
 
@@ -103,6 +103,12 @@ class Runner {
       log.log('status', 'Analyzing and running audits...');
       return artifacts;
     });
+
+    if (!config.audits) {
+      const err = Error(
+          'The run cannot continue as the config has defined no audits to evaluate.');
+      return Promise.reject(err);
+    }
 
     // Run each audit sequentially, the auditResults array has all our fine work
     const auditResults = [];
