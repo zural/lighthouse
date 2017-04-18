@@ -37,6 +37,16 @@ class Audit {
   }
 
   /**
+   * @return {{GROUP_BY_STATUS: string, GROUP_BY_TAG: string}}
+   */
+  static get RENDERERS() {
+    return {
+      GROUP_BY_STATUS: 'GroupByStatus',
+      GROUP_BY_TAG: 'GroupByTag',
+    };
+  }
+
+  /**
    * @throws {Error}
    */
   static get meta() {
@@ -85,6 +95,7 @@ class Audit {
       debugString: result.debugString,
       optimalValue: result.optimalValue,
       extendedInfo: result.extendedInfo,
+      renderer: audit.meta.category === 'Accessibility' ? Audit.RENDERERS.GROUP_BY_TAG : Audit.RENDERERS.GROUP_BY_STATUS,
       scoringMode: audit.meta.scoringMode || Audit.SCORING_MODES.BINARY,
       informative: audit.meta.informative,
       name: audit.meta.name,

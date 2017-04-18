@@ -62,6 +62,7 @@ class ReportRenderer {
   constructor(dom, detailsRenderer) {
     this._dom = dom;
     this._detailsRenderer = detailsRenderer;
+    this._auditsRenderer = new AuditsRenderer(this._dom, this._renderAudit.bind(this));
 
     this._templateContext = this._dom.document();
   }
@@ -164,7 +165,7 @@ class ReportRenderer {
   _renderReport(report) {
     const element = this._dom.createElement('div', 'lh-report');
     for (const category of report.reportCategories) {
-      element.appendChild(this._renderCategory(category));
+      element.appendChild(this._renderCategory(category, report.reportTags));
     }
     return element;
   }
@@ -173,29 +174,10 @@ class ReportRenderer {
    * @param {!ReportRenderer.CategoryJSON} category
    * @return {!Element}
    */
-  _renderCategory(category) {
+  _renderCategory(category, tags) {
     const element = this._dom.createElement('div', 'lh-category');
     element.appendChild(this._renderCategoryScore(category));
-
-    const passedAudits = category.audits.filter(audit => audit.score === 100);
-    const nonPassedAudits = category.audits.filter(audit => !passedAudits.includes(audit));
-
-    for (const audit of nonPassedAudits) {
-      element.appendChild(this._renderAudit(audit));
-    }
-
-    // don't create a passed section if there are no passed
-    if (!passedAudits.length) return element;
-
-    const passedElem = this._dom.createElement('details', 'lh-passed-audits');
-    const passedSummary = this._dom.createElement('summary', 'lh-passed-audits-summary');
-    passedSummary.textContent = `View ${passedAudits.length} passed items`;
-    passedElem.appendChild(passedSummary);
-
-    for (const audit of passedAudits) {
-      passedElem.appendChild(this._renderAudit(audit));
-    }
-    element.appendChild(passedElem);
+    element.appendChild(this._auditsRenderer.render(category.audits, tags));
     return element;
   }
 
