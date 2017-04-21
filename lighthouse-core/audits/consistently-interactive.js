@@ -25,6 +25,12 @@ const distribution = TracingProcessor.getLogNormalDistribution(
   SCORING_POINT_OF_DIMINISHING_RETURNS
 );
 
+/**
+ * @fileoverview This audit identifies the time the page is "consistently interactive".
+ * Looks for the first period of at least 5 seconds after FMP where both CPU and network were quiet,
+ * and returns the timestamp of the beginning of the CPU quiet period.
+ * @see https://docs.google.com/document/d/1GGiI9-7KeY3TPqS3YT271upUVimo-XiL5mwWorDUD4c/edit#
+ */
 class ConsistentlyInteractiveMetric extends Audit {
   /**
    * @return {!AuditMeta}
@@ -42,6 +48,11 @@ class ConsistentlyInteractiveMetric extends Audit {
     };
   }
 
+  /**
+   * @param {!Array} networkRecords
+   * @param {{timestamps: {traceEnd: number}}} traceOfTab
+   * @return {!Array<{start: number, end: number}>}
+   */
   static _findNetworkQuietPeriods(networkRecords, traceOfTab) {
     const traceEnd = traceOfTab.timestamps.traceEnd;
     const timeBoundaries = networkRecords.reduce((boundaries, record) => {
@@ -84,6 +95,11 @@ class ConsistentlyInteractiveMetric extends Audit {
     return quietPeriods;
   }
 
+  /**
+   * @param {!Array<{start: number, end: number}>} longTasks
+   * @param {{timestamps: {navigationStart: number, traceEnd: number}}} traceOfTab
+   * @return {!Array<{start: number, end: number}>}
+   */
   static _findCPUQuietPeriods(longTasks, traceOfTab) {
     const navStartTsInMs = traceOfTab.timestamps.navigationStart;
     const traceEndTsInMs = traceOfTab.timestamps.traceEnd;
@@ -116,6 +132,12 @@ class ConsistentlyInteractiveMetric extends Audit {
     return quietPeriods;
   }
 
+  /**
+   * @param {!Array<{start: number, end: number}>} longTasks
+   * @param {{timestamps: {navigationStart: number, firstMeaningfulPaint: number,
+   *    traceEnd: number}}} traceOfTab
+   * @return {!Object}
+   */
   static findOverlappingQuietPeriods(longTasks, networkRecords, traceOfTab) {
     const FMPTsInMs = traceOfTab.timestamps.firstMeaningfulPaint;
 
@@ -165,9 +187,6 @@ class ConsistentlyInteractiveMetric extends Audit {
   }
 
   /**
-   * Identify the time the page is "consistently interactive"
-   * @see https://docs.google.com/document/d/1GGiI9-7KeY3TPqS3YT271upUVimo-XiL5mwWorDUD4c/edit#
-   *
    * @param {!Artifacts} artifacts
    * @return {!Promise<!AuditResult>}
    */
