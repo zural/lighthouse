@@ -47,7 +47,7 @@ const externs = [
 ];
 
 const additionalExterns = [
-  // --> // 'third_party/devtools-protocol/protocol_externs.js',
+  'third_party/devtools-protocol/protocol_externs.js',
 ];
 
 // Files to explicitly ignore
@@ -91,7 +91,7 @@ gulp.task('js-compile', function() {
       language_in: 'ECMASCRIPT6_STRICT',
       language_out: 'ECMASCRIPT5_STRICT',
       env: 'CUSTOM',
-      // externs: additionalExterns,
+      externs: additionalExterns,
       warning_level: process.env.CI ? 'QUIET' : 'VERBOSE',
       jscomp_error: [
         'checkTypes',

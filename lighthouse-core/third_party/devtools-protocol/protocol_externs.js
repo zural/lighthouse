@@ -1,3 +1,12 @@
+/**
+ * Base namespace for debugger protocol.
+ * @const
+ */
+var Protocol = {};
+
+/** @typedef {string} */
+Protocol.Error;
+
 Protocol.Inspector = {};
 
 

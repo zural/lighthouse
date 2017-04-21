@@ -36,9 +36,3 @@ WebInspector.Color = function() {};
  * @return {?WebInspector.Color}
  */
 WebInspector.Color.parse = function(text) {};
-
-/**
- * Base namespace for debugger protocol.
- * @const
- */
-var Protocol = {};
