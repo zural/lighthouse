@@ -55,33 +55,37 @@ class ConsistentlyInteractiveMetric extends Audit {
    */
   static _findNetworkQuietPeriods(networkRecords, traceOfTab) {
     const traceEnd = traceOfTab.timestamps.traceEnd;
-    const timeBoundaries = networkRecords.reduce((boundaries, record) => {
+
+    // First collect the timestamps of when requests start and end
+    const timeBoundaries = [];
+    networkRecords.forEach(record => {
       const scheme = record.parsedURL && record.parsedURL.scheme;
       if (scheme === 'data' || scheme === 'ws') {
-        return boundaries;
+        return;
       }
 
       // convert the network record timestamp to ms to line-up with traceOfTab
-      boundaries.push({time: record.startTime * 1000, isStart: true});
-      boundaries.push({time: record.endTime * 1000, isStart: false});
-      return boundaries;
-    }, []).sort((a, b) => a.time - b.time);
+      timeBoundaries.push({time: record.startTime * 1000, isStart: true});
+      timeBoundaries.push({time: record.endTime * 1000, isStart: false});
+    });
 
-    let inflight = 0;
+    timeBoundaries.sort((a, b) => a.time - b.time);
+
+    let numInflightRequests = 0;
     let quietPeriodStart = 0;
     const quietPeriods = [];
     timeBoundaries.forEach(boundary => {
       if (boundary.isStart) {
-        // we are exiting a quiet period
-        if (inflight === ALLOWED_CONCURRENT_REQUESTS) {
+        // we've just started a new request. are we exiting a quiet period?
+        if (numInflightRequests === ALLOWED_CONCURRENT_REQUESTS) {
           quietPeriods.push({start: quietPeriodStart, end: boundary.time});
           quietPeriodStart = Infinity;
         }
-        inflight++;
+        numInflightRequests++;
       } else {
-        inflight--;
-        // we are entering a quiet period
-        if (inflight <= ALLOWED_CONCURRENT_REQUESTS) {
+        numInflightRequests--;
+        // we've just completed a request. are we entering a quiet period?
+        if (numInflightRequests <= ALLOWED_CONCURRENT_REQUESTS) {
           quietPeriodStart = Math.min(boundary.time, quietPeriodStart);
         }
       }
@@ -141,12 +145,13 @@ class ConsistentlyInteractiveMetric extends Audit {
   static findOverlappingQuietPeriods(longTasks, networkRecords, traceOfTab) {
     const FMPTsInMs = traceOfTab.timestamps.firstMeaningfulPaint;
 
+    const isLongEnoughQuietPeriod = period =>
+        period.end > FMPTsInMs + REQUIRED_QUIET_WINDOW &&
+        period.end - period.start >= REQUIRED_QUIET_WINDOW;
     const networkQuietPeriods = this._findNetworkQuietPeriods(networkRecords, traceOfTab)
-        .filter(period => period.end > FMPTsInMs + REQUIRED_QUIET_WINDOW &&
-            period.end - period.start >= REQUIRED_QUIET_WINDOW);
+        .filter(isLongEnoughQuietPeriod);
     const cpuQuietPeriods = this._findCPUQuietPeriods(longTasks, traceOfTab)
-        .filter(period => period.end > FMPTsInMs + REQUIRED_QUIET_WINDOW &&
-            period.end - period.start >= REQUIRED_QUIET_WINDOW);
+        .filter(isLongEnoughQuietPeriod);
 
     const cpuQueue = cpuQuietPeriods.slice();
     const networkQueue = networkQuietPeriods.slice();
