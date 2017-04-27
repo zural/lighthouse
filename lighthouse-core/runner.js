@@ -84,23 +84,22 @@ class Runner {
       opts.driver = opts.driverMock || new Driver(connection);
       // Kick off the gather run
       run = run.then(_ => GatherRunner.run(config.passes, opts));
-      // Potentially quit now if we're only saving collected artifacts
+      // Quit now if we're only saving collected artifacts
       if (opts.flags.onlyGather) {
-        run = run.then(artifacts =>
+        return run.then(artifacts =>
           assetSaver.saveArtifacts(artifacts, path.join(process.cwd(), partialRunFilename))
         );
-        return run;
       }
-    // In this case, skip connecting to a browser, we'll just process the offline artifacts
-    } else if (willProcessSavedArtifacts) {
-      run = run.then(_ => {
-        return Object.assign(Runner.instantiateComputedArtifacts(), config.artifacts);
-      });
     }
 
     // Entering: Audit phase
     run = run.then(artifacts => {
       log.log('status', 'Analyzing and running audits...');
+      if (willProcessSavedArtifacts) {
+        artifacts = Object.assign(Runner.instantiateComputedArtifacts(), config.artifacts);
+      } else {
+        artifacts = Object.assign(artifacts, Runner.instantiateComputedArtifacts());
+      }
       return artifacts;
     });
 
