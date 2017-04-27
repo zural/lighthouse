@@ -54,7 +54,7 @@ describe('Runner', () => {
       .then(_ => {
         assert.ok(false);
       }, err => {
-        assert.ok(/The config must provide passes/.test(err.message));
+        assert.ok(/The config must provide/.test(err.message), err.message);
       });
   });
 
@@ -97,35 +97,6 @@ describe('Runner', () => {
       assert.equal(audits['user-timings'].displayValue, 2);
       assert.equal(audits['user-timings'].rawValue, true);
     });
-  });
-
-  it('rejects when given an invalid trace artifact', () => {
-    const url = 'https://example.com';
-    const config = new Config({
-      passes: [{
-        recordTrace: true,
-        gatherers: []
-      }],
-      audits: [
-        'user-timings'
-      ]
-    });
-
-    // Arrange for driver to return bad trace.
-    const badTraceDriver = Object.assign({}, driverMock, {
-      endTrace() {
-        return Promise.resolve({
-          traceEvents: 'not an array'
-        });
-      }
-    });
-
-    return Runner.run({}, {url, config, driverMock: badTraceDriver})
-      .then(_ => {
-        assert.ok(false);
-      }, _ => {
-        assert.ok(true);
-      });
   });
 
   describe('Bad required artifact handling', () => {
@@ -292,68 +263,6 @@ describe('Runner', () => {
       });
   });
 
-  it('returns reportCategories', () => {
-    const url = 'https://example.com';
-    const config = new Config({
-      auditResults: [{
-        name: 'content-width',
-        rawValue: true,
-        score: true,
-        displayValue: 'display'
-      }],
-      categories: {
-        category: {
-          name: 'Category',
-          description: '',
-          audits: [
-            {id: 'content-width', weight: 1}
-          ]
-        }
-      }
-    });
-
-    return Runner.run(null, {url, config, driverMock}).then(results => {
-      assert.ok(results.lighthouseVersion);
-      assert.ok(results.generatedTime);
-      assert.equal(results.initialUrl, url);
-      assert.equal(results.audits['content-width'].name, 'content-width');
-      assert.equal(results.reportCategories[0].score, 100);
-      assert.equal(results.reportCategories[0].audits[0].id, 'content-width');
-      assert.equal(results.reportCategories[0].audits[0].score, 100);
-      assert.equal(results.reportCategories[0].audits[0].result.displayValue, 'display');
-    });
-  });
-
-  it('returns an aggregation', () => {
-    const url = 'https://example.com';
-    const config = new Config({
-      auditResults: [{
-        name: 'content-width',
-        rawValue: true,
-        score: true,
-        displayValue: ''
-      }],
-      categories: {
-        category: {
-          name: 'Category',
-          description: '',
-          audits: [
-            {id: 'content-width', weight: 1}
-          ]
-        }
-      }
-    });
-
-    return Runner.run(null, {url, config, driverMock}).then(results => {
-      assert.ok(results.lighthouseVersion);
-      assert.ok(results.generatedTime);
-      assert.equal(results.initialUrl, url);
-      assert.equal(results.audits['content-width'].name, 'content-width');
-      assert.equal(results.aggregations[0].score[0].overall, 1);
-      assert.equal(results.aggregations[0].score[0].subItems[0].name, 'content-width');
-    });
-  });
-
   it('rejects when not given a URL', () => {
     return Runner.run({}, {}).then(_ => assert.ok(false), _ => assert.ok(true));
   });
@@ -439,32 +348,6 @@ describe('Runner', () => {
         assert.ok(chains['93149.1'].request);
         assert.ok(chains['93149.1'].children);
       });
-    });
-  });
-
-  it('results include artifacts when given auditResults', () => {
-    const url = 'https://example.com';
-    const config = new Config({
-      auditResults: [{
-        name: 'is-on-https',
-        rawValue: true,
-        score: true,
-        displayValue: ''
-      }],
-
-      artifacts: {
-        HTTPS: {
-          value: true
-        }
-      }
-    });
-
-    return Runner.run(null, {url, config, driverMock}).then(results => {
-      assert.strictEqual(results.artifacts.HTTPS.value, true);
-
-      for (const method of Object.keys(computedArtifacts)) {
-        assert.ok(results.artifacts.hasOwnProperty(method));
-      }
     });
   });
 });
