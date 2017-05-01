@@ -62,12 +62,25 @@ describe('DOM', () => {
       assert.ok(clone.querySelector('.lh-score'));
     });
 
+    it('should clone a template from a context scope', () => {
+      const heading = dom.cloneTemplate('#tmpl-lh-heading', dom.document());
+      const items = dom.cloneTemplate('#tmpl-lh-env__items', heading);
+      assert.ok(items.querySelector('.lh-env__item'));
+    });
+
     it('fails when template cannot be found', () => {
       assert.throws(() => dom.cloneTemplate('#unknown-selector', dom.document()));
     });
 
     it('fails when a template context isn\'t provided', () => {
       assert.throws(() => dom.cloneTemplate('#tmpl-lh-audit-score'));
+    });
+
+    it('does not inject duplicate styles', () => {
+      const clone = dom.cloneTemplate('#tmpl-lh-gauge', dom.document());
+      const clone2 = dom.cloneTemplate('#tmpl-lh-gauge', dom.document());
+      assert.ok(clone.querySelector('style'));
+      assert.ok(!clone2.querySelector('style'));
     });
   });
 

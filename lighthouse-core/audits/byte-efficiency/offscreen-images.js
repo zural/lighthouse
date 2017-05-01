@@ -20,8 +20,7 @@
   */
 'use strict';
 
-const Audit = require('./byte-efficiency-audit');
-const TTIAudit = require('../time-to-interactive');
+const ByteEfficiencyAudit = require('./byte-efficiency-audit');
 const URL = require('../../lib/url-shim');
 
 const ALLOWABLE_OFFSCREEN_X = 100;
@@ -30,7 +29,7 @@ const ALLOWABLE_OFFSCREEN_Y = 200;
 const IGNORE_THRESHOLD_IN_BYTES = 2048;
 const IGNORE_THRESHOLD_IN_PERCENT = 75;
 
-class OffscreenImages extends Audit {
+class OffscreenImages extends ByteEfficiencyAudit {
   /**
    * @return {!AuditMeta}
    */
@@ -102,6 +101,7 @@ class OffscreenImages extends Audit {
   static audit_(artifacts) {
     const images = artifacts.ImageUsage;
     const viewportDimensions = artifacts.ViewportDimensions;
+    const trace = artifacts.traces[ByteEfficiencyAudit.DEFAULT_PASS];
 
     let debugString;
     const resultsMap = images.reduce((results, image) => {
@@ -124,8 +124,8 @@ class OffscreenImages extends Audit {
       return results;
     }, new Map());
 
-    return TTIAudit.audit(artifacts).then(ttiResult => {
-      const ttiTimestamp = ttiResult.extendedInfo.value.timestamps.timeToInteractive / 1000000;
+    return artifacts.requestFirstInteractive(trace).then(firstInteractive => {
+      const ttiTimestamp = firstInteractive.timestamp / 1000000;
       const results = Array.from(resultsMap.values()).filter(item => {
         const isWasteful = item.wastedBytes > IGNORE_THRESHOLD_IN_BYTES &&
             item.wastedPercent > IGNORE_THRESHOLD_IN_PERCENT;

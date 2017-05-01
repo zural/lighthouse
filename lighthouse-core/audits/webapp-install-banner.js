@@ -6,7 +6,7 @@
 
 'use strict';
 
-const Audit = require('./multi-check-audit');
+const MultiCheckAudit = require('./multi-check-audit');
 const SWAudit = require('./service-worker');
 
 /**
@@ -29,7 +29,7 @@ const SWAudit = require('./service-worker');
  *   * it doesn't consider the site engagement score (naturally)
  */
 
-class WebappInstallBanner extends Audit {
+class WebappInstallBanner extends MultiCheckAudit {
 
   /**
    * @return {!AuditMeta}
@@ -39,7 +39,7 @@ class WebappInstallBanner extends Audit {
       category: 'PWA',
       name: 'webapp-install-banner',
       description: 'User can be prompted to Install the Web App',
-      helpText: 'While users can manually add your site to their homescreen, the [prompt (aka app install banner)](https://developers.google.com/web/updates/2015/03/increasing-engagement-with-app-install-banners-in-chrome-for-android) will proactively prompt the user to install the app if the various requirements are met and the user has moderate engagement with your site.',
+      helpText: 'While users can manually add your site to their homescreen, the [prompt (aka app install banner)](https://developers.google.com/web/fundamentals/engage-and-retain/app-install-banners/) will proactively prompt the user to install the app if the various requirements are met and the user has moderate engagement with your site.',
       requiredArtifacts: ['URL', 'ServiceWorker', 'Manifest']
     };
   }

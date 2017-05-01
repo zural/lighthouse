@@ -19,7 +19,11 @@
 const path = require('path');
 
 const OUT_PATH = path.resolve(__dirname, 'out');
+const LIGHTHOUSE_RESULTS_FILENAME = 'lighthouse.json';
+const SCREENSHOTS_FILENAME = 'assets-0.screenshots.json';
 
 module.exports = {
-  OUT_PATH
+  OUT_PATH,
+  LIGHTHOUSE_RESULTS_FILENAME,
+  SCREENSHOTS_FILENAME
 };

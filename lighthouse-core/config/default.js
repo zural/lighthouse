@@ -69,6 +69,7 @@ module.exports = {
     "speed-index-metric",
     "estimated-input-latency",
     "consistently-interactive",
+    "first-interactive",
     "time-to-interactive",
     "user-timings",
     "critical-request-chains",
@@ -331,7 +332,7 @@ module.exports = {
   }, {
       "name": "Accessibility",
       "id": "accessibility",
-      "description": "These checks highlight opportunities to improve the accessibility of your app.",
+      "description": "These checks highlight opportunities to [improve the accessibility of your app](https://developers.google.com/web/fundamentals/accessibility).",
       "scored": false,
       "categorizable": true,
       "items": [{
@@ -617,7 +618,8 @@ module.exports = {
         {"id": "speed-index-metric", "weight": 1},
         {"id": "estimated-input-latency", "weight": 1},
         {"id": "time-to-interactive", "weight": 5},
-        {"id": "consistently-interactive", "weight": 3},
+        {"id": "consistently-interactive", "weight": 5},
+        {"id": "first-interactive", "weight": 5},
         {"id": "link-blocking-first-paint", "weight": 0},
         {"id": "script-blocking-first-paint", "weight": 0},
         // {"id": "unused-css-rules", "weight": 0},
@@ -632,7 +634,7 @@ module.exports = {
     },
     "accessibility": {
       "name": "Accessibility",
-      "description": "These audits validate that your app [works for all users](https://developers.google.com/web/fundamentals/accessibility/).",
+      "description": "These checks highlight opportunities to [improve the accessibility of your app](https://developers.google.com/web/fundamentals/accessibility).",
       "audits": [
         {"id": "accesskeys", "weight": 1},
         {"id": "aria-allowed-attr", "weight": 1},

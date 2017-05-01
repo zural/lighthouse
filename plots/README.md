@@ -1,5 +1,7 @@
 # Lighthouse Metrics Analysis
 
+Online at https://googlechrome.github.io/lighthouse/plots/
+
 For context and roadmap, please see issue:
 https://github.com/GoogleChrome/lighthouse/issues/1924
 
@@ -9,19 +11,20 @@ https://github.com/GoogleChrome/lighthouse/issues/1924
 
 You need to build lighthouse first.
 
-### Commands
+### Generating & viewing charts
 
 ```
 # View all commands
 $ cd plots
-$ npm run
+$ yarn run
 
 # Run lighthouse to collect metrics data
-$ npm run measure
+$ yarn measure
 
 # Analyze the data to generate a summary file (i.e. out/generatedResults.js)
-$ npm run analyze
+# This will launch the charts web page in the browser
+$ yarn analyze
 
-# View visualization
-# Open index.html in browser
+# If you need to view the charts later
+$ yarn open
 ```

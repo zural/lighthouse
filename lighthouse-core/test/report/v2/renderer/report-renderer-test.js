@@ -15,14 +15,17 @@
  */
 'use strict';
 
-/* eslint-env mocha, browser */
+/* eslint-env mocha */
 
 const assert = require('assert');
 const fs = require('fs');
 const jsdom = require('jsdom');
+const Util = require('../../../../report/v2/renderer/util.js');
 const URL = require('../../../../lib/url-shim');
 const DOM = require('../../../../report/v2/renderer/dom.js');
 const DetailsRenderer = require('../../../../report/v2/renderer/details-renderer.js');
+const ReportUIFeatures = require('../../../../report/v2/renderer/report-ui-features.js');
+const CategoryRenderer = require('../../../../report/v2/renderer/category-renderer.js');
 const ReportRenderer = require('../../../../report/v2/renderer/report-renderer.js');
 const sampleResults = require('../../../results/sample_v2.json');
 
@@ -33,91 +36,102 @@ describe('ReportRenderer V2', () => {
 
   before(() => {
     global.URL = URL;
+    global.Util = Util;
+    global.ReportUIFeatures = ReportUIFeatures;
+
+    // Stub out matchMedia for Node.
+    global.matchMedia = function() {
+      return {
+        addListener: function() {}
+      };
+    };
+
     const document = jsdom.jsdom(TEMPLATE_FILE);
+    global.self = document.defaultView;
+
     const dom = new DOM(document);
     const detailsRenderer = new DetailsRenderer(dom);
-    renderer = new ReportRenderer(dom, detailsRenderer);
+    const categoryRenderer = new CategoryRenderer(dom, detailsRenderer);
+    renderer = new ReportRenderer(dom, categoryRenderer);
   });
 
   after(() => {
+    global.self = undefined;
     global.URL = undefined;
+    global.Util = undefined;
+    global.ReportUIFeatures = undefined;
+    global.matchMedia = undefined;
   });
 
   describe('renderReport', () => {
     it('should render a report', () => {
-      const output = renderer.renderReport(sampleResults);
-      assert.ok(output.classList.contains('lh-report'));
+      const container = renderer._dom._document.body;
+      const output = renderer.renderReport(sampleResults, container);
+      assert.ok(container.contains(output), 'report appended to container');
+      assert.ok(output.classList.contains('lh-container'));
+      assert.ok(output.querySelector('.lh-header'), 'has a header');
+      assert.ok(output.querySelector('.lh-report'), 'has report body');
+      assert.equal(output.querySelectorAll('.lh-gauge').length,
+          sampleResults.reportCategories.length, 'renders category gauges');
+    });
+
+    it('renders additional reports by replacing the existing one', () => {
+      const container = renderer._dom._document.body;
+      const oldReport = renderer.renderReport(sampleResults, container);
+      const newReport = renderer.renderReport(sampleResults, container);
+      assert.ok(!container.contains(oldReport), 'old report was removed');
+      assert.ok(container.contains(newReport), 'new report appended to container');
     });
 
     it('should render an exception for invalid input', () => {
+      const container = renderer._dom._document.body;
       const output = renderer.renderReport({
         get reportCategories() {
           throw new Error();
         }
-      });
+      }, container);
       assert.ok(output.classList.contains('lh-exception'));
     });
 
-    it('renders an audit', () => {
-      const audit = sampleResults.reportCategories[0].audits[0];
-      const auditDOM = renderer._renderAudit(audit);
+    it('renders a header', () => {
+      const header = renderer._renderReportHeader(sampleResults);
+      assert.ok(header.querySelector('.lh-export'), 'contains export button');
 
-      const title = auditDOM.querySelector('.lh-score__title');
-      const description = auditDOM.querySelector('.lh-score__description');
-      const score = auditDOM.querySelector('.lh-score__value');
+      assert.ok(header.querySelector('.lh-config__timestamp').textContent.includes('Apr 5, 2017'),
+          'formats the generated datetime');
+      assert.equal(header.querySelector('.lh-metadata__url').textContent, sampleResults.url);
+      const url = header.querySelector('.lh-metadata__url');
+      assert.equal(url.textContent, sampleResults.url);
+      assert.equal(url.href, sampleResults.url);
 
-      assert.equal(title.textContent, audit.result.description);
-      assert.ok(description.querySelector('a'), 'audit help text contains coverted markdown links');
-      assert.equal(score.textContent, '0');
-      assert.ok(score.classList.contains('lh-score__value--fail'));
-      assert.ok(score.classList.contains(`lh-score__value--${audit.result.scoringMode}`));
+      // Check runtime settings were populated.
+      const enables = header.querySelectorAll('.lh-env__enabled');
+      const names = header.querySelectorAll('.lh-env__name');
+      const descriptions = header.querySelectorAll('.lh-env__description');
+      sampleResults.runtimeConfig.environment.forEach((env, i) => {
+        assert.equal(enables[i].textContent, env.enabled ? 'Enabled' : 'Disabled');
+        assert.equal(names[i].textContent, env.name);
+        assert.equal(descriptions[i].textContent, env.description);
+      });
     });
 
-    it('renders a category', () => {
-      const category = sampleResults.reportCategories[0];
-      const categoryDOM = renderer._renderCategory(category);
+    it('renders a left nav', () => {
+      const header = renderer._renderReportNav(sampleResults);
+      assert.equal(header.querySelectorAll('.lh-leftnav__item').length, 4);
 
-      const score = categoryDOM.querySelector('.lh-score');
-      const value = categoryDOM.querySelector('.lh-score  > .lh-score__value');
-      const title = score.querySelector('.lh-score__title');
-      const description = score.querySelector('.lh-score__description');
-
-      assert.deepEqual(score, score.firstElementChild, 'first child is a score');
-      assert.ok(value.classList.contains('lh-score__value--numeric'),
-                'category score is numeric');
-      assert.equal(value.textContent, Math.round(category.score), 'category score is rounded');
-      assert.equal(title.textContent, category.name, 'title is set');
-      assert.ok(description.querySelector('a'), 'description contains converted markdown links');
-
-      const audits = categoryDOM.querySelectorAll('.lh-category > .lh-audit, ' +
-          '.lh-category > .lh-passed-audits > .lh-audit');
-      assert.equal(audits.length, category.audits.length, 'renders correct number of audits');
-    });
-  });
-
-  describe('grouping passed/failed', () => {
-    it('separates audits in the DOM', () => {
-      const category = sampleResults.reportCategories[0];
-      const elem = renderer._renderCategory(category);
-      const passedAudits = elem.querySelectorAll('.lh-category > .lh-passed-audits > .lh-audit');
-      const failedAudits = elem.querySelectorAll('.lh-category > .lh-audit');
-
-      assert.equal(passedAudits.length + failedAudits.length, category.audits.length);
-      assert.equal(passedAudits.length, 4);
-      assert.equal(failedAudits.length, 7);
+      const categories = header.querySelectorAll('.leftnav-item__category');
+      const scores = header.querySelectorAll('.leftnav-item__score');
+      sampleResults.reportCategories.forEach((cat, i) => {
+        assert.equal(categories[i].textContent, cat.name);
+        assert.equal(scores[i].textContent, Math.round(Util.formatNumber(cat.score)));
+      });
     });
 
-    it('doesnt create a pased section if there were 0 passed', () => {
-      const category = JSON.parse(JSON.stringify(sampleResults.reportCategories[0]));
-      category.audits.forEach(audit => audit.score = 0);
-      const elem = renderer._renderCategory(category);
-      const passedAudits = elem.querySelectorAll('.lh-category > .lh-passed-audits > .lh-audit');
-      const failedAudits = elem.querySelectorAll('.lh-category > .lh-audit');
-
-      assert.equal(passedAudits.length, 0);
-      assert.equal(failedAudits.length, 11);
-
-      assert.equal(elem.querySelector('.lh-passed-audits-summary'), null);
+    it('renders a footer', () => {
+      const footer = renderer._renderReportFooter(sampleResults);
+      const footerContent = footer.querySelector('.lh-footer').textContent;
+      assert.ok(footerContent.includes('Generated by Lighthouse 1.6.0', 'includes lh version'));
+      assert.ok(footerContent.includes('Apr 5, 2017'), 'includes timestamp');
     });
   });
 
