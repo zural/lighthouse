@@ -38,15 +38,14 @@ class TotalByteWeight extends ByteEfficiencyAudit {
     return {
       category: 'Network',
       name: 'total-byte-weight',
-      optimalValue: this.bytesToKbString(OPTIMAL_VALUE),
+      optimalValue: `< ${this.bytesToKbString(OPTIMAL_VALUE)}`,
       description: 'Avoids enormous network payloads',
-      informative: true,
       helpText:
           'Network transfer size [costs users real dollars](https://whatdoesmysitecost.com/) ' +
           'and is [highly correlated](http://httparchive.org/interesting.php#onLoad) with long load times. ' +
           'Try to find ways to reduce the size of required files.',
       scoringMode: ByteEfficiencyAudit.SCORING_MODES.NUMERIC,
-      requiredArtifacts: ['networkRecords']
+      requiredArtifacts: ['devtoolsLogs']
     };
   }
 
@@ -55,53 +54,60 @@ class TotalByteWeight extends ByteEfficiencyAudit {
    * @return {!Promise<!AuditResult>}
    */
   static audit(artifacts) {
-    const networkRecords = artifacts.networkRecords[ByteEfficiencyAudit.DEFAULT_PASS];
-    return artifacts.requestNetworkThroughput(networkRecords).then(networkThroughput => {
-      let totalBytes = 0;
-      const results = networkRecords.reduce((prev, record) => {
-        // exclude data URIs since their size is reflected in other resources
-        if (record.scheme === 'data') {
-          return prev;
-        }
+    const devtoolsLogs = artifacts.devtoolsLogs[ByteEfficiencyAudit.DEFAULT_PASS];
+    return artifacts.requestNetworkRecords(devtoolsLogs).then(networkRecords => {
+      return artifacts.requestNetworkThroughput(networkRecords).then(networkThroughput => {
+        let totalBytes = 0;
+        let results = [];
+        networkRecords.forEach(record => {
+          // exclude data URIs since their size is reflected in other resources
+          if (record.scheme === 'data') return;
 
-        const result = {
-          url: URL.getDisplayName(record.url),
-          totalBytes: record.transferSize,
-          totalKb: this.bytesToKbString(record.transferSize),
-          totalMs: this.bytesToMsString(record.transferSize, networkThroughput),
-        };
+          const result = {
+            url: URL.getDisplayName(record.url),
+            totalBytes: record.transferSize,
+            totalKb: this.bytesToKbString(record.transferSize),
+            totalMs: this.bytesToMsString(record.transferSize, networkThroughput),
+          };
 
-        totalBytes += result.totalBytes;
-        prev.push(result);
-        return prev;
-      }, []).sort((itemA, itemB) => itemB.totalBytes - itemA.totalBytes).slice(0, 10);
+          totalBytes += result.totalBytes;
+          results.push(result);
+        });
+        results = results.sort((itemA, itemB) => itemB.totalBytes - itemA.totalBytes).slice(0, 10);
 
 
-      // Use the CDF of a log-normal distribution for scoring.
-      //   <= 1600KB: score≈100
-      //   4000KB: score=50
-      //   >= 9000KB: score≈0
-      const distribution = TracingProcessor.getLogNormalDistribution(
+        // Use the CDF of a log-normal distribution for scoring.
+        //   <= 1600KB: score≈100
+        //   4000KB: score=50
+        //   >= 9000KB: score≈0
+        const distribution = TracingProcessor.getLogNormalDistribution(
           SCORING_MEDIAN, SCORING_POINT_OF_DIMINISHING_RETURNS);
-      const score = 100 * distribution.computeComplementaryPercentile(totalBytes);
+        const score = 100 * distribution.computeComplementaryPercentile(totalBytes);
 
-      return {
-        rawValue: totalBytes,
-        optimalValue: this.meta.optimalValue,
-        displayValue: `Total size was ${ByteEfficiencyAudit.bytesToKbString(totalBytes)}`,
-        score: Math.round(Math.max(0, Math.min(score, 100))),
-        extendedInfo: {
-          formatter: Formatter.SUPPORTED_FORMATS.TABLE,
-          value: {
-            results,
-            tableHeadings: {
-              url: 'URL',
-              totalKb: 'Total Size',
-              totalMs: 'Transfer Time',
+        const headings = [
+          {key: 'url', itemType: 'url', text: 'URL'},
+          {key: 'totalKb', itemType: 'text', text: 'Total Size'},
+          {key: 'totalMs', itemType: 'text', text: 'Transfer Time'},
+        ];
+
+        const v1TableHeadings = ByteEfficiencyAudit.makeV1TableHeadings(headings);
+        const v2TableDetails = ByteEfficiencyAudit.makeV2TableDetails(headings, results);
+
+        return {
+          rawValue: totalBytes,
+          optimalValue: this.meta.optimalValue,
+          displayValue: `Total size was ${ByteEfficiencyAudit.bytesToKbString(totalBytes)}`,
+          score: Math.round(Math.max(0, Math.min(score, 100))),
+          extendedInfo: {
+            formatter: Formatter.SUPPORTED_FORMATS.TABLE,
+            value: {
+              results,
+              tableHeadings: v1TableHeadings
             }
-          }
-        }
-      };
+          },
+          details: v2TableDetails
+        };
+      });
     });
   }
 }

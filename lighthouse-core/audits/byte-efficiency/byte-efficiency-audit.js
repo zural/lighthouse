@@ -60,17 +60,18 @@ class UnusedBytes extends Audit {
    * @return {!Promise<!AuditResult>}
    */
   static audit(artifacts) {
-    const networkRecords = artifacts.networkRecords[Audit.DEFAULT_PASS];
-    return artifacts.requestNetworkThroughput(networkRecords).then(networkThroughput => {
-      return Promise.resolve(this.audit_(artifacts, networkRecords)).then(result => {
-        return this.createAuditResult(result, networkThroughput);
-      });
+    const devtoolsLogs = artifacts.devtoolsLogs[Audit.DEFAULT_PASS];
+    return artifacts.requestNetworkRecords(devtoolsLogs).then(networkRecords => {
+      return artifacts.requestNetworkThroughput(networkRecords).then(networkThroughput =>
+        Promise.resolve(this.audit_(artifacts, networkRecords)).then(result =>
+          this.createAuditResult(result, networkThroughput)
+        )
+      );
     });
   }
 
   /**
-   * @param {!{debugString: string=, passes: boolean=, tableHeadings: !Object,
-   *    results: !Array<!Object>}} result
+   * @param {!Audit.HeadingsResult} result
    * @param {number} networkThroughput
    * @return {!AuditResult}
    */
@@ -96,6 +97,9 @@ class UnusedBytes extends Audit {
       displayValue = `Potential savings of ${wastedKbDisplay} (~${wastedMsDisplay})`;
     }
 
+    const v1TableHeadings = Audit.makeV1TableHeadings(result.headings);
+    const v2TableDetails = Audit.makeV2TableDetails(result.headings, results);
+
     return {
       debugString,
       displayValue,
@@ -104,8 +108,9 @@ class UnusedBytes extends Audit {
           !!result.passes,
       extendedInfo: {
         formatter: Formatter.SUPPORTED_FORMATS.TABLE,
-        value: {results, tableHeadings: result.tableHeadings}
-      }
+        value: {results, tableHeadings: v1TableHeadings}
+      },
+      details: v2TableDetails
     };
   }
 

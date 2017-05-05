@@ -46,7 +46,7 @@ class UsesOptimizedImages extends ByteEfficiencyAudit {
         'The following images could have smaller file sizes when compressed with ' +
         '[WebP](https://developers.google.com/speed/webp/) or JPEG at 80 quality. ' +
         '[Learn more about image optimization](https://developers.google.com/web/fundamentals/performance/optimizing-content-efficiency/image-optimization).',
-      requiredArtifacts: ['OptimizedImages', 'networkRecords']
+      requiredArtifacts: ['OptimizedImages', 'devtoolsLogs']
     };
   }
 
@@ -63,8 +63,7 @@ class UsesOptimizedImages extends ByteEfficiencyAudit {
 
   /**
    * @param {!Artifacts} artifacts
-   * @return {{results: !Array<Object>, tableHeadings: Object,
-   *     passes: boolean=, debugString: string=}}
+   * @return {!Audit.HeadingsResult}
    */
   static audit_(artifacts) {
     const images = artifacts.OptimizedImages;
@@ -106,7 +105,7 @@ class UsesOptimizedImages extends ByteEfficiencyAudit {
       results.push({
         url,
         isCrossOrigin: !image.isSameOrigin,
-        preview: {url: image.url, mimeType: image.mimeType},
+        preview: {url: image.url, mimeType: image.mimeType, type: 'thumbnail'},
         totalBytes: image.originalSize,
         wastedBytes: webpSavings.bytes,
         webpSavings: this.toSavingsString(webpSavings.bytes, webpSavings.percent),
@@ -121,17 +120,19 @@ class UsesOptimizedImages extends ByteEfficiencyAudit {
       debugString = `Lighthouse was unable to decode some of your images: ${urls.join(', ')}`;
     }
 
+    const headings = [
+      {key: 'preview', itemType: 'thumbnail', text: ''},
+      {key: 'url', itemType: 'url', text: 'URL'},
+      {key: 'totalKb', itemType: 'text', text: 'Original'},
+      {key: 'webpSavings', itemType: 'text', text: 'Savings as WebP'},
+      {key: 'jpegSavings', itemType: 'text', text: 'Savings as JPEG'},
+    ];
+
     return {
       passes: hasAllEfficientImages && totalWastedBytes < TOTAL_WASTED_BYTES_THRESHOLD,
       debugString,
       results,
-      tableHeadings: {
-        preview: '',
-        url: 'URL',
-        totalKb: 'Original',
-        webpSavings: 'WebP Savings',
-        jpegSavings: 'JPEG Savings',
-      }
+      headings
     };
   }
 }

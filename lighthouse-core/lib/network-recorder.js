@@ -21,11 +21,15 @@ const EventEmitter = require('events').EventEmitter;
 const log = require('../lib/log.js');
 
 class NetworkRecorder extends EventEmitter {
-  constructor(recordArray, driver) {
+  /**
+   * Creates an instance of NetworkRecorder.
+   * @param {!Array} recordArray
+   */
+  constructor(recordArray) {
     super();
 
     this._records = recordArray;
-    this.networkManager = NetworkManager.createWithFakeTarget(driver);
+    this.networkManager = NetworkManager.createWithFakeTarget();
 
     this.startedRequestCount = 0;
     this.finishedRequestCount = 0;
@@ -34,14 +38,6 @@ class NetworkRecorder extends EventEmitter {
         this.onRequestStarted.bind(this));
     this.networkManager.addEventListener(this.EventTypes.RequestFinished,
         this.onRequestFinished.bind(this));
-
-    this.onRequestWillBeSent = this.onRequestWillBeSent.bind(this);
-    this.onRequestServedFromCache = this.onRequestServedFromCache.bind(this);
-    this.onResponseReceived = this.onResponseReceived.bind(this);
-    this.onDataReceived = this.onDataReceived.bind(this);
-    this.onLoadingFinished = this.onLoadingFinished.bind(this);
-    this.onLoadingFailed = this.onLoadingFailed.bind(this);
-    this.onResourceChangedPriority = this.onResourceChangedPriority.bind(this);
   }
 
   get EventTypes() {
@@ -144,26 +140,39 @@ class NetworkRecorder extends EventEmitter {
         data.newPriority, data.timestamp);
   }
 
-  static recordsFromLogs(logs) {
+  /**
+   * Routes network events to their handlers, so we can construct networkRecords
+   * @param {!string} method
+   * @param {!Object<string, *>=} params
+   */
+  dispatch(method, params) {
+    if (!method.startsWith('Network.')) {
+      return;
+    }
+
+    switch (method) {
+      case 'Network.requestWillBeSent': return this.onRequestWillBeSent(params);
+      case 'Network.requestServedFromCache': return this.onRequestServedFromCache(params);
+      case 'Network.responseReceived': return this.onResponseReceived(params);
+      case 'Network.dataReceived': return this.onDataReceived(params);
+      case 'Network.loadingFinished': return this.onLoadingFinished(params);
+      case 'Network.loadingFailed': return this.onLoadingFailed(params);
+      case 'Network.resourceChangedPriority': return this.onResourceChangedPriority(params);
+      default: return;
+    }
+  }
+
+  /**
+   * Construct network records from a log of devtools protocol messages.
+   * @param {!DevtoolsLog} devtoolsLog
+   * @return {!Array<!WebInspector.NetworkRequest>}
+   */
+  static recordsFromLogs(devtoolsLog) {
     const records = [];
     const nr = new NetworkRecorder(records);
-    const dispatcher = method => {
-      switch (method) {
-        case 'Network.requestWillBeSent': return nr.onRequestWillBeSent;
-        case 'Network.requestServedFromCache': return nr.onRequestServedFromCache;
-        case 'Network.responseReceived': return nr.onResponseReceived;
-        case 'Network.dataReceived': return nr.onDataReceived;
-        case 'Network.loadingFinished': return nr.onLoadingFinished;
-        case 'Network.loadingFailed': return nr.onLoadingFailed;
-        case 'Network.resourceChangedPriority': return nr.onResourceChangedPriority;
-        default: return () => {};
-      }
-    };
-
-    logs.forEach(networkEvent => {
-      dispatcher(networkEvent.method)(networkEvent.params);
+    devtoolsLog.forEach(message => {
+      nr.dispatch(message.method, message.params);
     });
-
     return records;
   }
 }

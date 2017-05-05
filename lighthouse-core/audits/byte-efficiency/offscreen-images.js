@@ -41,7 +41,7 @@ class OffscreenImages extends ByteEfficiencyAudit {
       informative: true,
       helpText: 'Images that are not above the fold should be lazily loaded after the page is ' +
         'interactive. Consider using the [IntersectionObserver](https://developers.google.com/web/updates/2016/04/intersectionobserver) API.',
-      requiredArtifacts: ['ImageUsage', 'ViewportDimensions', 'traces', 'networkRecords']
+      requiredArtifacts: ['ImageUsage', 'ViewportDimensions', 'traces', 'devtoolsLogs']
     };
   }
 
@@ -83,6 +83,7 @@ class OffscreenImages extends ByteEfficiencyAudit {
     return {
       url,
       preview: {
+        type: 'thumbnail',
         url: image.networkRecord.url,
         mimeType: image.networkRecord.mimeType
       },
@@ -95,8 +96,7 @@ class OffscreenImages extends ByteEfficiencyAudit {
 
   /**
    * @param {!Artifacts} artifacts
-   * @return {{results: !Array<Object>, tableHeadings: Object,
-   *     passes: boolean=, debugString: string=}}
+   * @return {!Audit.HeadingsResult}
    */
   static audit_(artifacts) {
     const images = artifacts.ImageUsage;
@@ -132,15 +132,18 @@ class OffscreenImages extends ByteEfficiencyAudit {
         const loadedEarly = item.requestStartTime < ttiTimestamp;
         return isWasteful && loadedEarly;
       });
+
+      const headings = [
+        {key: 'preview', itemType: 'thumbnail', text: ''},
+        {key: 'url', itemType: 'url', text: 'URL'},
+        {key: 'totalKb', itemType: 'text', text: 'Original'},
+        {key: 'potentialSavings', itemType: 'text', text: 'Potential Savings'},
+      ];
+
       return {
         debugString,
         results,
-        tableHeadings: {
-          preview: '',
-          url: 'URL',
-          totalKb: 'Original',
-          potentialSavings: 'Potential Savings',
-        }
+        headings,
       };
     });
   }
