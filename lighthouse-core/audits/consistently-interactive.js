@@ -44,7 +44,7 @@ class ConsistentlyInteractiveMetric extends Audit {
           'CPU is idle for a prolonged period.',
       optimalValue: SCORING_TARGET.toLocaleString() + 'ms',
       scoringMode: Audit.SCORING_MODES.NUMERIC,
-      requiredArtifacts: ['traces', 'networkRecords']
+      requiredArtifacts: ['traces', 'devtoolsLogs']
     };
   }
 
@@ -197,14 +197,15 @@ class ConsistentlyInteractiveMetric extends Audit {
    */
   static audit(artifacts) {
     const trace = artifacts.traces[Audit.DEFAULT_PASS];
-    const networkRecords = artifacts.networkRecords[Audit.DEFAULT_PASS];
-    const computedTraceArtifacts = [
+    const devtoolsLog = artifacts.devtoolsLogs[Audit.DEFAULT_PASS];
+    const computedArtifacts = [
+      artifacts.requestNetworkRecords(devtoolsLog),
       artifacts.requestTracingModel(trace),
       artifacts.requestTraceOfTab(trace),
     ];
 
-    return Promise.all(computedTraceArtifacts)
-      .then(([traceModel, traceOfTab]) => {
+    return Promise.all(computedArtifacts)
+      .then(([networkRecords, traceModel, traceOfTab]) => {
         if (!traceOfTab.timestamps.firstMeaningfulPaint) {
           throw new Error('No firstMeaningfulPaint found in trace.');
         }
@@ -219,8 +220,8 @@ class ConsistentlyInteractiveMetric extends Audit {
           cpuQuietPeriod.start,
           traceOfTab.timestamps.firstMeaningfulPaint,
           traceOfTab.timestamps.domContentLoaded
-        );
-        const timeInMs = timestamp - traceOfTab.timestamps.navigationStart;
+        ) * 1000;
+        const timeInMs = (timestamp - traceOfTab.timestamps.navigationStart * 1000) / 1000;
         const extendedInfo = Object.assign(quietPeriodInfo, {timestamp, timeInMs});
 
         let score = 100 * distribution.computeComplementaryPercentile(timeInMs);

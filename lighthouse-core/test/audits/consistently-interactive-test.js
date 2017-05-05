@@ -15,8 +15,12 @@
  */
 'use strict';
 
-const TimeToInteractive = require('../../audits/consistently-interactive.js');
+const ConsistentlyInteractive = require('../../audits/consistently-interactive.js');
+const Runner = require('../../runner.js');
 const assert = require('assert');
+
+const acceptableTrace = require('../fixtures/traces/progressive-app-m60.json');
+const acceptableDevToolsLog = require('../fixtures/traces/progressive-app-m60.devtools.log.json');
 
 function generateNetworkRecords(records, navStart) {
   return records.map(item => {
@@ -29,6 +33,23 @@ function generateNetworkRecords(records, navStart) {
 
 /* eslint-env mocha */
 describe('Performance: consistently-interactive audit', () => {
+  it('should compute consistently interactive', () => {
+    const artifacts = Object.assign({
+      traces: {
+        [ConsistentlyInteractive.DEFAULT_PASS]: acceptableTrace
+      },
+      devtoolsLogs: {
+        [ConsistentlyInteractive.DEFAULT_PASS]: acceptableDevToolsLog
+      },
+    }, Runner.instantiateComputedArtifacts());
+
+    return ConsistentlyInteractive.audit(artifacts).then(output => {
+      assert.equal(output.score, 99);
+      assert.equal(Math.round(output.rawValue), 1587);
+      assert.equal(output.displayValue, '1,590ms');
+    });
+  });
+
   describe('#findOverlappingQuietPeriods', () => {
     it('should return entire range when no activity is present', () => {
       const navigationStart = 220023532;
@@ -39,7 +60,7 @@ describe('Performance: consistently-interactive audit', () => {
       const cpu = [];
       const network = generateNetworkRecords([], navigationStart);
 
-      const result = TimeToInteractive.findOverlappingQuietPeriods(cpu, network, traceOfTab);
+      const result = ConsistentlyInteractive.findOverlappingQuietPeriods(cpu, network, traceOfTab);
       assert.deepEqual(result.cpuQuietPeriod, {start: 0, end: traceEnd});
       assert.deepEqual(result.networkQuietPeriod, {start: 0, end: traceEnd});
     });
@@ -54,7 +75,7 @@ describe('Performance: consistently-interactive audit', () => {
       const network = generateNetworkRecords([], navigationStart);
 
       assert.throws(() => {
-        TimeToInteractive.findOverlappingQuietPeriods(cpu, network, traceOfTab);
+        ConsistentlyInteractive.findOverlappingQuietPeriods(cpu, network, traceOfTab);
       }, /did not quiet/);
     });
 
@@ -73,7 +94,7 @@ describe('Performance: consistently-interactive audit', () => {
       ], navigationStart);
 
       assert.throws(() => {
-        TimeToInteractive.findOverlappingQuietPeriods(cpu, network, traceOfTab);
+        ConsistentlyInteractive.findOverlappingQuietPeriods(cpu, network, traceOfTab);
       }, /Network did not quiet/);
     });
 
@@ -91,7 +112,7 @@ describe('Performance: consistently-interactive audit', () => {
       ], navigationStart);
 
       assert.throws(() => {
-        TimeToInteractive.findOverlappingQuietPeriods(cpu, network, traceOfTab);
+        ConsistentlyInteractive.findOverlappingQuietPeriods(cpu, network, traceOfTab);
       }, /CPU did not quiet/);
     });
 
@@ -129,7 +150,7 @@ describe('Performance: consistently-interactive audit', () => {
         // final quiet period
       ], navigationStart);
 
-      const result = TimeToInteractive.findOverlappingQuietPeriods(cpu, network, traceOfTab);
+      const result = ConsistentlyInteractive.findOverlappingQuietPeriods(cpu, network, traceOfTab);
       assert.deepEqual(result.cpuQuietPeriod, {start: 34000 + navigationStart, end: traceEnd});
       assert.deepEqual(result.networkQuietPeriod, {start: 32000 + navigationStart, end: traceEnd});
       assert.equal(result.cpuQuietPeriods.length, 3);
