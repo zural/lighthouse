@@ -42,10 +42,11 @@ class Util {
   /**
    * Format number.
    * @param {number} number
+   * @param {number} decimalPlaces
    * @return {string}
    */
-  static formatNumber(number) {
-    return number.toLocaleString(undefined, {maximumFractionDigits: 1});
+  static formatNumber(number, decimalPlaces = 1) {
+    return number.toLocaleString(undefined, {maximumFractionDigits: decimalPlaces});
   }
 
   /**

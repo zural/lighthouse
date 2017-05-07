@@ -606,7 +606,7 @@ summary.lh-passed-audits-summary::-webkit-details-marker {
     align-items: center;
     margin: 4px 0 2px;
     border: 2px solid transparent;
-    box-shadow: 0 0 3px #bbb;
+    box-shadow: 0 0 3px #bbb, 2px 1px 1px -1px #7c80a0;
 }
 
 .lh-filmstrip .frame .thumbnail img {

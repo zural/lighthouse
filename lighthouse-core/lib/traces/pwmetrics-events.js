@@ -119,7 +119,7 @@ class Metrics {
         }
       },
       {
-        name: 'Visually Complete 100%',
+        name: 'Visually Complete',
         id: 'vc100',
         getTs: auditResults => {
           const siExt = auditResults['speed-index-metric'].extendedInfo;

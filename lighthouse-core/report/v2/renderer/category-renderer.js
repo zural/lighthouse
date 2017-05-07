@@ -312,8 +312,9 @@ class CategoryRenderer {
     const artifacts = this._artifacts;
     const timelineElement = this._renderPerfTimeline(metricAudits, artifacts);
     const metricsDescEl = metricAuditsEl.querySelector(':scope > .lh-audit-group__description');
-    if (metricsDescEl) console.log('wtffff');
-    metricsDescEl.parentElement.insertBefore(timelineElement, metricsDescEl.nextSibling);
+    if (timelineElement && metricsDescEl) {
+      metricsDescEl.parentElement.insertBefore(timelineElement, metricsDescEl.nextSibling);
+    }
 
     const hintAudits = category.audits
         .filter(audit => audit.group === 'perf-hint' && audit.score < 100)
@@ -390,7 +391,8 @@ class CategoryRenderer {
     ];
 
     const timeSpan = Math.max(...markers.map(marker => marker.value));
-    const screenshots = tracePass.traceEvents.filter(e => e.cat === 'disabled-by-default-devtools.screenshot');
+    const screenshots = tracePass.traceEvents.filter(e =>
+        e.cat === 'disabled-by-default-devtools.screenshot');
     const timelineElement = this._dom.createElement('div', 'lh-timeline');
     const filmStripElement = this._dom.createChildOf(timelineElement, 'div', 'lh-filmstrip');
 
@@ -405,7 +407,8 @@ class CategoryRenderer {
           frameForTime = e.args.snapshot;
       }
       const frame = this._dom.createChildOf(filmStripElement, 'div', 'frame');
-      this._dom.createChildOf(frame, 'div', 'time').textContent = (time + timeStep);
+      this._dom.createChildOf(frame, 'div', 'time').textContent =
+          Util.formatNumber(time + timeStep, 0);
 
       const thumbnail = this._dom.createChildOf(frame, 'div', 'thumbnail');
       if (frameForTime) {
@@ -419,7 +422,8 @@ class CategoryRenderer {
       this._dom.createChildOf(markerElement, 'div', 'lh-timeline-bar').style.width =
           (100 * (marker.value / timeSpan) | 0) + '%';
       this._dom.createChildOf(markerElement, 'span').textContent = `${marker.title}: `;
-      this._dom.createChildOf(markerElement, 'span', 'lh-timeline-subtitle').textContent = (marker.value);
+      this._dom.createChildOf(markerElement, 'span', 'lh-timeline-subtitle').textContent =
+          Util.formatNumber(marker.value, 0) + '\xa0ms';
     }
 
     return timelineElement;

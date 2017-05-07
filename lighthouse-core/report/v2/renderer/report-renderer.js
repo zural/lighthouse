@@ -19,13 +19,10 @@
  * @fileoverview The entry point for rendering the Lighthouse report based on the JSON output.
  *    This file is injected into the report HTML along with the JSON report.
  *
- * Dummy text for ensuring report robustness: \u003c/script> pre$`post %%LIGHTHOUSE_JSON%%
+ * Dummy text for ensuring report robustness: </script> pre$`post %%LIGHTHOUSE_JSON%%
  */
 
-/* globals self, Util, Common */
-self.Common = {
-  UIString: s => s
-};
+/* globals self, Util */
 
 class ReportRenderer {
   /**
@@ -240,4 +237,3 @@ ReportRenderer.GroupJSON; // eslint-disable-line no-unused-expressions
  * }}
  */
 ReportRenderer.ReportJSON; // eslint-disable-line no-unused-expressions
-

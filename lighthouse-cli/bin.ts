@@ -333,7 +333,7 @@ export async function runLighthouse(url: string,
     // Filter out artifacts except for screenshots in traces to minimize report size.
     var traces = results.artifacts.traces;
     for (var pass in traces)
-      traces[pass]['traceEvents'] = traces[pass]['traceEvents'].filter(e => e['cat'] === 'disabled-by-default-devtools.screenshot');
+      traces[pass]['traceEvents'] = traces[pass]['traceEvents'].filter((e: {cat: string}) => e['cat'] === 'disabled-by-default-devtools.screenshot');
     results.artifacts = { traces: traces };
 
     const artifacts = results.artifacts;

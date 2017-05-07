@@ -19,7 +19,8 @@
 const fs = require('fs');
 
 const readFile = filename => fs.readFileSync(__dirname + filename, 'utf8');
-const readScript = filename => '<script>' + readFile(filename).replace(/<\//g, '\\u003c/') +
+const sanitizeScript = src => src.replace(/<\//g, '\\u003c/');
+const readScript = filename => '<script>' + sanitizeScript(readFile(filename)) +
     `\n//# sourceURL=file://${__dirname}${filename} \n</script>`;
 
 const REPORT_TEMPLATE = readFile('/report-template.html');
@@ -32,7 +33,7 @@ const REPORT_JAVASCRIPT = [
   readScript('/renderer/report-ui-features.js'),
   readScript('/renderer/category-renderer.js'),
   readScript('/renderer/report-renderer.js'),
-].join('\n');
+].join('\n\n');
 const REPORT_CSS = readFile('/report-styles.css');
 const REPORT_TEMPLATES = readFile('/templates.html');
 
@@ -139,7 +140,6 @@ class ReportGeneratorV2 {
     const sanitizedJson = JSON.stringify(reportAsJson).replace(/</g, '\\u003c');
     const sanitizedJavascript = REPORT_JAVASCRIPT;
 
-    // console.error(sanitizedJavascript.slice(0, 6000));
     return ReportGeneratorV2.replaceStrings(REPORT_TEMPLATE, [
       {search: '%%LIGHTHOUSE_JSON%%', replacement: sanitizedJson},
       {search: '%%LIGHTHOUSE_JAVASCRIPT%%', replacement: sanitizedJavascript},
