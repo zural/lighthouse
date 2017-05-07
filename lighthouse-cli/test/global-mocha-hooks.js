@@ -12,17 +12,16 @@ let currTest;
 
 // monkey-patch all assert.* methods
 Object.keys(assert)
-  .filter(key => typeof assert[key] === 'function')
-  .forEach(key => {
-    const _origFn = assert[key];
-    assert[key] = function(...args) {
-      if (currTest) {
-        currTest._assertions++;
-      }
-      return _origFn.apply(this, args);
-    };
-  }
-);
+    .filter(key => typeof assert[key] === 'function')
+    .forEach(key => {
+      const _origFn = assert[key];
+      assert[key] = function(...args) {
+        if (currTest) {
+          currTest._assertions++;
+        }
+        return _origFn.apply(this, args);
+      };
+    });
 
 // store the count of assertions on each test's state object
 beforeEach(function() {
@@ -33,8 +32,8 @@ beforeEach(function() {
 
 afterEach(function() {
   if (currTest._assertions === 0) {
-    throw new Error(`ZERO assertions in test: "${currTest.title}"\n${currTest.file}`);
+    throw new Error(
+        `ZERO assertions in test: "${currTest.title}"\n${currTest.file}`);
   }
   currTest = null;
 });
-

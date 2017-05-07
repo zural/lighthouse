@@ -23,8 +23,13 @@
  *   'html': An HTML report
  *   'domhtml': An HTML report rendered client-side with DOM elements
  */
-enum OutputMode { json, html, domhtml };
-type Mode = 'json' | 'html' | 'domhtml';
+enum OutputMode {
+  json,
+  html,
+  domhtml
+}
+;
+type Mode = 'json'|'html'|'domhtml';
 
 import {Results} from './types/types';
 
@@ -32,7 +37,6 @@ const fs = require('fs');
 const ReportGenerator = require('../lighthouse-core/report/report-generator');
 const ReportGeneratorV2 = require('../lighthouse-core/report/v2/report-generator');
 const log = require('../lighthouse-core/lib/log');
-
 
 /**
  * Verify output path to use, either stdout or a file path.
@@ -108,23 +112,27 @@ function write(results: Results, mode: Mode, path: string): Promise<Results> {
 
     const output = createOutput(results, (<any>OutputMode)[mode]);
 
-    // Testing stdout is out of scope, and doesn't really achieve much besides testing Node,
+    // Testing stdout is out of scope, and doesn't really achieve much besides
+    // testing Node,
     // so we will skip this chunk of the code.
     /* istanbul ignore if */
     if (outputPath === 'stdout') {
       return writeToStdout(output).then(_ => resolve(results));
     }
 
-    return writeFile(outputPath, output, (<any>OutputMode)[mode]).then(_ => {
-      resolve(results);
-    }).catch(err => reject(err));
+    return writeFile(outputPath, output, (<any>OutputMode)[mode])
+        .then(_ => {
+          resolve(results);
+        })
+        .catch(err => reject(err));
   });
 }
 
-function GetValidOutputOptions():Array<Mode> {
-  return [OutputMode[OutputMode.json] as Mode,
-          OutputMode[OutputMode.html] as Mode,
-          OutputMode[OutputMode.domhtml] as Mode];
+function GetValidOutputOptions(): Array<Mode> {
+  return [
+    OutputMode[OutputMode.json] as Mode, OutputMode[OutputMode.html] as Mode,
+    OutputMode[OutputMode.domhtml] as Mode
+  ];
 }
 
 export {
