@@ -209,6 +209,13 @@ class CategoryRenderer {
   }
 
   /**
+   * @param {*} artifacts
+   */
+  setArtifacts(artifacts) {
+    this._artifacts = artifacts;
+  }
+
+  /**
    * @param {!Document|!Element} context
    */
   setTemplateContext(context) {
@@ -302,7 +309,11 @@ class CategoryRenderer {
     metricAuditsEl.open = true;
     element.appendChild(metricAuditsEl);
 
-
+    const artifacts = this._artifacts;
+    const timelineElement = this._renderPerfTimeline(metricAudits, artifacts);
+    const metricsDescEl = metricAuditsEl.querySelector(':scope > .lh-audit-group__description');
+    if (metricsDescEl) console.log('wtffff');
+    metricsDescEl.parentElement.insertBefore(timelineElement, metricsDescEl.nextSibling);
 
     const hintAudits = category.audits
         .filter(audit => audit.group === 'perf-hint' && audit.score < 100)
@@ -335,6 +346,83 @@ class CategoryRenderer {
     const passedElem = this._renderPassedAuditsSection(passedElements);
     element.appendChild(passedElem);
     return element;
+  }
+
+  /**
+   * Render a screenshot filmstrip and metrics bars
+   * @param {!Array<!ReportRenderer.AuditJSON>} metricAudits
+   * @param {*} artifacts
+   * @return {?Element}
+   */
+  _renderPerfTimeline(metricAudits, artifacts) {
+    if (!artifacts)
+      return;
+    const tracePass = artifacts['traces'] ? artifacts['traces']['defaultPass'] : null;
+    if (!tracePass)
+      return;
+
+    const fmp = metricAudits.find(a => a.id === 'first-meaningful-paint').result;
+    if (!fmp || !fmp['extendedInfo'])
+      return;
+
+    const tti = metricAudits.find(a => a.id === 'time-to-interactive').result;
+    if (!tti || !tti['extendedInfo'])
+      return;
+
+    const navStart = fmp['extendedInfo']['value']['timestamps']['navStart'];
+    const markers = [
+      {
+        title: 'First contentful paint',
+        value: (fmp['extendedInfo']['value']['timestamps']['fCP'] - navStart) / 1000
+      },
+      {
+        title: 'First meaningful paint',
+        value: (fmp['extendedInfo']['value']['timestamps']['fMP'] - navStart) / 1000
+      },
+      {
+        title: 'Time to interactive',
+        value: (tti['extendedInfo']['value']['timestamps']['timeToInteractive'] - navStart) / 1000
+      },
+      {
+        title: 'Visually ready',
+        value: (tti['extendedInfo']['value']['timestamps']['visuallyReady'] - navStart) / 1000
+      }
+    ];
+
+    const timeSpan = Math.max(...markers.map(marker => marker.value));
+    const screenshots = tracePass.traceEvents.filter(e => e.cat === 'disabled-by-default-devtools.screenshot');
+    const timelineElement = this._dom.createElement('div', 'lh-timeline');
+    const filmStripElement = this._dom.createChildOf(timelineElement, 'div', 'lh-filmstrip');
+
+    const numberOfFrames = 8;
+    const roundToMs = 100;
+    const timeStep = (Math.ceil(timeSpan / numberOfFrames / roundToMs)) * roundToMs;
+
+    for (let time = 0; time < timeSpan; time += timeStep) {
+      let frameForTime = null;
+      for (const e of screenshots) {
+        if ((e.ts - navStart) / 1000 < time + timeStep)
+          frameForTime = e.args.snapshot;
+      }
+      const frame = this._dom.createChildOf(filmStripElement, 'div', 'frame');
+      this._dom.createChildOf(frame, 'div', 'time').textContent = (time + timeStep);
+
+      const thumbnail = this._dom.createChildOf(frame, 'div', 'thumbnail');
+      if (frameForTime) {
+        const img = this._dom.createChildOf(thumbnail, 'img');
+        img.src = 'data:image/jpg;base64,' + frameForTime;
+      }
+    }
+
+    for (const marker of markers) {
+      const markerElement = this._dom.createChildOf(timelineElement, 'div', 'lh-timeline-marker');
+      this._dom.createChildOf(markerElement, 'div', 'lh-timeline-bar').style.width =
+          (100 * (marker.value / timeSpan) | 0) + '%';
+      this._dom.createChildOf(markerElement, 'span').textContent = `${marker.title}: `;
+      this._dom.createChildOf(markerElement, 'span', 'lh-timeline-subtitle').textContent = (marker.value);
+    }
+
+    return timelineElement;
   }
 
   /**
