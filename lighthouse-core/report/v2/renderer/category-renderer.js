@@ -302,6 +302,8 @@ class CategoryRenderer {
     metricAuditsEl.open = true;
     element.appendChild(metricAuditsEl);
 
+
+
     const hintAudits = category.audits
         .filter(audit => audit.group === 'perf-hint' && audit.score < 100)
         .sort((auditA, auditB) => auditB.result.rawValue - auditA.result.rawValue);

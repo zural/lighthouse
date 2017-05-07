@@ -18,19 +18,23 @@
 
 const fs = require('fs');
 
-const REPORT_TEMPLATE = fs.readFileSync(__dirname + '/report-template.html', 'utf8');
+const readFile = filename => fs.readFileSync(__dirname + filename, 'utf8');
+const readScript = filename => '<script>' + readFile(filename).replace(/<\//g, '\\u003c/') +
+    `\n//# sourceURL=file://${__dirname}${filename} \n</script>`;
+
+const REPORT_TEMPLATE = readFile('/report-template.html');
 const REPORT_JAVASCRIPT = [
-  fs.readFileSync(__dirname + '/renderer/util.js', 'utf8'),
-  fs.readFileSync(__dirname + '/renderer/dom.js', 'utf8'),
-  fs.readFileSync(__dirname + '/renderer/details-renderer.js', 'utf8'),
-  fs.readFileSync(__dirname + '/../../lib/file-namer.js', 'utf8'),
-  fs.readFileSync(__dirname + '/renderer/logger.js', 'utf8'),
-  fs.readFileSync(__dirname + '/renderer/report-ui-features.js', 'utf8'),
-  fs.readFileSync(__dirname + '/renderer/category-renderer.js', 'utf8'),
-  fs.readFileSync(__dirname + '/renderer/report-renderer.js', 'utf8'),
-].join(';\n');
-const REPORT_CSS = fs.readFileSync(__dirname + '/report-styles.css', 'utf8');
-const REPORT_TEMPLATES = fs.readFileSync(__dirname + '/templates.html', 'utf8');
+  readScript('/renderer/util.js'),
+  readScript('/renderer/dom.js'),
+  readScript('/renderer/details-renderer.js'),
+  readScript('/../../lib/file-namer.js'),
+  readScript('/renderer/logger.js'),
+  readScript('/renderer/report-ui-features.js'),
+  readScript('/renderer/category-renderer.js'),
+  readScript('/renderer/report-renderer.js'),
+].join('\n');
+const REPORT_CSS = readFile('/report-styles.css');
+const REPORT_TEMPLATES = readFile('/templates.html');
 
 class ReportGeneratorV2 {
   /**
@@ -133,8 +137,9 @@ class ReportGeneratorV2 {
    */
   generateReportHtml(reportAsJson) {
     const sanitizedJson = JSON.stringify(reportAsJson).replace(/</g, '\\u003c');
-    const sanitizedJavascript = REPORT_JAVASCRIPT.replace(/<\//g, '\\u003c/');
+    const sanitizedJavascript = REPORT_JAVASCRIPT;
 
+    // console.error(sanitizedJavascript.slice(0, 6000));
     return ReportGeneratorV2.replaceStrings(REPORT_TEMPLATE, [
       {search: '%%LIGHTHOUSE_JSON%%', replacement: sanitizedJson},
       {search: '%%LIGHTHOUSE_JAVASCRIPT%%', replacement: sanitizedJavascript},

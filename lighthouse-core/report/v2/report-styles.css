@@ -574,6 +574,64 @@ summary.lh-passed-audits-summary::-webkit-details-marker {
   z-index: 3;
 }
 
+.lh-timeline {
+    display: flex;
+    flex-direction: column;
+    border-top: 1px solid #ccc;
+    border-bottom: 1px solid #ccc;
+    padding: 5px 0;
+    margin: 5px 0;
+    overflow: auto;
+}
+
+.lh-filmstrip {
+    display: flex;
+    flex-direction: row;
+    margin-bottom: 20px;
+}
+
+.lh-filmstrip .frame {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 4px;
+    flex: none;
+}
+
+.lh-filmstrip .frame .thumbnail {
+    display: flex;
+    width: 54px;
+    height: 100%;
+    flex-direction: row;
+    align-items: center;
+    margin: 4px 0 2px;
+    border: 2px solid transparent;
+    box-shadow: 0 0 3px #bbb;
+}
+
+.lh-filmstrip .frame .thumbnail img {
+    height: auto;
+    width: 50px;
+    flex: 0 0 auto;
+}
+
+.lh-filmstrip .frame .time {
+    margin-top: 2px;
+}
+
+.lh-timeline-marker {
+    margin: 4px 0 6px;
+    width: calc(68px * 7);
+}
+
+.lh-timeline-subtitle {
+    color: #01579B;
+}
+
+.lh-timeline-bar {
+    border-top: 4px solid #03A9F4;
+}
+
 #lh-log.show {
   opacity: 1;
   transform: translateY(0);

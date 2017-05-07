@@ -19,10 +19,13 @@
  * @fileoverview The entry point for rendering the Lighthouse report based on the JSON output.
  *    This file is injected into the report HTML along with the JSON report.
  *
- * Dummy text for ensuring report robustness: </script> pre$`post %%LIGHTHOUSE_JSON%%
+ * Dummy text for ensuring report robustness: \u003c/script> pre$`post %%LIGHTHOUSE_JSON%%
  */
 
-/* globals self, Util */
+/* globals self, Util, Common */
+self.Common = {
+  UIString: s => s
+};
 
 class ReportRenderer {
   /**
@@ -48,6 +51,7 @@ class ReportRenderer {
   renderReport(report, container) {
     container.textContent = ''; // Remove previous report.
     const element = container.appendChild(this._renderReport(report));
+    this._renderPerfTimeline(report, container);
 
     // Hook in JS features and page-level event listeners after the report
     // is in the document.
@@ -158,6 +162,79 @@ class ReportRenderer {
 
     return container;
   }
+
+  _renderPerfTimeline(report, container) {
+    const performanceScoreElement = container.querySelector('.lh-category[id=performance] .lh-score');
+    const artifacts = report['artifacts'];
+    if (!performanceScoreElement || !artifacts)
+      return;
+    const tracePass = artifacts['traces'] ? artifacts['traces']['defaultPass'] : null;
+    if (!tracePass)
+      return;
+
+    const fmp = report['audits']['first-meaningful-paint'];
+    if (!fmp || !fmp['extendedInfo'])
+      return;
+
+    const tti = report['audits']['time-to-interactive'];
+    if (!tti || !tti['extendedInfo'])
+      return;
+
+    const navStart = fmp['extendedInfo']['value']['timestamps']['navStart'];
+    const markers = [
+      {
+        title: 'First contentful paint',
+        value: (fmp['extendedInfo']['value']['timestamps']['fCP'] - navStart) / 1000
+      },
+      {
+        title: 'First meaningful paint',
+        value: (fmp['extendedInfo']['value']['timestamps']['fMP'] - navStart) / 1000
+      },
+      {
+        title: 'Time to interactive',
+        value: (tti['extendedInfo']['value']['timestamps']['timeToInteractive'] - navStart) / 1000
+      },
+      {
+        title: 'Visually ready',
+        value: (tti['extendedInfo']['value']['timestamps']['visuallyReady'] - navStart) / 1000
+      }
+    ];
+
+    const timeSpan = Math.max(...markers.map(marker => marker.value));
+    const screenshots = tracePass.traceEvents.filter(e => e.cat === 'disabled-by-default-devtools.screenshot');
+    const timelineElement = this._dom.createElement('div', 'lh-timeline');
+    const filmStripElement = this._dom.createChildOf(timelineElement, 'div', 'lh-filmstrip');
+
+    const numberOfFrames = 8;
+    const roundToMs = 100;
+    const timeStep = (Math.ceil(timeSpan / numberOfFrames / roundToMs)) * roundToMs;
+
+    for (let time = 0; time < timeSpan; time += timeStep) {
+      let frameForTime = null;
+      for (const e of screenshots) {
+        if ((e.ts - navStart) / 1000 < time + timeStep)
+          frameForTime = e.args.snapshot;
+      }
+      const frame = this._dom.createChildOf(filmStripElement, 'div', 'frame');
+      this._dom.createChildOf(frame, 'div', 'time').textContent = (time + timeStep);
+
+      const thumbnail = this._dom.createChildOf(frame, 'div', 'thumbnail');
+      if (frameForTime) {
+        const img = this._dom.createChildOf(thumbnail, 'img');
+        img.src = 'data:image/jpg;base64,' + frameForTime;
+      }
+    }
+
+    for (const marker of markers) {
+      const markerElement = this._dom.createChildOf(timelineElement, 'div', 'lh-timeline-marker');
+      this._dom.createChildOf(markerElement, 'div', 'lh-timeline-bar').style.width =
+          (100 * (marker.value / timeSpan) | 0) + '%';
+      this._dom.createChildOf(markerElement, 'span').textContent = `${marker.title}: `;
+      this._dom.createChildOf(markerElement, 'span', 'lh-timeline-subtitle').textContent = (marker.value);
+    }
+
+    performanceScoreElement.parentElement.insertBefore(timelineElement, performanceScoreElement.nextSibling);
+  }
 }
 
 if (typeof module !== 'undefined' && module.exports) {
@@ -226,3 +303,4 @@ ReportRenderer.GroupJSON; // eslint-disable-line no-unused-expressions
  * }}
  */
 ReportRenderer.ReportJSON; // eslint-disable-line no-unused-expressions
+
