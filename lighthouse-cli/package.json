@@ -6,6 +6,7 @@
     "build": "tsc",
     "dev": "tsc -w",
     "test": "mocha --reporter dot test/**/*-test.js",
+    "test-formatting": "./test/check-formatting.py",
     "format": "clang-format -i -style=file *.ts **/*.ts"
   },
   "devDependencies": {
