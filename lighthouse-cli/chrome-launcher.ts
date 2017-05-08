@@ -67,12 +67,10 @@ export class ChromeLauncher {
       '--disable-translate',
       // Disable all chrome extensions entirely
       '--disable-extensions',
-      // Disable various background network services, including extension
-      // updating,
+      // Disable various background network services, including extension updating,
       //   safe browsing service, upgrade detector, translate, UMA
       '--disable-background-networking',
-      // Disable fetching safebrowsing lists, likely redundant due to
-      // disable-background-networking
+      // Disable fetching safebrowsing lists, likely redundant due to disable-background-networking
       '--safebrowsing-disable-auto-update',
       // Disable syncing to a Google account
       '--disable-sync',
@@ -114,8 +112,7 @@ export class ChromeLauncher {
     this.outFile = fs.openSync(`${this.TMP_PROFILE_DIR}/chrome-out.log`, 'a');
     this.errFile = fs.openSync(`${this.TMP_PROFILE_DIR}/chrome-err.log`, 'a');
 
-    // fix for Node4
-    // you can't pass a fd to fs.writeFileSync
+    // fix for Node4: you can't pass a fd to fs.writeFileSync
     this.pidFile = `${this.TMP_PROFILE_DIR}/chrome.pid`;
 
     log.verbose('ChromeLauncher', `created ${this.TMP_PROFILE_DIR}`);

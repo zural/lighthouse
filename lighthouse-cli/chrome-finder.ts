@@ -77,8 +77,7 @@ export function linux() {
     installations.push(process.env.LIGHTHOUSE_CHROMIUM_PATH);
   }
 
-  // 2. Look into the directories where .desktop are saved on gnome based
-  // distro's
+  // 2. Look into the directories where .desktop are saved on gnome based distro's
   const desktopInstallationFolders = [
     path.join(require('os').homedir(), '.local/share/applications/'),
     '/usr/share/applications/',
@@ -87,8 +86,7 @@ export function linux() {
     installations = installations.concat(findChromeExecutables(folder));
   });
 
-  // Look for google-chrome-stable & google-chrome executables by using the
-  // which command
+  // Look for google-chrome-stable & google-chrome executables by using the which command
   const executables = [
     'google-chrome-stable',
     'google-chrome',

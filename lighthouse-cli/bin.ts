@@ -119,10 +119,8 @@ Example: --output-path=./lighthouse-results.html`,
         .default('port', 9222)
         .default('max-wait-for-load', Driver.MAX_WAIT_FOR_FULLY_LOADED)
         .check((argv: {listAllAudits?: boolean, listTraceCategories?: boolean, _: Array<any>}) => {
-          // Make sure lighthouse has been passed a url, or at least one of
-          // --list-all-audits
-          // or --list-trace-categories. If not, stop the program and ask for a
-          // url
+          // Make sure lighthouse has been passed a url, or at least one of --list-all-audits
+          // or --list-trace-categories. If not, stop the program and ask for a url
           if (!argv.listAllAudits && !argv.listTraceCategories && argv._.length === 0) {
             throw new Error('Please provide a url');
           }

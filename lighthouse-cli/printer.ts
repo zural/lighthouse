@@ -112,8 +112,7 @@ function write(results: Results, mode: Mode, path: string): Promise<Results> {
 
     const output = createOutput(results, (<any>OutputMode)[mode]);
 
-    // Testing stdout is out of scope, and doesn't really achieve much besides
-    // testing Node,
+    // Testing stdout is out of scope, and doesn't really achieve much besides testing Node,
     // so we will skip this chunk of the code.
     /* istanbul ignore if */
     if (outputPath === 'stdout') {
