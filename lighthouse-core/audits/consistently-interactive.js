@@ -15,10 +15,10 @@ const Formatter = require('../report/formatter');
 //   https://www.desmos.com/calculator/uti67afozh
 const SCORING_POINT_OF_DIMINISHING_RETURNS = 1700;
 const SCORING_MEDIAN = 10000;
-const SCORING_TARGET = 5000;
 
 const REQUIRED_QUIET_WINDOW = 5000;
 const ALLOWED_CONCURRENT_REQUESTS = 2;
+const IGNORED_NETWORK_SCHEMES = ['data', 'ws'];
 
 const distribution = TracingProcessor.getLogNormalDistribution(
   SCORING_MEDIAN,
@@ -42,14 +42,15 @@ class ConsistentlyInteractiveMetric extends Audit {
       description: 'Consistently Interactive (beta)',
       helpText: 'The point at which most network resources have finished loading and the ' +
           'CPU is idle for a prolonged period.',
-      optimalValue: SCORING_TARGET.toLocaleString() + 'ms',
       scoringMode: Audit.SCORING_MODES.NUMERIC,
       requiredArtifacts: ['traces', 'devtoolsLogs']
     };
   }
 
   /**
-   * @param {!Array} networkRecords
+   * Finds all time periods where the number of inflight requests is less than or equal to the
+   * number of allowed concurrent requests (2).
+   * @param {!Array<WebInspector.NetworkRequest>} networkRecords
    * @param {{timestamps: {traceEnd: number}}} traceOfTab
    * @return {!Array<{start: number, end: number}>}
    */
@@ -60,7 +61,7 @@ class ConsistentlyInteractiveMetric extends Audit {
     const timeBoundaries = [];
     networkRecords.forEach(record => {
       const scheme = record.parsedURL && record.parsedURL.scheme;
-      if (scheme === 'data' || scheme === 'ws') {
+      if (IGNORED_NETWORK_SCHEMES.includes(scheme)) {
         return;
       }
 
@@ -79,20 +80,19 @@ class ConsistentlyInteractiveMetric extends Audit {
         // we've just started a new request. are we exiting a quiet period?
         if (numInflightRequests === ALLOWED_CONCURRENT_REQUESTS) {
           quietPeriods.push({start: quietPeriodStart, end: boundary.time});
-          quietPeriodStart = Infinity;
         }
         numInflightRequests++;
       } else {
         numInflightRequests--;
         // we've just completed a request. are we entering a quiet period?
-        if (numInflightRequests <= ALLOWED_CONCURRENT_REQUESTS) {
-          quietPeriodStart = Math.min(boundary.time, quietPeriodStart);
+        if (numInflightRequests === ALLOWED_CONCURRENT_REQUESTS) {
+          quietPeriodStart = boundary.time;
         }
       }
     });
 
     // Check if the trace ended in a quiet period
-    if (quietPeriodStart !== Infinity) {
+    if (numInflightRequests <= ALLOWED_CONCURRENT_REQUESTS) {
       quietPeriods.push({start: quietPeriodStart, end: traceEnd});
     }
 
@@ -100,6 +100,7 @@ class ConsistentlyInteractiveMetric extends Audit {
   }
 
   /**
+   * Finds all time periods where there are no long tasks.
    * @param {!Array<{start: number, end: number}>} longTasks
    * @param {{timestamps: {navigationStart: number, traceEnd: number}}} traceOfTab
    * @return {!Array<{start: number, end: number}>}
@@ -137,10 +138,13 @@ class ConsistentlyInteractiveMetric extends Audit {
   }
 
   /**
+   * Finds the first time period where a network quiet period and a CPU quiet period overlap.
    * @param {!Array<{start: number, end: number}>} longTasks
+   * @param {!Array<WebInspector.NetworkRequest>} networkRecords
    * @param {{timestamps: {navigationStart: number, firstMeaningfulPaint: number,
    *    traceEnd: number}}} traceOfTab
-   * @return {!Object}
+   * @return {{cpuQuietPeriod: !Object, networkQuietPeriod: !Object, cpuQuietPeriods: !Array,
+   *    networkQuietPeriods: !Array}}
    */
   static findOverlappingQuietPeriods(longTasks, networkRecords, traceOfTab) {
     const FMPTsInMs = traceOfTab.timestamps.firstMeaningfulPaint;
@@ -161,7 +165,7 @@ class ConsistentlyInteractiveMetric extends Audit {
     let networkCandidate = networkQueue.shift();
     while (cpuCandidate && networkCandidate) {
       if (cpuCandidate.start >= networkCandidate.start) {
-        // CPU starts later than network, it must be contained by network or we check the next network
+        // CPU starts later than network, window must be contained by network or we check the next
         if (networkCandidate.end >= cpuCandidate.start + REQUIRED_QUIET_WINDOW) {
           return {
             cpuQuietPeriod: cpuCandidate,
@@ -173,7 +177,7 @@ class ConsistentlyInteractiveMetric extends Audit {
           networkCandidate = networkQueue.shift();
         }
       } else {
-        // Network starts later than CPU, it must be contained by CPU or we check the next CPU
+        // Network starts later than CPU, window must be contained by CPU or we check the next
         if (cpuCandidate.end >= networkCandidate.start + REQUIRED_QUIET_WINDOW) {
           return {
             cpuQuietPeriod: cpuCandidate,
@@ -210,8 +214,12 @@ class ConsistentlyInteractiveMetric extends Audit {
           throw new Error('No firstMeaningfulPaint found in trace.');
         }
 
+        if (!traceOfTab.timestamps.domContentLoaded) {
+          throw new Error('No domContentLoaded found in trace.');
+        }
+
         const longTasks = TracingProcessor.getMainThreadTopLevelEvents(traceModel, trace)
-            .filter(event => event.end - event.start >= 50);
+            .filter(event => event.duration >= 50);
         const quietPeriodInfo = this.findOverlappingQuietPeriods(longTasks, networkRecords,
             traceOfTab);
         const cpuQuietPeriod = quietPeriodInfo.cpuQuietPeriod;
