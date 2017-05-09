@@ -56,7 +56,7 @@ class LoadFastEnough4Pwa extends Audit {
         // Ignore requests that don't have timing data or resources that have
         // previously been requested and are coming from the cache.
         const fromCache = record._fromDiskCache || record._fromMemoryCache;
-        if (!record._timing || fromCache) {
+        if (!record._timing || fromCache || !record.finished) {
           return undefined;
         }
 
