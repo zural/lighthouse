@@ -21,15 +21,18 @@ module.exports = {
     "useThrottling": false,
     "gatherers": [
       "service-worker",
-      "offline"
+      "offline",
+      "start-url",
     ]
   },
   {
     "passName": "redirectPass",
     "useThrottling": false,
+    // Speed up the redirect pass by blocking stylesheets, fonts, and images
+    "blockedUrlPatterns": ["*.css", "*.jpg", "*.jpeg", "*.png", "*.gif", "*.svg", "*.ttf", "*.woff", "*.woff2"],
     "gatherers": [
       "http-redirect",
-      "html-without-javascript"
+      "html-without-javascript",
     ]
   }, {
     "passName": "dbw",
@@ -66,6 +69,7 @@ module.exports = {
     "speed-index-metric",
     "estimated-input-latency",
     "consistently-interactive",
+    "time-to-firstbyte",
     "first-interactive",
     "time-to-interactive",
     "user-timings",
@@ -171,6 +175,10 @@ module.exports = {
         },
         "estimated-input-latency": {
           "expectedValue": 100,
+          "weight": 1
+        },
+        "time-to-firstbyte": {
+          "expectedValue": true,
           "weight": 1
         },
         "time-to-interactive": {
@@ -589,6 +597,18 @@ module.exports = {
     }]
   }],
   "groups": {
+    "perf-metric": {
+      "title": "Metrics",
+      "description": "These metrics encapsulate your app's performance across a number of dimensions."
+    },
+    "perf-hint": {
+      "title": "Opportunities",
+      "description": "These are opportunities to speed up your application by optimizing the following resources."
+    },
+    "perf-info": {
+      "title": "Diagnostics",
+      "description": "More information about the performance of your application."
+    },
     "a11y-color-contrast": {
       "title": "Color Contrast Is Satisfactory",
       "description": "Screen readers and other assitive technologies require annotations to understand otherwise ambiguous content."
@@ -645,22 +665,24 @@ module.exports = {
       "name": "Performance",
       "description": "These encapsulate your app's performance.",
       "audits": [
-        {"id": "first-meaningful-paint", "weight": 5},
-        {"id": "speed-index-metric", "weight": 1},
-        {"id": "estimated-input-latency", "weight": 1},
-        {"id": "time-to-interactive", "weight": 5},
-        {"id": "consistently-interactive", "weight": 5},
-        {"id": "first-interactive", "weight": 5},
-        {"id": "link-blocking-first-paint", "weight": 0},
-        {"id": "script-blocking-first-paint", "weight": 0},
+        {"id": "first-meaningful-paint", "weight": 5, "group": "perf-metric"},
+        {"id": "speed-index-metric", "weight": 1, "group": "perf-metric"},
+        {"id": "estimated-input-latency", "weight": 1, "group": "perf-metric"},
+        {"id": "time-to-interactive", "weight": 5, "group": "perf-metric"},
+        {"id": "first-interactive", "weight": 5, "group": "perf-metric"},
+        {"id": "consistently-interactive", "weight": 5, "group": "perf-metric"},
+        {"id": "link-blocking-first-paint", "weight": 0, "group": "perf-hint"},
+        {"id": "script-blocking-first-paint", "weight": 0, "group": "perf-hint"},
         // {"id": "unused-css-rules", "weight": 0},
-        {"id": "uses-optimized-images", "weight": 0},
-        {"id": "uses-request-compression", "weight": 0},
-        {"id": "uses-responsive-images", "weight": 0},
-        {"id": "total-byte-weight", "weight": 0},
-        {"id": "dom-size", "weight": 0},
-        {"id": "critical-request-chains", "weight": 0},
-        {"id": "user-timings", "weight": 0}
+        {"id": "uses-optimized-images", "weight": 0, "group": "perf-hint"},
+        {"id": "uses-request-compression", "weight": 0, "group": "perf-hint"},
+        {"id": "uses-responsive-images", "weight": 0, "group": "perf-hint"},
+        {"id": "time-to-firstbyte", "weight": 0, "group": "perf-hint"},
+        {"id": "total-byte-weight", "weight": 0, "group": "perf-info"},
+        {"id": "dom-size", "weight": 0, "group": "perf-info"},
+        {"id": "critical-request-chains", "weight": 0, "group": "perf-info"},
+        {"id": "user-timings", "weight": 0, "group": "perf-info"}
+
       ]
     },
     "accessibility": {

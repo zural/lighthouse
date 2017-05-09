@@ -268,6 +268,28 @@ class Driver {
     });
   }
 
+  getAppManifest() {
+    return new Promise((resolve, reject) => {
+      this.sendCommand('Page.getAppManifest')
+        .then(response => {
+          // We're not reading `response.errors` however it may contain critical and noncritical
+          // errors from Blink's manifest parser:
+          //   https://chromedevtools.github.io/debugger-protocol-viewer/tot/Page/#type-AppManifestError
+          if (!response.data) {
+            if (response.url) {
+              return reject(new Error(`Unable to retrieve manifest at ${response.url}.`));
+            }
+
+            // If both the data and the url are empty strings, the page had no manifest.
+            return reject('No web app manifest found.');
+          }
+
+          resolve(response);
+        })
+        .catch(err => reject(err));
+    });
+  }
+
   getSecurityState() {
     return new Promise((resolve, reject) => {
       this.once('Security.securityStateChanged', data => {
@@ -773,19 +795,12 @@ class Driver {
         .then(_ => this.online = true);
   }
 
-  cleanAndDisableBrowserCaches() {
-    return Promise.all([
-      this.clearBrowserCache(),
-      this.disableBrowserCache()
-    ]);
-  }
-
-  clearBrowserCache() {
-    return this.sendCommand('Network.clearBrowserCache');
-  }
-
-  disableBrowserCache() {
-    return this.sendCommand('Network.setCacheDisabled', {cacheDisabled: true});
+  cleanBrowserCaches() {
+    // Wipe entire disk cache
+    return this.sendCommand('Network.clearBrowserCache')
+      // Toggle 'Disable Cache' to evict the memory cache
+      .then(_ => this.sendCommand('Network.setCacheDisabled', {cacheDisabled: true}))
+      .then(_ => this.sendCommand('Network.setCacheDisabled', {cacheDisabled: false}));
   }
 
   clearDataForOrigin(url) {
@@ -852,9 +867,18 @@ class Driver {
     return collectUsage;
   }
 
-  blockUrlPatterns(urlPatterns) {
-    const promiseArr = urlPatterns.map(url => this.sendCommand('Network.addBlockedURL', {url}));
-    return Promise.all(promiseArr);
+  /**
+   * @param {!Array<string>} urls URL patterns to block. Wildcards ('*') are allowed.
+   * @return {!Promise}
+   */
+  blockUrlPatterns(urls) {
+    return this.sendCommand('Network.setBlockedURLs', {urls})
+      .catch(err => {
+        // TODO: remove this handler once m59 hits stable
+        if (!/wasn't found/.test(err.message)) {
+          throw err;
+        }
+      });
   }
 
   /**

@@ -36,7 +36,7 @@ module.exports = [
       //   }
       // },
       'offscreen-images': {
-        score: false,
+        score: 65,
         extendedInfo: {
           value: {
             results: {
@@ -46,17 +46,17 @@ module.exports = [
         }
       },
       'uses-optimized-images': {
-        score: false,
+        score: 65,
         extendedInfo: {
           value: {
             results: {
-              length: 5
+              length: 4
             }
           }
         }
       },
       'uses-responsive-images': {
-        score: false,
+        score: 90,
         extendedInfo: {
           value: {
             results: {
