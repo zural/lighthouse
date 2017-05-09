@@ -25,8 +25,9 @@ const acceptableDevToolsLog = require('../fixtures/traces/progressive-app-m60.de
 function generateNetworkRecords(records, navStart) {
   return records.map(item => {
     return {
+      finished: typeof item.finished === 'undefined' ? true : item.finished,
       startTime: (item.start + navStart) / 1000,
-      endTime: (item.end + navStart) / 1000,
+      endTime: item.end === -1 ? -1 : (item.end + navStart) / 1000,
     };
   });
 }
@@ -114,6 +115,24 @@ describe('Performance: consistently-interactive audit', () => {
       assert.throws(() => {
         ConsistentlyInteractive.findOverlappingQuietPeriods(cpu, network, traceOfTab);
       }, /CPU did not quiet/);
+    });
+
+    it('should handle unfinished network requests', () => {
+      const navigationStart = 220023532;
+      const firstMeaningfulPaint = 2500 + navigationStart;
+      const traceEnd = 10000 + navigationStart;
+      const traceOfTab = {timestamps: {navigationStart, firstMeaningfulPaint, traceEnd}};
+
+      const cpu = [];
+      const network = generateNetworkRecords([
+        {start: 0, end: -1, finished: false},
+        {start: 0, end: -1, finished: false},
+        {start: 0, end: -1, finished: false},
+      ], navigationStart);
+
+      assert.throws(() => {
+        ConsistentlyInteractive.findOverlappingQuietPeriods(cpu, network, traceOfTab);
+      }, /Network did not quiet/);
     });
 
     it('should find first overlapping quiet period', () => {

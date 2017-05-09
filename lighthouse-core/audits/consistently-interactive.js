@@ -67,7 +67,9 @@ class ConsistentlyInteractiveMetric extends Audit {
 
       // convert the network record timestamp to ms to line-up with traceOfTab
       timeBoundaries.push({time: record.startTime * 1000, isStart: true});
-      timeBoundaries.push({time: record.endTime * 1000, isStart: false});
+      if (record.finished) {
+        timeBoundaries.push({time: record.endTime * 1000, isStart: false});
+      }
     });
 
     timeBoundaries.sort((a, b) => a.time - b.time);
