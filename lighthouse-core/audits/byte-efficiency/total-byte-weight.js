@@ -61,6 +61,7 @@ class TotalByteWeight extends ByteEfficiencyAudit {
         let results = [];
         networkRecords.forEach(record => {
           // exclude data URIs since their size is reflected in other resources
+          // exclude unfinished requests since they won't have transfer size information
           if (record.scheme === 'data' || !record.finished) return;
 
           const result = {
