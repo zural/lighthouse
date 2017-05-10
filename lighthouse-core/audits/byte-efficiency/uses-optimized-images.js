@@ -42,10 +42,10 @@ class UsesOptimizedImages extends ByteEfficiencyAudit {
       name: 'uses-optimized-images',
       description: 'Optimize images',
       informative: true,
-      helpText: 'Images should be optimized to save network bytes. ' +
-        'The following images could have smaller file sizes when compressed with ' +
-        '[WebP](https://developers.google.com/speed/webp/) or JPEG at 80 quality. ' +
-        '[Learn more about image optimization](https://developers.google.com/web/fundamentals/performance/optimizing-content-efficiency/image-optimization).',
+      helpText: 'Optimized images take less time to download and save cellular data. ' +
+        'Consider converting the following images to WebP, or lowering their JPEG quality ' +
+        'level to 80. ' +
+        '[Learn more](https://developers.google.com/web/tools/lighthouse/audits/unoptimized-images).',
       requiredArtifacts: ['OptimizedImages', 'devtoolsLogs']
     };
   }
