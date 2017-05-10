@@ -116,17 +116,17 @@ class GatherRunner {
       .then(_ => gathererResults.UserAgent = [driver.getUserAgent()]);
   }
 
-  static disposeDriver(driver) {
+  static disposeDriver() {
     // We dont need to hold up the reporting for the reload/disconnect,
     // so we will not return a promise in here.
     log.log('status', 'Disconnecting from browser...');
-    driver.disconnect().catch(err => {
-      // Ignore disconnecting error if browser was already closed.
-      // See https://github.com/GoogleChrome/lighthouse/issues/1583
-      if (!(/close\/.*status: 500$/.test(err.message))) {
-        log.error('GatherRunner disconnect', err.message);
-      }
-    });
+    // driver.disconnect().catch(err => {
+    //   // Ignore disconnecting error if browser was already closed.
+    //   // See https://github.com/GoogleChrome/lighthouse/issues/1583
+    //   if (!(/close\/.*status: 500$/.test(err.message))) {
+    //     log.error('GatherRunner disconnect', err.message);
+    //   }
+    // });
   }
 
   /**
