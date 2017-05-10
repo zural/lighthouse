@@ -29,93 +29,13 @@ const ChromeLauncher = require('../lighthouse-cli/chrome-launcher.js').ChromeLau
 const Printer = require('../lighthouse-cli/printer');
 const assetSaver = require('../lighthouse-core/lib/asset-saver.js');
 
-const NUMBER_OF_RUNS = 20;
+const NUMBER_OF_RUNS = 30;
 
-const URLS = [
-  // Flagship sites
-  'https://nytimes.com',
-  'https://flipkart.com',
-  'http://www.espn.com/',
-  'https://www.washingtonpost.com/pwa/',
+const URLS = require('./pwa-sites.js');
 
-  // TTI Tester sites
-  'https://housing.com/in/buy/real-estate-hyderabad',
-  'http://www.npr.org/',
-  'http://www.vevo.com/',
-  'https://weather.com/',
-  'https://www.nasa.gov/',
-  'https://vine.co/',
-  'http://www.booking.com/',
-  'http://www.thestar.com.my',
-  'http://www.58pic.com',
-  'http://www.dawn.com/',
-  'https://www.ebs.in/IPS/',
-
-  // Sourced from: https://en.wikipedia.org/wiki/List_of_most_popular_websites
-  // (http://www.alexa.com/topsites)
-  // Removed adult websites and duplicates (e.g. google int'l websites)
-  // Also removed sites that don't have significant index pages:
-  // "t.co", "popads.net", "onclickads.net", "microsoftonline.com", "onclckds.com", "cnzz.com",
-  // "live.com", "adf.ly", "googleusercontent.com",
-
-  'https://google.com',
-  'https://youtube.com',
-  'https://facebook.com',
-  'https://baidu.com',
-  'https://wikipedia.org',
-  'https://yahoo.com',
-  'https://amazon.com',
-  'http://www.qq.com/',
-  'https://taobao.com',
-  'https://vk.com',
-  'https://twitter.com',
-  'https://instagram.com',
-  'http://www.hao123.cn/',
-  'http://www.sohu.com/',
-  'https://sina.com.cn',
-  'https://reddit.com',
-  'https://linkedin.com',
-  'https://tmall.com',
-  'https://weibo.com',
-  'https://360.cn',
-  'https://yandex.ru',
-  'https://ebay.com',
-  'https://bing.com',
-  'https://msn.com',
-  'https://www.sogou.com/',
-  'https://wordpress.com',
-  'https://microsoft.com',
-  'https://tumblr.com',
-  'https://aliexpress.com',
-  'https://blogspot.com',
-  'https://netflix.com',
-  'https://ok.ru',
-  'https://stackoverflow.com',
-  'https://imgur.com',
-  'https://apple.com',
-  'http://www.naver.com/',
-  'https://mail.ru',
-  'http://www.imdb.com/',
-  'https://office.com',
-  'https://github.com',
-  'https://pinterest.com',
-  'https://paypal.com',
-  'http://www.tianya.cn/',
-  'https://diply.com',
-  'https://twitch.tv',
-  'https://adobe.com',
-  'https://wikia.com',
-  'https://coccoc.com',
-  'https://so.com',
-  'https://fc2.com',
-  'https://www.pixnet.net/',
-  'https://dropbox.com',
-  'https://zhihu.com',
-  'https://whatsapp.com',
-  'https://alibaba.com',
-  'https://ask.com',
-  'https://bbc.com'
-];
+function delay(time) {
+  return _ => new Promise(resolve => setTimeout(resolve, time));
+}
 
 /**
  * Launches Chrome once at the beginning, runs all the analysis,
@@ -130,18 +50,7 @@ function main() {
     return;
   }
 
-  const launcher = new ChromeLauncher();
-  launcher
-    .isDebuggerReady()
-    .catch(() => launcher.run())
-    .then(() => runAnalysis())
-    .then(() => launcher.kill())
-    .catch(err => launcher.kill().then(
-      () => {
-        throw err;
-      },
-      console.error // eslint-disable-line no-console
-    ));
+  return runAnalysis();
 }
 
 main();
@@ -163,9 +72,21 @@ function runAnalysis() {
     const id = i.toString();
     const isFirstRun = i === 0;
     for (const url of URLS) {
-      promise = promise.then(() => singleRunAnalysis(url, id, {ignoreRun: isFirstRun}));
+      promise = promise.then(() => {
+        const launcher = new ChromeLauncher();
+        return launcher
+          .isDebuggerReady()
+          .catch(() => launcher.run())
+          .then(() => singleRunAnalysis(url, id, {ignoreRun: isFirstRun}))
+          .then(() => launcher.kill())
+          .catch(err => launcher.kill().then(
+            _ => console.error(err), // eslint-disable-line no-console
+            console.error // eslint-disable-line no-console
+          )).then(delay(2000));
+      });
     }
   }
+
   return promise;
 }
 
