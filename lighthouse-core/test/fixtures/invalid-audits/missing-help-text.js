@@ -1,5 +1,5 @@
 /**
- * @license
+ *
  * Copyright 2016 Google Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,26 +15,25 @@
  * limitations under the License.
  */
 
-/**
- * @fileoverview Tests whether the page is using console.time().
- */
-
 'use strict';
 
-const Gatherer = require('../gatherer');
+const LighthouseAudit = require('../../../audits/audit');
 
-class ConsoleTimeUsage extends Gatherer {
-
-  beforePass(options) {
-    this.collectUsage = options.driver.captureFunctionCallSites('console.time');
+class MissingRequiredArtifacts extends LighthouseAudit {
+  static get meta() {
+    return {
+      name: 'missing-description',
+      category: 'Custom',
+      description: 'Missing required artifacts',
+      requiredArtifacts: ['HTML']
+    };
   }
 
-  /**
-   * @return {!Promise<!Array<{url: string, line: number, col: number}>>}
-   */
-  afterPass() {
-    return this.collectUsage();
+  static audit(_) {
+    return {
+      rawValue: true
+    };
   }
 }
 
-module.exports = ConsoleTimeUsage;
+module.exports = MissingRequiredArtifacts;
