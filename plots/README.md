@@ -9,7 +9,10 @@ https://github.com/GoogleChrome/lighthouse/issues/1924
 
 ### Setup
 
-You need to build lighthouse first.
+Install node and yarn
+Install and build lighthouse.
+sudo apt-get install google-chrome-unstable
+export LIGHTHOUSE_CHROMIUM_PATH="$(which google-chrome-unstable)"
 
 ### Generating & viewing charts
 

@@ -1,7 +1,7 @@
 {
   "main": "index.js",
   "scripts": {
-    "measure": "node measure.js",
+    "measure": "node measure.js --trace-warnings",
     "analyze": "node analyze.js",
     "clean": "node clean.js",
     "open": "node open.js"
