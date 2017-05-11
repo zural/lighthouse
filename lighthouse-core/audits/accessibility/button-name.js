@@ -33,8 +33,8 @@ class ButtonName extends AxeAudit {
       category: 'Accessibility',
       name: 'button-name',
       description: 'Buttons have an accessible name.',
-      helpText: 'An accessible name helps convey the purpose of a button. Without one, a screen ' +
-          'reader will only announce the word "button".',
+      helpText: 'Buttons without names are unusable to users who rely on screen readers. ' +
+          '[Learn more](https://developers.google.com/web/tools/lighthouse/audits/button-name).',
       requiredArtifacts: ['Accessibility']
     };
   }
