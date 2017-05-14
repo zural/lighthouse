@@ -110,12 +110,16 @@ describe('CategoryRenderer', () => {
     assert.equal(audits.length, category.audits.length, 'renders correct number of audits');
   });
 
-  it('renders manual audits', () => {
+  it('renders manual audits if the category contains them', () => {
     const pwaCategory = sampleResults.reportCategories.find(cat => cat.id === 'pwa');
     const categoryDOM = renderer.render(pwaCategory, sampleResults.reportGroups);
     assert.ok(categoryDOM.querySelector('.lh-audit-group__summary--manual'));
     assert.equal(categoryDOM.querySelectorAll('.lh-score--informative.lh-score--unknown').length, 3,
         'score shows informative and dash icon');
+
+    const perfCategory = sampleResults.reportCategories.find(cat => cat.id === 'performance');
+    const categoryDOM2 = renderer.render(perfCategory, sampleResults.reportGroups);
+    assert.ok(!categoryDOM2.querySelector('.lh-audit-group__summary--manual'));
   });
 
   describe('performance category', () => {
