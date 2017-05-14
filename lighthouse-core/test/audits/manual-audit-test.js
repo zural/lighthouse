@@ -1,6 +1,4 @@
-
 /**
- * @license
  * Copyright 2017 Google Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,28 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 'use strict';
 
-const ManualAudit = require('./manual-audit');
+const ManualAudit = require('../../audits/manual/manual-audit.js');
+const assert = require('assert');
 
-/**
- * @fileoverview Manual PWA audit for cross browser support.
- */
+/* eslint-env mocha */
 
-class PWACrossBrowser extends ManualAudit {
-
-  /**
-   * @return {!AuditMeta}
-   */
+// Extend the Audit class but fail to implement meta. It should throw errors.
+class TestAudit extends ManualAudit {
   static get meta() {
     return Object.assign({
-      category: 'PWA',
-      name: 'pwa-cross-browser',
-      helpText: 'To reach the most number of users, sites should work across every major browser.',
-      description: 'Site works cross-browser',
+      category: 'AuditCategory',
+      name: 'manual-audit',
+      helpText: 'Some help text.',
     }, super.meta);
   }
 }
 
-module.exports = PWACrossBrowser;
+describe('ManualAudit', () => {
+  it('sets defaults', () => {
+    assert.equal(TestAudit.meta.name, 'manual-audit');
+    assert.equal(TestAudit.meta.requiredArtifacts.length, 0);
+    assert.equal(TestAudit.meta.informative, true);
+    assert.equal(TestAudit.meta.manual, true);
+  });
+});

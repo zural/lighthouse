@@ -20,10 +20,10 @@
 const ManualAudit = require('./manual-audit');
 
 /**
- * @fileoverview Manual PWA audit for cross browser support.
+ * @fileoverview Manual PWA audit for janky-free page transitions.
  */
 
-class PWACrossBrowser extends ManualAudit {
+class PWAPageTransitions extends ManualAudit {
 
   /**
    * @return {!AuditMeta}
@@ -31,11 +31,12 @@ class PWACrossBrowser extends ManualAudit {
   static get meta() {
     return Object.assign({
       category: 'PWA',
-      name: 'pwa-cross-browser',
-      helpText: 'To reach the most number of users, sites should work across every major browser.',
-      description: 'Site works cross-browser',
+      name: 'pwa-page-transitions',
+      helpText: 'Transitions should feel snappy as you tap around, even on a slow network, a key ' +
+          'to perceived performance.',
+      description: 'Page transitions don\'t feel like they block on the network',
     }, super.meta);
   }
 }
 
-module.exports = PWACrossBrowser;
+module.exports = PWAPageTransitions;

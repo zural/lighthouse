@@ -297,7 +297,7 @@ class CategoryRenderer {
 
     // Render manual audits after passing.
     const auditsGroupedByGroup = /** @type {!Object<string,
-        !Array<!ReportRenderer.AuditJSON>} */ ({});
+        !Array<!ReportRenderer.AuditJSON>>} */ ({});
     manualAudits.forEach(audit => {
       const group = auditsGroupedByGroup[audit.group] || [];
       group.push(audit);
