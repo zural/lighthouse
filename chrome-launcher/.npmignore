@@ -1,0 +1,20 @@
+
+# folders
+.vscode/
+test/
+node_modules/
+
+# include all compiled JS
+!*.js
+
+# generated files
+npm-debug.log
+
+# dev files
+.appveyor.yml
+.DS_Store
+.editorconfig
+.eslintignore
+.eslintrc.js
+.travis.yml
+gulpfile.js
