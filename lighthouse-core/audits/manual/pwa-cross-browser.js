@@ -18,25 +18,37 @@
 
 'use strict';
 
-const ManualAudit = require('./manual-audit');
+const Audit = require('../audit');
 
 /**
  * @fileoverview Manual PWA audit for cross browser support.
  */
 
-class PWACrossBrowser extends ManualAudit {
+class PWACrossBrowser extends Audit {
 
   /**
    * @return {!AuditMeta}
    */
   static get meta() {
-    return Object.assign({
+    return {
       category: 'PWA',
       name: 'pwa-cross-browser',
       helpText: 'To reach the most number of users, sites should work across ' +
       'every major browser. [Learn more](https://developers.google.com/web/progressive-web-apps/checklist#site-works-cross-browser).',
       description: 'Site works cross-browser',
-    }, super.meta);
+      informative: true,
+      manual: true,
+      requiredArtifacts: []
+    };
+  }
+
+  /**
+   * @return {!AuditResult}
+   */
+  static audit() {
+    return {
+      rawValue: false
+    };
   }
 }
 

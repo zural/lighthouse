@@ -17,25 +17,37 @@
 
 'use strict';
 
-const ManualAudit = require('./manual-audit');
+const Audit = require('../audit');
 
 /**
  * @fileoverview Manual PWA audit for janky-free page transitions.
  */
 
-class PWAPageTransitions extends ManualAudit {
+class PWAPageTransitions extends Audit {
 
   /**
    * @return {!AuditMeta}
    */
   static get meta() {
-    return Object.assign({
+    return {
       category: 'PWA',
       name: 'pwa-page-transitions',
       helpText: 'Transitions should feel snappy as you tap around, even on a slow network, a key ' +
           'to perceived performance. [Learn more](https://developers.google.com/web/progressive-web-apps/checklist#page-transitions-dont-feel-like-they-block-on-the-network).',
       description: 'Page transitions don\'t feel like they block on the network',
-    }, super.meta);
+      informative: true,
+      manual: true,
+      requiredArtifacts: []
+    };
+  }
+
+  /**
+   * @return {!AuditResult}
+   */
+  static audit() {
+    return {
+      rawValue: false
+    };
   }
 }
 

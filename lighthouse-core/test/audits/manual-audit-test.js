@@ -14,28 +14,30 @@
  * limitations under the License.
  */
 'use strict';
-
-const ManualAudit = require('../../audits/manual/manual-audit.js');
+const fs = require('fs');
 const assert = require('assert');
 
 /* eslint-env mocha */
+const manualAuditsPath = __dirname + '/../../audits/manual/';
+const auditsModules = fs.readdirSync(manualAuditsPath)
+  .map(filename => manualAuditsPath + filename)
+  .map(require);
 
-// Extend the Audit class but fail to implement meta. It should throw errors.
-class TestAudit extends ManualAudit {
-  static get meta() {
-    return Object.assign({
-      category: 'AuditCategory',
-      name: 'manual-audit',
-      helpText: 'Some help text.',
-    }, super.meta);
-  }
-}
-
-describe('ManualAudit', () => {
+describe('Manual Audits', () => {
   it('sets defaults', () => {
-    assert.equal(TestAudit.meta.name, 'manual-audit');
-    assert.equal(TestAudit.meta.requiredArtifacts.length, 0);
-    assert.equal(TestAudit.meta.informative, true);
-    assert.equal(TestAudit.meta.manual, true);
+    auditsModules.forEach(audit => {
+      assert.strictEqual(audit.meta.requiredArtifacts.length, 0);
+      assert.strictEqual(audit.meta.informative, true);
+      assert.strictEqual(audit.meta.manual, true);
+      assert.strictEqual(audit.meta.informative, true);
+    });
+  });
+
+  it('returns empty results', () => {
+    auditsModules.forEach(audit => {
+      const result = audit.audit();
+      assert.strictEqual(result.rawValue, false);
+      assert.strictEqual(result.displayValue, undefined);
+    });
   });
 });

@@ -17,25 +17,37 @@
 
 'use strict';
 
-const ManualAudit = require('./manual-audit');
+const Audit = require('../audit');
 
 /**
  * @fileoverview Manual PWA audit to ensure every page has a deep link.
  */
 
-class PWAEachPageHasURL extends ManualAudit {
+class PWAEachPageHasURL extends Audit {
 
   /**
    * @return {!AuditMeta}
    */
   static get meta() {
-    return Object.assign({
+    return {
       category: 'PWA',
       name: 'pwa-each-page-has-url',
       helpText: 'Ensure individual pages are deep linkable via the URLs and that URLs are ' +
           'unique for the purpose of shareability on social media. [Learn more](https://developers.google.com/web/progressive-web-apps/checklist#each-page-has-a-url).',
       description: 'Each page has a URL',
-    }, super.meta);
+      informative: true,
+      manual: true,
+      requiredArtifacts: []
+    };
+  }
+
+  /**
+   * @return {!AuditResult}
+   */
+  static audit() {
+    return {
+      rawValue: false
+    };
   }
 }
 
