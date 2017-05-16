@@ -640,17 +640,17 @@ module.exports = {
       "description": "Screen readers and other assistive technologies require annotations to understand otherwise ambiguous content."
     },
     "manual-pwa-checks": {
-      "title": "¹ Manual checks to verify",
+      "title": "Manual checks to verify",
       "description": "These audits are required by the baseline " +
           "[PWA Checklist](https://developers.google.com/web/progressive-web-apps/checklist) but are " +
-          "not automatically checked by Lighthouse. They do not affect your score but please verify them manually."
+          "not automatically checked by Lighthouse. They do not affect your score but it's important that you verify them manually."
     },
   },
   "categories": {
     "pwa": {
       "name": "Progressive Web App",
       "weight": 1,
-      "description": "These audits validate the aspects of a Progressive Web App. They are a subset¹ of the baseline [PWA Checklist](https://developers.google.com/web/progressive-web-apps/checklist).",
+      "description": "These audits validate the aspects of a Progressive Web App, as specified by the baseline [PWA Checklist](https://developers.google.com/web/progressive-web-apps/checklist).",
       "audits": [
         {"id": "service-worker", "weight": 1},
         {"id": "works-offline", "weight": 1},

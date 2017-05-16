@@ -67,7 +67,7 @@ class CategoryRenderer {
       scoreEl.classList.add('lh-score--informative');
     }
     if (audit.result.manual) {
-      scoreEl.classList.add('lh-score--unknown');
+      scoreEl.classList.add('lh-score--manual');
     }
 
     return this._populateScore(tmpl, audit.score, scoringMode, title, description);
@@ -217,6 +217,35 @@ class CategoryRenderer {
   }
 
   /**
+   * @param {!Array<!ReportRenderer.AuditJSON>} manualAudits
+   * @param {!Object<string, !ReportRenderer.GroupJSON>} groupDefinitions
+   * @param {!Element} element Parent container to add the manual audits to.
+   */
+  _renderManualAudits(manualAudits, groupDefinitions, element) {
+    const auditsGroupedByGroup = /** @type {!Object<string,
+        !Array<!ReportRenderer.AuditJSON>>} */ ({});
+    manualAudits.forEach(audit => {
+      const group = auditsGroupedByGroup[audit.group] || [];
+      group.push(audit);
+      auditsGroupedByGroup[audit.group] = group;
+    });
+
+    Object.keys(auditsGroupedByGroup).forEach(groupId => {
+      const group = groupDefinitions[groupId];
+      const auditGroupElem = this._renderAuditGroup(group);
+
+      this._dom.find('.lh-audit-group__summary', auditGroupElem)
+          .classList.add('lh-audit-group__summary--manual');
+
+      auditsGroupedByGroup[groupId].forEach(audit => {
+        auditGroupElem.appendChild(this._renderAudit(audit));
+      });
+
+      element.appendChild(auditGroupElem);
+    });
+  }
+
+  /**
    * @param {!Document|!Element} context
    */
   setTemplateContext(context) {
@@ -296,27 +325,7 @@ class CategoryRenderer {
     }
 
     // Render manual audits after passing.
-    const auditsGroupedByGroup = /** @type {!Object<string,
-        !Array<!ReportRenderer.AuditJSON>>} */ ({});
-    manualAudits.forEach(audit => {
-      const group = auditsGroupedByGroup[audit.group] || [];
-      group.push(audit);
-      auditsGroupedByGroup[audit.group] = group;
-    });
-
-    Object.keys(auditsGroupedByGroup).forEach(groupId => {
-      const group = groupDefinitions[groupId];
-      const auditGroupElem = this._renderAuditGroup(group);
-
-      this._dom.find('.lh-audit-group__summary', auditGroupElem)
-          .classList.add('lh-audit-group__summary--manual');
-
-      auditsGroupedByGroup[groupId].forEach(audit => {
-        auditGroupElem.appendChild(this._renderAudit(audit));
-      });
-
-      element.appendChild(auditGroupElem);
-    });
+    this._renderManualAudits(manualAudits, groupDefinitions, element);
 
     return element;
   }

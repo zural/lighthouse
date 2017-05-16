@@ -33,7 +33,7 @@ class PWAEachPageHasURL extends ManualAudit {
       category: 'PWA',
       name: 'pwa-each-page-has-url',
       helpText: 'Ensure individual pages are deep linkable via the URLs and that URLs are ' +
-          'unique for the purpose of shareability on social media.',
+          'unique for the purpose of shareability on social media. [Learn more](https://developers.google.com/web/progressive-web-apps/checklist#each-page-has-a-url).',
       description: 'Each page has a URL',
     }, super.meta);
   }

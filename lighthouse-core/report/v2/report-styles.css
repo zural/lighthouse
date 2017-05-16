@@ -27,7 +27,7 @@
   --fail-color: #df332f;
   --pass-color: #2b882f;
   --informative-color: #0c50c7;
-  --unknown-color: #757575;
+  --manual-color: #757575;
   --average-color: #ef6c00; /* md orange 800 */
   --warning-color: #ffab00; /* md amber a700 */
 
@@ -214,10 +214,10 @@ summary {
   background-size: var(--lh-score-icon-background-size);
 }
 
-.lh-score--unknown .lh-score__value::after {
+.lh-score--manual .lh-score__value::after {
   background: url('data:image/svg+xml;utf8,<svg width="12" height="12" viewBox="0 0 12 12" xmlns="http://www.w3.org/2000/svg"><title>manual</title><path d="M2 5h8v2H2z" fill="#fff" fill-rule="evenodd"/></svg>') no-repeat 50% 50%;
   background-size: 18px;
-  background-color: var(--unknown-color);
+  background-color: var(--manual-color);
   width: 20px;
   height:  20px;
   position: relative;
@@ -475,7 +475,7 @@ summary {
 
 .lh-audit-group__summary--manual::-webkit-details-marker {
   display: initial;
-  background: var(--unknown-color) !important;
+  background: var(--manual-color) !important;
 }
 
 .lh-audit-group__description {
