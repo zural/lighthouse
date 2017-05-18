@@ -637,9 +637,6 @@ span.lh-node:hover {
   padding-left: var(--expandable-indent);
 }
 
-.lh-audit-group[open] {
-}
-
 .lh-category > .lh-audit-group.lh-audit-group--manual {
   border-top: none;
   margin-left: var(--default-padding);
@@ -747,18 +744,6 @@ span.lh-node:hover {
 
 .lh-category:first-of-type {
   border: none;
-}
-
-.lh-category .lh-audit {
-}
-
-.lh-category .lh-audit-group {
-}
-
-.lh-category > .lh-audit-group {
-}
-
-.lh-category .lh-audit-group .lh-audit {
 }
 
 .lh-category > .lh-score {

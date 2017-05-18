@@ -148,33 +148,7 @@ class CategoryRenderer {
     
     const sparklineBarEl = this._dom.find('.lh-sparkline__bar', tmpl);
     sparklineBarEl.style.width = `${audit.result.rawValue / scale * 100}%`;
-/*
-    const element = this._dom.createElement('div',
-        `lh-timeline-metric lh-timeline-metric--${Util.calculateRating(audit.score)}`);
-
-    const sparklineContainerEl = this._dom.createChildOf(element, 'div',
-        'lh-timeline-metric__sparkline');
-    const titleEl = this._dom.createChildOf(element, 'div', 'lh-timeline-metric__title');
-    const titleNameEl = this._dom.createChildOf(titleEl, 'span', 'lh-timeline-metric__name');
-    const titleValueEl = this._dom.createChildOf(titleEl, 'span', 'lh-timeline-metric__value');
-    titleNameEl.textContent = audit.result.description;
-    titleValueEl.textContent = audit.result.displayValue;
-
-    if (typeof audit.result.rawValue !== 'number') {
-      const debugStrEl = this._dom.createChildOf(element, 'div', 'lh-debug');
-      debugStrEl.textContent = audit.result.debugString || 'Report error: no metric information';
-      return element;
-    }
-
-    const sparklineEl = this._dom.createChildOf(sparklineContainerEl, 'div',
-        'lh-sparkline lh-sparkline--thin');
-    const sparklineBarEl = this._dom.createChildOf(sparklineEl, 'div', 'lh-sparkline__bar');
-    sparklineBarEl.style.width = `${audit.result.rawValue / scale * 100}%`;
-
-    const descriptionEl = this._dom.createChildOf(element, 'div',
-        'lh-timeline-metric__description');
-    descriptionEl.appendChild(this._dom.convertMarkdownLinkSnippets(audit.result.helpText));
-*/
+    
     return tmpl;
   }
 
@@ -270,7 +244,6 @@ class CategoryRenderer {
   _renderPassedAuditsSection(elements) {
     const passedElem = this._renderAuditGroup({
       title: `${elements.length} Passed Audits`,
-      description: '',
     });
     elements.forEach(elem => passedElem.appendChild(elem));
     return passedElem;
@@ -382,7 +355,6 @@ class CategoryRenderer {
     if (passedAudits.length) {
       const passedElem = this._renderAuditGroup({
         title: `${passedAudits.length} passed audits`,
-        description: '',
       });
       passedAudits.forEach(audit => passedElem.appendChild(this._renderAudit(audit)));
       element.appendChild(passedElem);
