@@ -724,7 +724,6 @@ span.lh-node:hover {
 .lh-category {
   padding: var(--section-padding);
   border-top: 1px solid var(--report-border-color);
-  padding-left: calc(var(--section-padding) + var(--expandable-indent));
 }
 
 .lh-category:first-of-type {
@@ -745,8 +744,7 @@ span.lh-node:hover {
 
 .lh-category > .lh-score {
   font-size: var(--header-font-size);
-  padding-bottom: var(--default-padding);
-  margin-left: calc(0px - var(--expandable-indent));
+  padding-bottom: var(--lh-section-vpadding);
 }
 
 .lh-category > .lh-score .lh-score__value,
