@@ -15,6 +15,62 @@
  */
 
 .lh-vars {
+  --text-font-family: Roboto, Helvetica, Arial, sans-serif;
+  --monospace-font-family: 'Menlo', 'dejavu sans mono', 'Consolas', 'Lucida Console', monospace;
+  --body-font-size: 14px;
+  --body-line-height: 18px;
+  --subheader-font-size: 16px;
+  --subheader-line-height: 20px;
+  --header-font-size: 20px;
+  --header-line-height: 24px;
+  --title-font-size: 24px;
+  --title-line-height: 28px;
+  --caption-font-size: 12px;
+  --caption-line-height: 16px;
+  --default-padding: 12px;
+  --section-padding: 20px;
+  --section-indent: 16px;
+  --audit-group-indent: 16px;
+  --audit-indent: 16px;
+  --expandable-indent: 20px;
+  --secondary-text-color: #565656;
+  /*--accent-color: #3879d9;*/
+  --fail-color: #df332f;
+  --pass-color: #2b882f;
+  --informative-color: #0c50c7;
+  --manual-color: #757575;
+  --average-color: #ef6c00; /* md orange 800 */
+  --warning-color: #ffab00; /* md amber a700 */
+  --report-border-color: #ccc;
+  --report-secondary-border-color: #ebebeb;
+  --report-width: calc(60 * var(--body-font-size));
+  --report-menu-width: calc(20 * var(--body-font-size));
+  --report-content-width: calc(var(--report-width) + var(--report-menu-width));
+  --navitem-font-size: var(--body-font-size);
+  --navitem-line-height: var(--body-line-height);
+  --navitem-hpadding: var(--body-font-size);
+  --navitem-vpadding: calc(var(--navitem-line-height) / 2);
+  --lh-score-highlight-bg: #fafafa;
+  --lh-score-icon-background-size: 24px;
+  --lh-score-margin: 12px;
+  --lh-table-header-bg: #ccc;
+  --lh-table-higlight-bg: #fafafa;
+  --lh-sparkline-height: 8px;
+  --lh-sparkline-thin-height: 3px;
+  --lh-filmstrip-thumbnail-width: 60px;
+  --lh-audit-score-width: calc(5 * var(--body-font-size));
+  --lh-category-score-width: calc(5 * var(--body-font-size));
+  --lh-audit-vpadding: 8px;
+  --lh-audit-hgap: 12px;
+  --lh-audit-group-vpadding: 12px;
+  --lh-section-vpadding: 12px;
+  --pass-icon-url: url('data:image/svg+xml;utf8,<svg width="12" height="12" viewBox="0 0 12 12" xmlns="http://www.w3.org/2000/svg"><path stroke="#007F04" stroke-width="1.5" d="M1 5.75l3.5 3.5 6.5-6.5" fill="none" fill-rule="evenodd"/></svg>');
+  --fail-icon-url: url('data:image/svg+xml;utf8,<svg width="12" height="12" viewBox="0 0 12 12" xmlns="http://www.w3.org/2000/svg"><g stroke="#EE1D0A" stroke-width="1.5" fill="none" fill-rule="evenodd"><path d="M2 10l8-8M10 10L2 2"/></g></svg>');
+  --collapsed-icon-url: url('data:image/svg+xml;utf8,<svg width="12" height="12" viewBox="0 0 12 12" xmlns="http://www.w3.org/2000/svg"><g fill="none" fill-rule="evenodd"><path fill="none" d="M0 0h12v12H0z"/><path fill="#999" d="M3 2l6 4-6 4z"/></g></svg>');
+  --expanded-icon-url: url('data:image/svg+xml;utf8,<svg width="12" height="12" viewBox="0 0 12 12" xmlns="http://www.w3.org/2000/svg"><g fill="none" fill-rule="evenodd"><path fill="none" d="M0 0h12v12H0z"/><path fill="#999" d="M10 3L6 9 2 3z"/></g></svg>');
+}
+
+.lh-vars.lh-devtools {
   --text-font-family: '.SFNSDisplay-Regular', 'Helvetica Neue', 'Lucida Grande', sans-serif;
   --monospace-font-family: 'Menlo', 'dejavu sans mono', 'Consolas', 'Lucida Console', monospace;
   --body-font-size: 12px;
@@ -34,51 +90,10 @@
   --audit-indent: 16px;
   --expandable-indent: 16px;
 
-  --secondary-text-color: #565656;
-  /*--accent-color: #3879d9;*/
-  --fail-color: #df332f;
-  --pass-color: #2b882f;
-  --informative-color: #0c50c7;
-  --manual-color: #757575;
-  --average-color: #ef6c00; /* md orange 800 */
-  --warning-color: #ffab00; /* md amber a700 */
-
-  --report-border-color: #ccc;
-  --report-secondary-border-color: #ebebeb;
-  --report-width: calc(60 * var(--body-font-size));
-  --report-menu-width: calc(20 * var(--body-font-size));
-  --report-content-width: calc(var(--report-width) + var(--report-menu-width));
-  
-  --navitem-font-size: var(--body-font-size);
-  --navitem-line-height: var(--body-line-height);
-  --navitem-hpadding: var(--body-font-size);
-  --navitem-vpadding: calc(var(--navitem-line-height) / 2);
-
-  --lh-score-highlight-bg: #fafafa;
-  --lh-score-icon-background-size: 24px;
-  --lh-score-margin: 12px;
-
-  --lh-table-header-bg: #ccc;
-  --lh-table-higlight-bg: #fafafa;
-
-  --lh-sparkline-height: 8px;
-  --lh-sparkline-thin-height: 3px;
-  --lh-filmstrip-thumbnail-width: 60px;
-  --lh-audit-score-width: 60px;
-  --lh-category-score-width: 60px;
-
   --lh-audit-vpadding: 4px;
   --lh-audit-hgap: 12px;
   --lh-audit-group-vpadding: 8px;
   --lh-section-vpadding: 8px;
-  
-  --pass-icon-url: url('data:image/svg+xml;utf8,<svg width="12" height="12" viewBox="0 0 12 12" xmlns="http://www.w3.org/2000/svg"><path stroke="#007F04" stroke-width="1.5" d="M1 5.75l3.5 3.5 6.5-6.5" fill="none" fill-rule="evenodd"/></svg>');
-  
-  --fail-icon-url: url('data:image/svg+xml;utf8,<svg width="12" height="12" viewBox="0 0 12 12" xmlns="http://www.w3.org/2000/svg"><g stroke="#EE1D0A" stroke-width="1.5" fill="none" fill-rule="evenodd"><path d="M2 10l8-8M10 10L2 2"/></g></svg>');
-  
-  --collapsed-icon-url: url('data:image/svg+xml;utf8,<svg width="12" height="12" viewBox="0 0 12 12" xmlns="http://www.w3.org/2000/svg"><g fill="none" fill-rule="evenodd"><path fill="none" d="M0 0h12v12H0z"/><path fill="#999" d="M3 2l6 4-6 4z"/></g></svg>');
-  
-  --expanded-icon-url: url('data:image/svg+xml;utf8,<svg width="12" height="12" viewBox="0 0 12 12" xmlns="http://www.w3.org/2000/svg"><g fill="none" fill-rule="evenodd"><path fill="none" d="M0 0h12v12H0z"/><path fill="#999" d="M10 3L6 9 2 3z"/></g></svg>');
 }
 
 .lh-root * {
@@ -327,7 +342,7 @@ span.lh-node:hover {
   cursor: pointer;
   border: none;
   order: -1;
-  margin-right: 4px;
+  margin-right: calc(var(--expandable-indent) - 12px);
   align-self: flex-start;
 }
 
@@ -485,6 +500,10 @@ span.lh-node:hover {
   display: flex;
   align-items: flex-start;
   min-height: calc(var(--body-line-height) + var(--caption-line-height));
+}
+
+.lh-perf-hint__summary .lh-toggle-arrow {
+  margin-top: calc((var(--subheader-line-height) - 12px) / 2);  
 }
 
 .lh-perf-hint__title {
@@ -759,7 +778,7 @@ span.lh-node:hover {
 }
 
 .lh-category .lh-score__gauge .lh-gauge {
-  --circle-size: 40px;
+  --circle-size: calc(2.5 * var(--header-font-size));
 }
 
 /* Category snippet shouldnt have pointer cursor. */
