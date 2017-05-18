@@ -345,7 +345,6 @@ class CategoryRenderer {
 
     const nonPassedElem = this._renderAuditGroup({
       title: `${nonPassedAudits.length} failed audits`,
-      description: '',
     });
     nonPassedElem.open = true;
     nonPassedAudits.forEach(audit => nonPassedElem.appendChild(this._renderAudit(audit)));
