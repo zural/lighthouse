@@ -17,6 +17,8 @@
 
 'use strict';
 
+const log = require('../log.js');
+
 if (typeof global.window === 'undefined') {
   global.window = global;
 }
@@ -76,7 +78,18 @@ class TraceProcessor {
 
     const model = new traceviewer.Model();
     const importer = new traceviewer.importer.Import(model, io);
-    importer.importTraces([trace]);
+    const progressMeter = {
+      update(msg) {
+        log.log('TraceViewer', msg);
+      }
+    };
+
+    log.log('TracingProcessor', 'creating import task');
+    const importTask = importer.createImportTracesTask(progressMeter, [trace]);
+    log.log('TracingProcessor', 'running import task');
+    traceviewer.b.Task.RunSynchronously(importTask);
+    log.log('TracingProcessor', 'import complete');
+    // importer.importTraces([trace]);
 
     return model;
   }
