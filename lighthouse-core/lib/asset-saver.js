@@ -131,7 +131,7 @@ function saveAssets(artifacts, audits, pathWithBasename) {
     assets.forEach((data, index) => {
       const traceFilename = `${pathWithBasename}-${index}.trace.json`;
       log.log('AssetSaver', 'stringifying ' + traceFilename);
-      const traceContents = JSON.stringify(data.traceData, null, 2);
+      const traceContents = JSON.stringify(data.traceData);
       log.log('AssetSaver', 'saving trace file to disk');
       fs.writeFileSync(traceFilename, traceContents);
       log.log('AssetSaver', 'trace file saved to disk: ' + traceFilename);
