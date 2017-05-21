@@ -235,6 +235,7 @@ class Metrics {
    * @return {!Array} Pair of trace events (start/end)
    */
   synthesizeEventPair(metric) {
+    log.log('pwmetrics-events', `Sythesizing trace events for ${metric.name}`);
     // We'll masquerade our fake events to look mostly like navigationStart
     const eventBase = {
       pid: this._navigationStartEvt.pid,
@@ -253,6 +254,7 @@ class Metrics {
       ts: metric.ts,
       ph: 'e',
     });
+    log.log('pwmetrics-events', 'Sythesizing complete');
     return [fakeMeasureStartEvent, fakeMeasureEndEvent];
   }
 
@@ -261,13 +263,17 @@ class Metrics {
    */
   generateFakeEvents() {
     const fakeEvents = [];
+    log.log('pwmetrics-events', 'gathering metrics');
     const metrics = this.gatherMetrics();
+    log.log('pwmetrics-events', 'gathering complete');
     if (metrics.length === 0) {
       log.error('metrics-events', 'Metrics collection had errors, not synthetizing trace events');
       return [];
     }
 
+    log.log('pwmetrics-events', 'identifyNavigationStartEvt');
     this.identifyNavigationStartEvt(metrics);
+    log.log('pwmetrics-events', 'identification complete');
     if (!this._navigationStartEvt) {
       log.error('pwmetrics-events', 'Reference navigationStart not found');
       return [];
@@ -281,7 +287,7 @@ class Metrics {
         log.error('pwmetrics-events', `(${metric.name}) missing timestamp. Skipping…`);
         return;
       }
-      log.verbose('pwmetrics-events', `Sythesizing trace events for ${metric.name}`);
+      // log.verbose('pwmetrics-events', `Sythesizing trace events for ${metric.name}`);
       fakeEvents.push(...this.synthesizeEventPair(metric));
     });
     return fakeEvents;

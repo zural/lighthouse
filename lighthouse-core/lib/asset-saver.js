@@ -89,18 +89,23 @@ function prepareAssets(artifacts, audits) {
   const passNames = Object.keys(artifacts.traces);
   const assets = [];
 
+  log.log('AssetSaver', 'preparing assets');
   return passNames.reduce((chain, passName) => {
     const trace = artifacts.traces[passName];
     const devtoolsLog = artifacts.devtoolsLogs[passName];
 
+    log.log('AssetSaver', 'extracting screenshots for pass ' + passName);
     return chain.then(_ => artifacts.requestScreenshots(trace))
       .then(screenshots => {
         const traceData = Object.assign({}, trace);
         const screenshotsHTML = screenshotDump(screenshots);
 
         if (audits) {
+          log.log('AssetSaver', `generating fake events into pass ${passName}`);
           const evts = new Metrics(traceData.traceEvents, audits).generateFakeEvents();
+          log.log('AssetSaver', `pushing fake events into pass ${passName}`);
           traceData.traceEvents.push(...evts);
+          log.log('AssetSaver', `fake events complete for pass ${passName}`);
         }
         assets.push({
           traceData,
@@ -122,22 +127,29 @@ function prepareAssets(artifacts, audits) {
  */
 function saveAssets(artifacts, audits, pathWithBasename) {
   return prepareAssets(artifacts, audits).then(assets => {
+    log.log('AssetSaver', 'assets prepared.');
     assets.forEach((data, index) => {
       const traceFilename = `${pathWithBasename}-${index}.trace.json`;
-      fs.writeFileSync(traceFilename, JSON.stringify(data.traceData, null, 2));
-      log.log('trace file saved to disk', traceFilename);
+      log.log('AssetSaver', 'stringifying ' + traceFilename);
+      const traceContents = JSON.stringify(data.traceData, null, 2);
+      log.log('AssetSaver', 'saving trace file to disk');
+      fs.writeFileSync(traceFilename, traceContents);
+      log.log('AssetSaver', 'trace file saved to disk: ' + traceFilename);
 
       const devtoolsLogFilename = `${pathWithBasename}-${index}.devtoolslog.json`;
-      fs.writeFileSync(devtoolsLogFilename, JSON.stringify(data.devtoolsLog, null, 2));
-      log.log('devtools log saved to disk', devtoolsLogFilename);
+      log.log('AssetSaver', 'stringifying ' + devtoolsLogFilename);
+      const devtoolsContents = JSON.stringify(data.devtoolsLog, null, 2);
+      log.log('AssetSaver', 'saving devtools log to disk');
+      fs.writeFileSync(devtoolsLogFilename, devtoolsContents);
+      log.log('AssetSaver', 'devtools log saved to disk: ' + devtoolsLogFilename);
 
       const screenshotsHTMLFilename = `${pathWithBasename}-${index}.screenshots.html`;
       fs.writeFileSync(screenshotsHTMLFilename, data.screenshotsHTML);
-      log.log('screenshots saved to disk', screenshotsHTMLFilename);
+      log.log('AssetSaver', 'screenshots saved to disk: ' + screenshotsHTMLFilename);
 
       const screenshotsJSONFilename = `${pathWithBasename}-${index}.screenshots.json`;
       fs.writeFileSync(screenshotsJSONFilename, JSON.stringify(data.screenshots, null, 2));
-      log.log('screenshots saved to disk', screenshotsJSONFilename);
+      log.log('AssetSaver', 'screenshots saved to disk: ' + screenshotsJSONFilename);
     });
   });
 }
