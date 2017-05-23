@@ -130,25 +130,25 @@ class CategoryRenderer {
     const tmpl = this._dom.cloneTemplate('#tmpl-lh-timeline-metric', this._templateContext);
     const element = this._dom.find('.lh-timeline-metric', tmpl);
     element.classList.add(`lh-timeline-metric--${Util.calculateRating(audit.score)}`);
-    
+
     const titleEl = this._dom.find('.lh-timeline-metric__title', tmpl);
     titleEl.textContent = audit.result.description;
-    
+
     const valueEl = this._dom.find('.lh-timeline-metric__value', tmpl);
     valueEl.textContent = audit.result.displayValue;
-    
+
     const descriptionEl = this._dom.find('.lh-timeline-metric__description', tmpl);
     descriptionEl.appendChild(this._dom.convertMarkdownLinkSnippets(audit.result.helpText));
-    
+
     if (typeof audit.result.rawValue !== 'number') {
       const debugStrEl = this._dom.createChildOf(element, 'div', 'lh-debug');
       debugStrEl.textContent = audit.result.debugString || 'Report error: no metric information';
       return tmpl;
     }
-    
+
     const sparklineBarEl = this._dom.find('.lh-sparkline__bar', tmpl);
     sparklineBarEl.style.width = `${audit.result.rawValue / scale * 100}%`;
-    
+
     return tmpl;
   }
 
@@ -227,13 +227,13 @@ class CategoryRenderer {
     auditGroupSummary.appendChild(auditGroupHeader);
     auditGroupSummary.appendChild(auditGroupArrow);
     auditGroupElem.appendChild(auditGroupSummary);
-    
+
     if (group.description) {
       const auditGroupDescription = this._dom.createElement('div', 'lh-audit-group__description');
       auditGroupDescription.appendChild(this._dom.convertMarkdownLinkSnippets(group.description));
       auditGroupElem.appendChild(auditGroupDescription);
     }
-    
+
     return auditGroupElem;
   }
 
