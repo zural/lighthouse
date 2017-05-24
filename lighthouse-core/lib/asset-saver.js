@@ -17,6 +17,7 @@
 'use strict';
 
 const fs = require('fs');
+const stream = require('stream');
 const log = require('../../lighthouse-core/lib/log.js');
 const stringifySafe = require('json-stringify-safe');
 const Metrics = require('./traces/pwmetrics-events');
@@ -119,6 +120,65 @@ function prepareAssets(artifacts, audits) {
 }
 
 /**
+ * Generates a JSON representation of traceData line-by-line to avoid OOM due to
+ * very large traces.
+ * @param {{traceEvents: !Array}} traceData
+ * @return {!Iterator<string>}
+ */
+function* traceJsonGenerator(traceData) {
+  const keys = Object.keys(traceData);
+
+  yield '{\n';
+
+  // Stringify and emit trace events separately to avoid a giant string in memory.
+  yield '"traceEvents": [\n';
+  if (traceData.traceEvents.length > 0) {
+    const eventsIterator = traceData.traceEvents[Symbol.iterator]();
+    // Emit first item manually to avoid a trailing comma.
+    const firstEvent = eventsIterator.next().value;
+    yield `  ${JSON.stringify(firstEvent)}`;
+    for (const event of eventsIterator) {
+      yield `,\n  ${JSON.stringify(event)}`;
+    }
+  }
+  yield '\n]';
+
+  // Emit the rest of the object (usually just `metadata`)
+  if (keys.length > 1) {
+    for (const key of keys) {
+      if (key === 'traceEvents') continue;
+
+      yield `,\n"${key}": ${JSON.stringify(traceData[key], null, 2)}`;
+    }
+  }
+
+  yield '}\n';
+}
+
+/**
+ * Save the trace as JSON by streaming to disk at traceFilename.
+ * @param {{traceEvents: !Array}} traceData
+ * @param {string} traceFilename
+ * @return {!Promise}
+ */
+function saveTrace(traceData, traceFilename) {
+  return new Promise((resolve, reject) => {
+    const traceIter = traceJsonGenerator(traceData);
+    const traceStream = new stream.Readable({
+      read() {
+        const next = traceIter.next();
+        this.push(next.done ? null : next.value);
+      }
+    });
+
+    const ws = fs.createWriteStream(traceFilename);
+    traceStream.pipe(ws);
+    ws.on('finish', resolve);
+    ws.on('error', reject);
+  });
+}
+
+/**
  * Writes trace(s) and associated screenshot(s) to disk.
  * @param {!Artifacts} artifacts
  * @param {!Audits} audits
@@ -127,30 +187,30 @@ function prepareAssets(artifacts, audits) {
  */
 function saveAssets(artifacts, audits, pathWithBasename) {
   return prepareAssets(artifacts, audits).then(assets => {
-    log.log('AssetSaver', 'assets prepared.');
-    assets.forEach((data, index) => {
-      const traceFilename = `${pathWithBasename}-${index}.trace.json`;
-      log.log('AssetSaver', 'stringifying ' + traceFilename);
-      const traceContents = JSON.stringify(data.traceData);
-      log.log('AssetSaver', 'saving trace file to disk');
-      fs.writeFileSync(traceFilename, traceContents);
-      log.log('AssetSaver', 'trace file saved to disk: ' + traceFilename);
-
+    return Promise.all(assets.map((data, index) => {
       const devtoolsLogFilename = `${pathWithBasename}-${index}.devtoolslog.json`;
-      log.log('AssetSaver', 'stringifying ' + devtoolsLogFilename);
-      const devtoolsContents = JSON.stringify(data.devtoolsLog, null, 2);
-      log.log('AssetSaver', 'saving devtools log to disk');
-      fs.writeFileSync(devtoolsLogFilename, devtoolsContents);
-      log.log('AssetSaver', 'devtools log saved to disk: ' + devtoolsLogFilename);
+      fs.writeFileSync(devtoolsLogFilename, JSON.stringify(data.devtoolsLog, null, 2));
+      log.log('saveAssets', 'devtools log saved to disk: ' + devtoolsLogFilename);
 
       const screenshotsHTMLFilename = `${pathWithBasename}-${index}.screenshots.html`;
       fs.writeFileSync(screenshotsHTMLFilename, data.screenshotsHTML);
-      log.log('AssetSaver', 'screenshots saved to disk: ' + screenshotsHTMLFilename);
+      log.log('saveAssets', 'screenshots saved to disk: ' + screenshotsHTMLFilename);
 
       const screenshotsJSONFilename = `${pathWithBasename}-${index}.screenshots.json`;
       fs.writeFileSync(screenshotsJSONFilename, JSON.stringify(data.screenshots, null, 2));
-      log.log('AssetSaver', 'screenshots saved to disk: ' + screenshotsJSONFilename);
-    });
+      log.log('saveAssets', 'screenshots saved to disk: ' + screenshotsJSONFilename);
+
+      // const traceFilename = `${pathWithBasename}-${index}.trace.json`;
+      // log.log('saveAssets', 'saving trace file to disk: ' + traceFilename);
+      // fs.writeFileSync(traceFilename, JSON.stringify(data.traceData, null, 2));
+      // log.log('saveAssets', 'trace file saved to disk: ' + traceFilename);
+
+      const streamTraceFilename = `${pathWithBasename}-${index}.trace.json`;
+      log.log('saveAssets', 'streaming trace file to disk: ' + streamTraceFilename);
+      return saveTrace(data.traceData, streamTraceFilename).then(_ => {
+        log.log('saveAssets', 'trace file streamed to disk: ' + streamTraceFilename);
+      });
+    }));
   });
 }
 
