@@ -205,7 +205,7 @@ ReportRenderer.CategoryJSON; // eslint-disable-line no-unused-expressions
 /**
  * @typedef {{
  *     title: string,
- *     description: string,
+ *     description: (string|undefined),
  * }}
  */
 ReportRenderer.GroupJSON; // eslint-disable-line no-unused-expressions

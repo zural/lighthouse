@@ -143,13 +143,13 @@ class CategoryRenderer {
     if (typeof audit.result.rawValue !== 'number') {
       const debugStrEl = this._dom.createChildOf(element, 'div', 'lh-debug');
       debugStrEl.textContent = audit.result.debugString || 'Report error: no metric information';
-      return tmpl;
+      return element;
     }
 
     const sparklineBarEl = this._dom.find('.lh-sparkline__bar', tmpl);
     sparklineBarEl.style.width = `${audit.result.rawValue / scale * 100}%`;
 
-    return tmpl;
+    return element;
   }
 
   /**
@@ -245,6 +245,7 @@ class CategoryRenderer {
     const passedElem = this._renderAuditGroup({
       title: `${elements.length} Passed Audits`,
     });
+    passedElem.classList.add('lh-passed-audits');
     elements.forEach(elem => passedElem.appendChild(elem));
     return passedElem;
   }
@@ -266,6 +267,7 @@ class CategoryRenderer {
     Object.keys(auditsGroupedByGroup).forEach(groupId => {
       const group = groupDefinitions[groupId];
       const auditGroupElem = this._renderAuditGroup(group);
+      auditGroupElem.classList.add('lh-audit-group--manual');
 
       auditsGroupedByGroup[groupId].forEach(audit => {
         auditGroupElem.appendChild(this._renderAudit(audit));
@@ -352,10 +354,9 @@ class CategoryRenderer {
 
     // Create a passed section if there are passing audits.
     if (passedAudits.length) {
-      const passedElem = this._renderAuditGroup({
-        title: `${passedAudits.length} passed audits`,
-      });
-      passedAudits.forEach(audit => passedElem.appendChild(this._renderAudit(audit)));
+      const passedElem = this._renderPassedAuditsSection(
+        passedAudits.map(audit => this._renderAudit(audit))
+      );
       element.appendChild(passedElem);
     }
 
