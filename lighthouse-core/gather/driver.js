@@ -187,9 +187,10 @@ class Driver {
    * Call protocol methods
    * @param {!string} method
    * @param {!Object} params
+   * @param {{silent: boolean}=} cmdOpts
    * @return {!Promise}
    */
-  sendCommand(method, params) {
+  sendCommand(method, params, cmdOpts) {
     const domainCommand = /^(\w+)\.(enable|disable)$/.exec(method);
     if (domainCommand) {
       const enable = domainCommand[2] === 'enable';
@@ -198,7 +199,7 @@ class Driver {
       }
     }
 
-    return this._connection.sendCommand(method, params);
+    return this._connection.sendCommand(method, params, cmdOpts);
   }
 
   /**
@@ -382,9 +383,8 @@ class Driver {
   }
 
   /**
-   * Returns a promise that resolves when the network has been idle for
-   * `networkQuietThresholdMs` ms and a method to cancel internal network listeners and
-   * timeout.
+   * Returns a promise that resolves when the network has been idle (after DCL) for
+   * `networkQuietThresholdMs` ms and a method to cancel internal network listeners/timeout.
    * @param {number} networkQuietThresholdMs
    * @param {number} pauseAfterNetworkQuietMs
    * @return {{promise: !Promise, cancel: function()}}
@@ -409,17 +409,21 @@ class Driver {
         clearTimeout(idleTimeout);
       };
 
+      const domContentLoadedListener = () => {
+        if (this._networkStatusMonitor.is2Idle()) {
+          onIdle();
+        } else {
+          onBusy();
+        }
+      };
+
+      this.once('Page.domContentEventFired', domContentLoadedListener);
       cancel = () => {
         clearTimeout(idleTimeout);
+        this.off('Page.domContentEventFired', domContentLoadedListener);
         this._networkStatusMonitor.removeListener('network-2-busy', onBusy);
         this._networkStatusMonitor.removeListener('network-2-idle', onIdle);
       };
-
-      if (this._networkStatusMonitor.is2Idle()) {
-        onIdle();
-      } else {
-        onBusy();
-      }
     }).then(() => {
       // Once idle has been determined wait another pauseAfterLoadMs
       return new Promise(resolve => setTimeout(resolve, pauseAfterNetworkQuietMs));
@@ -710,7 +714,21 @@ class Driver {
 
     // Enable Page domain to wait for Page.loadEventFired
     return this.sendCommand('Page.enable')
+      // ensure tracing is stopped before we can start
+      // see https://github.com/GoogleChrome/lighthouse/issues/1091
+      .then(_ => this.endTraceIfStarted())
       .then(_ => this.sendCommand('Tracing.start', tracingOpts));
+  }
+
+  endTraceIfStarted() {
+    return new Promise((resolve) => {
+      const traceCallback = () => resolve();
+      this.once('Tracing.tracingComplete', traceCallback);
+      return this.sendCommand('Tracing.end', undefined, {silent: true}).catch(() => {
+        this.off('Tracing.tracingComplete', traceCallback);
+        traceCallback();
+      });
+    });
   }
 
   endTrace() {
