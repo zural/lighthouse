@@ -118,7 +118,9 @@ describe('CategoryRenderer', () => {
     const audit = {result: auditResult, score: 100};
     const category = {name: 'Fake', description: '', score: 100, audits: [audit]};
     const categoryDOM = renderer.render(category, sampleResults.reportGroups);
-    assert.ok(categoryDOM.querySelector('.lh-category > .lh-audit'), 'did not render as failed');
+    assert.ok(categoryDOM.querySelector(
+        '.lh-category > .lh-audit-group:not(.lh-passed-audits) > .lh-audit'),
+        'did not render as failed');
     assert.ok(categoryDOM.querySelector('.lh-debug'), 'did not render debug message');
   });
 
