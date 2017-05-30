@@ -261,10 +261,12 @@ span.lh-node:hover {
 
 .lh-score--informative .lh-score__value::after {
   display: none;
+  background: url('data:image/svg+xml;utf8,<svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>info</title><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z" fill="hsl(218, 89%, 41%)"/></svg>') no-repeat 50% 50%;
+  background-size: var(--lh-score-icon-background-size);
 }
 
 .lh-score--manual .lh-score__value::after {
-  background: url('data:image/svg+xml;utf8,<svg width="12" height="12" viewBox="0 0 12 12" xmlns="http://www.w3.org/2000/svg"><title>manual</title><path d="M2 5h8v2H2z" fill="#fff" fill-rule="evenodd"/></svg>') no-repeat 50% 50%;
+  background: url('data:image/svg+xml;utf8,<svg width="12" height="12" viewBox="0 0 12 12" xmlns="http://www.w3.org/2000/svg"><title>manual</title><path d="M2 5h8v2H2z" fill="hsl(0, 0%, 100%)" fill-rule="evenodd"/></svg>') no-repeat 50% 50%;
   background-size: 18px;
   background-color: var(--manual-color);
   width: 20px;
@@ -333,6 +335,7 @@ span.lh-node:hover {
 }
 
 .lh-toggle-arrow {
+<<<<<<< HEAD
   background: var(--collapsed-icon-url) no-repeat center center / 12px 12px;
   background-color: transparent;
   width: 12px;
@@ -692,7 +695,7 @@ span.lh-node:hover {
 .lh-debug::before {
   display: none;
   content: '';
-  background: url('data:image/svg+xml;utf8,<svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>warn</title><path d="M0 0h24v24H0z" fill="none"/><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z" fill="#FFAB00"/></svg>') no-repeat 50% 50%;
+  background: url('data:image/svg+xml;utf8,<svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>warn</title><path d="M0 0h24v24H0z" fill="none"/><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z" fill="hsl(40, 100%, 50%)"/></svg>') no-repeat 50% 50%;
   background-size: contain;
   width: 20px;
   height: 20px;
