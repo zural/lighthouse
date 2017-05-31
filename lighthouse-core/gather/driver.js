@@ -929,11 +929,10 @@ class Driver {
       this.on('Page.javascriptDialogOpening', data => {
         log.warn('Driver', `${data.type} dialog opened by the page automatically suppressed.`);
 
-        // rejection intentionally unhandled
         this.sendCommand('Page.handleJavaScriptDialog', {
           accept: true,
           promptText: 'Lighthouse prompt response',
-        });
+        }).catch(err => log.error('driver', err.message));
       });
     });
   }
