@@ -37,7 +37,7 @@ def restart_builds
   repository = Travis::Repository.find('GoogleChrome/lighthouse')
   repository.each_build do |build|
     # failed builds are failed. errored = timed out, or another problem.
-    next unless build.errored? or build.failed? or build.started?
+    next unless build.errored? or build.failed?
 
     # only consider builds from the last 3 days
     next if build.started_at.nil?
@@ -56,13 +56,6 @@ def restart_builds
     puts "  Build #{build.number} #{build.state} #{to_pretty(build.started_at)}. Looking at jobs..."
 
     build.jobs.each do |job|
-
-      if job.started? and job.log.body.include? "Could not handle JavaScript dialog"
-        puts "  👺  Job #{job.number} started to fail because of handleJavaScriptDialog 🔳  "
-        puts "      Restarting job #{job.number}"
-        job.restart
-        next
-      end
 
       if job.failed? and job.log.body.include? "Could not handle JavaScript dialog"
         puts "  👺  Job #{job.number} failed because of handleJavaScriptDialog 🔳  "
