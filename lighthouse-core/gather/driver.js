@@ -926,13 +926,16 @@ class Driver {
    */
   dismissJavaScriptDialogs() {
     return this.sendCommand('Page.enable').then(_ => {
+      // No need to wait for this event bind to complete, so no promise returned
       this.on('Page.javascriptDialogOpening', data => {
         log.warn('Driver', `${data.type} dialog opened by the page automatically suppressed.`);
-
+        // In some cases, handleJavaScriptDialog will reject, but it appears to only happen when the
+        // the dialog already dismissed.
+        // Since it's handled and no longer blocking the page, we're happy.
         this.sendCommand('Page.handleJavaScriptDialog', {
           accept: true,
           promptText: 'Lighthouse prompt response',
-        }).catch(err => log.error('driver', err.message));
+        }).catch(err => log.warn('Driver', err.message));
       });
     });
   }
