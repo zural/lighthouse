@@ -64,7 +64,7 @@ function runLighthouse(url, configPath, saveAssetsPath) {
     url,
     `--config-path=${configPath}`,
     '--output=json',
-    '--quiet',
+    // '--quiet',
     '--port=0'
   ];
 
