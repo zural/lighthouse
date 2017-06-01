@@ -92,8 +92,11 @@ function runLighthouse(url, configPath, saveAssetsPath) {
     console.error(`Lighthouse debugger connection timed out ${RETRIES} times. Giving up.`);
     process.exit(1);
   } else if (runResults.status !== 0) {
-    console.error(`Lighthouse run failed with exit code ${runResults.status}. stderr to follow:`);
+    console.error(`Lighthouse run failed with exit code ${runResults.status}. stderr:`);
     console.error(runResults.stderr);
+    console.error('stdout:');
+    console.error(runResults.stdout);
+
     process.exit(runResults.status);
   }
 
