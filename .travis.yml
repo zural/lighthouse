@@ -26,6 +26,7 @@ before_script:
   - export LIGHTHOUSE_CHROMIUM_PATH="$(pwd)/chrome-linux/chrome"
   - sh -e /etc/init.d/xvfb start
   - ./lighthouse-core/scripts/download-chrome.sh
+  - gulp;
 script:
   - bash lighthouse-cli/test/smokehouse/dobetterweb/run-tests.sh
   - bash lighthouse-cli/test/smokehouse/dobetterweb/run-tests.sh
