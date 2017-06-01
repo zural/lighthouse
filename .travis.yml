@@ -22,22 +22,14 @@ cache:
 install:
   - yarn install-all
 before_script:
-  - gem install travis-artifacts
   - export DISPLAY=:99.0
   - export LIGHTHOUSE_CHROMIUM_PATH="$(pwd)/chrome-linux/chrome"
   - sh -e /etc/init.d/xvfb start
   - ./lighthouse-core/scripts/download-chrome.sh
-  - yarn build-all
 script:
-  - yarn test-cli-formatting
-  - yarn test-launcher-formatting
-  - yarn lint
-  - yarn unit
-  - yarn closure
-  - yarn smoke
-  - yarn smokehouse
-  - yarn compile-devtools
-after_success:
-  - yarn coveralls
-after_failure:
-  - grep 'No screenshots' perf.json && travis-artifacts upload --path perf-0.trace.json
+  - bash lighthouse-cli/test/smokehouse/dobetterweb/run-tests.sh
+  - bash lighthouse-cli/test/smokehouse/dobetterweb/run-tests.sh
+  - bash lighthouse-cli/test/smokehouse/dobetterweb/run-tests.sh
+  - bash lighthouse-cli/test/smokehouse/dobetterweb/run-tests.sh
+  - bash lighthouse-cli/test/smokehouse/dobetterweb/run-tests.sh
+  - bash lighthouse-cli/test/smokehouse/dobetterweb/run-tests.sh
