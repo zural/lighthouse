@@ -60,6 +60,7 @@ function resolveLocalOrCwd(payloadPath) {
 function runLighthouse(url, configPath, saveAssetsPath) {
   const command = 'node';
   const args = [
+    '--trace-warnings',
     'lighthouse-cli/index.js',
     url,
     `--config-path=${configPath}`,
