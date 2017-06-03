@@ -37,6 +37,12 @@ const Config = require('./config/config');
  *
  */
 
+process.on('unhandledRejection', function(err) {
+  log.error('promise', 'Unhandled rejection.');
+  log.error('promise', err.message, err.stack);
+  throw new Error('unhandled rejection, terminating');
+});
+
 module.exports = function(url, flags = {}, configJSON) {
   const startTime = Date.now();
   return Promise.resolve().then(_ => {
