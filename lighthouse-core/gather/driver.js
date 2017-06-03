@@ -198,8 +198,22 @@ class Driver {
         return Promise.resolve();
       }
     }
+    const waitTimeout = 10 * 1000;
+    let waitTimeoutHandle;
 
-    return this._connection.sendCommand(method, params, cmdOpts);
+    const waitTimeoutPromise = new Promise(resolve => {
+      waitTimeoutHandle = setTimeout(resolve, waitTimeout);
+    }).then(_ => {
+      return Promise.reject(new Error(`sendCommand of ${method} took over 10s to respond`));
+    });
+
+    const sendCommandPromise = this._connection.sendCommand(method, params, cmdOpts);
+
+    return Promise.race([waitTimeoutPromise, sendCommandPromise])
+      .then(data => {
+        clearTimeout(waitTimeoutHandle);
+        return data;
+      });
   }
 
   /**
