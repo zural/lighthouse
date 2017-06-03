@@ -938,9 +938,8 @@ class Driver {
    * @return {!Promise}
    */
   dismissJavaScriptDialogs() {
-    const waitForDismiss = 300;
+    const waitForDismiss = 2000;
     const silent = {silent: true};
-
 
     return this.sendCommand('Page.enable').then(_ => {
       // No need to wait for this event bind to complete, so no promise returned
