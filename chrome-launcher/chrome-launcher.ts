@@ -185,7 +185,8 @@ export class Launcher {
 
       this.fs.writeFileSync(this.pidFile, chrome.pid.toString());
 
-      console.error('ChromeLauncher', `Chrome running with pid ${chrome.pid} on port ${this.port}.`);
+      console.error(
+          'ChromeLauncher', `Chrome running with pid ${chrome.pid} on port ${this.port}.`);
       resolve(chrome.pid);
     });
 
