@@ -6,8 +6,9 @@
 'use strict';
 
 import {Launcher} from '../chrome-launcher';
-
 import * as assert from 'assert';
+
+/* eslint-env mocha */
 
 const log = require('lighthouse-logger');
 const fsMock = {

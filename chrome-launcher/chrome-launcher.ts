@@ -23,6 +23,8 @@ const _SUPPORTED_PLATFORMS = new Set(['darwin', 'linux', 'win32']);
 
 type SupportedPlatforms = 'darwin'|'linux'|'win32';
 
+log.setLevel('verbose');
+
 export interface Options {
   startingUrl?: string;
   chromeFlags?: Array<string>;
@@ -123,7 +125,7 @@ export class Launcher {
     // you can't pass a fd to fs.writeFileSync
     this.pidFile = `${this.userDataDir}/chrome.pid`;
 
-    log.verbose('ChromeLauncher', `created ${this.userDataDir}`);
+    console.error('ChromeLauncher', `created ${this.userDataDir}`);
 
     this.tmpDirandPidFileReady = true;
   }
@@ -176,13 +178,14 @@ export class Launcher {
         this.port = await getRandomPort();
       }
 
+      console.error('ChromeLauncher', `Launching Chrome`, this.flags);
       const chrome = spawn(
           execPath, this.flags, {detached: true, stdio: ['ignore', this.outFile, this.errFile]});
       this.chrome = chrome;
 
       this.fs.writeFileSync(this.pidFile, chrome.pid.toString());
 
-      log.verbose('ChromeLauncher', `Chrome running with pid ${chrome.pid} on port ${this.port}.`);
+      console.error('ChromeLauncher', `Chrome running with pid ${chrome.pid} on port ${this.port}.`);
       resolve(chrome.pid);
     });
 

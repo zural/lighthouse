@@ -18,6 +18,7 @@
 import * as assert from 'assert';
 import {getRandomPort} from '../random-port';
 
+/* eslint-env mocha */
 describe('Random port generation', () => {
   it('generates a valid random port number', () => {
     return getRandomPort().then(port => {
