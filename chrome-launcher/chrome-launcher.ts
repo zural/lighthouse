@@ -30,6 +30,7 @@ export interface Options {
   handleSIGINT?: boolean;
   chromePath?: string;
   userDataDir?: string;
+  noDefaultFlags?: boolean;
 }
 
 export interface LaunchedChrome {
@@ -38,9 +39,14 @@ export interface LaunchedChrome {
   kill: () => Promise<{}>;
 }
 
-export interface ModuleOverrides { fs?: typeof fs, rimraf?: typeof rimraf, }
+export interface ModuleOverrides {
+  fs?: typeof fs;
+  rimraf?: typeof rimraf;
+  spawn?: typeof childProcess.spawn;
+}
 
 export async function launch(opts: Options = {}): Promise<LaunchedChrome> {
+  opts.noDefaultFlags = defaults(opts.noDefaultFlags, false);
   opts.handleSIGINT = defaults(opts.handleSIGINT, true);
 
   const instance = new Launcher(opts);
@@ -71,6 +77,7 @@ export class Launcher {
   private chrome?: childProcess.ChildProcess;
   private fs: typeof fs;
   private rimraf: typeof rimraf;
+  private spawn: typeof childProcess.spawn;
 
   userDataDir?: string;
   port?: number;
@@ -79,6 +86,7 @@ export class Launcher {
   constructor(private opts: Options = {}, moduleOverrides: ModuleOverrides = {}) {
     this.fs = moduleOverrides.fs || fs;
     this.rimraf = moduleOverrides.rimraf || rimraf;
+    this.spawn = moduleOverrides.spawn || spawn;
 
     // choose the first one (default)
     this.startingUrl = defaults(this.opts.startingUrl, 'about:blank');
@@ -88,18 +96,24 @@ export class Launcher {
   }
 
   private get flags() {
-    const flags = DEFAULT_FLAGS.concat([
-      `--remote-debugging-port=${this.port}`,
+    // Event if a user ignores default flags these flags are required to do a
+    // proper lifecycle cleanup as well as to drive chrome.
+    const requiredFlags = [
       // Place Chrome profile in a custom location we'll rm -rf later
-      `--user-data-dir=${this.userDataDir}`
-    ]);
+      `--remote-debugging-port=${this.port}`, `--user-data-dir=${this.userDataDir}`
+    ];
+
+    if (this.opts.noDefaultFlags === true) {
+      return requiredFlags.concat([this.startingUrl]);
+    }
+
+    const flags = DEFAULT_FLAGS.concat(requiredFlags);
 
     if (process.platform === 'linux') {
       flags.push('--disable-setuid-sandbox');
     }
 
-    flags.push(...this.chromeFlags);
-    flags.push(this.startingUrl);
+    flags.push(...this.chromeFlags, this.startingUrl);
 
     return flags;
   }
@@ -155,11 +169,11 @@ export class Launcher {
       this.chromePath = installations[0];
     }
 
-    this.pid = await this.spawn(this.chromePath);
+    this.pid = await this.spawnChromeProcess(this.chromePath);
     return Promise.resolve();
   }
 
-  private async spawn(execPath: string) {
+  private async spawnChromeProcess(execPath: string) {
     // Typescript is losing track of the return type without the explict typing.
     const spawnPromise: Promise<number> = new Promise(async (resolve) => {
       if (this.chrome) {
@@ -176,7 +190,7 @@ export class Launcher {
         this.port = await getRandomPort();
       }
 
-      const chrome = spawn(
+      const chrome = this.spawn(
           execPath, this.flags, {detached: true, stdio: ['ignore', this.outFile, this.errFile]});
       this.chrome = chrome;
 
@@ -216,7 +230,7 @@ export class Launcher {
   }
 
   // resolves when debugger is ready, rejects after 10 polls
-  private waitUntilReady() {
+  waitUntilReady() {
     const launcher = this;
 
     return new Promise((resolve, reject) => {
