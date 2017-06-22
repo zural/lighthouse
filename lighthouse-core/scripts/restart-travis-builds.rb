@@ -1,3 +1,9 @@
+##
+# @license Copyright 2017 Google Inc. All Rights Reserved.
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+# Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
+##
+
 # @fileoverview This script restarts travis builds that have either:
 #   1) timed out due to flakiness
 #   2) failed due to no screenshots collected in the trace.
@@ -37,7 +43,7 @@ def restart_builds
   repository = Travis::Repository.find('GoogleChrome/lighthouse')
   repository.each_build do |build|
     # failed builds are failed. errored = timed out, or another problem.
-    next unless build.errored? or build.failed?
+    next unless build.errored? or build.failed? or build.started?
 
     # only consider builds from the last 3 days
     next if build.started_at.nil?
@@ -53,9 +59,24 @@ def restart_builds
     # skip old builds (more than 1 day old)
     next if build.started_at < Time.now.to_date.prev_day(1).to_time
 
-    puts "😱  Build #{build.number} #{build.state} #{to_pretty(build.started_at)}. Looking at jobs..."
+    puts "  Build #{build.number} #{build.state} #{to_pretty(build.started_at)}. Looking at jobs..."
 
     build.jobs.each do |job|
+
+      if job.started? and job.log.body.include? "Could not handle JavaScript dialog"
+        puts "  👺  Job #{job.number} started to fail because of handleJavaScriptDialog 🔳  "
+        puts "      Restarting job #{job.number}"
+        job.restart
+        next
+      end
+
+      if job.failed? and job.log.body.include? "Could not handle JavaScript dialog"
+        puts "  👺  Job #{job.number} failed because of handleJavaScriptDialog 🔳  "
+        puts "      Restarting job #{job.number}"
+        job.restart
+        next
+      end
+
       if job.failed? and job.log.body.include? "No screenshots found in trace"
         puts "  👺  Job #{job.number} failed because of screenshots 🖼 "
         puts "      Restarting job #{job.number}"

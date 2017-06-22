@@ -1,23 +1,14 @@
 /**
- * Copyright 2016 Google Inc. All rights reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * @license Copyright 2016 Google Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
  */
 'use strict';
 
 /* eslint-env mocha */
 
 const assert = require('assert');
+const fs = require('fs');
 const pwaTrace = require('../../fixtures/traces/progressive-app.json');
 const threeFrameTrace = require('../../fixtures/traces/threeframes-blank_content_more.json');
 const Runner = require('../../../runner.js');
@@ -69,6 +60,22 @@ describe('Speedline gatherer', () => {
         assert.equal(firstResult, speedline, 'Cache match matches');
 
         return assert.equal(Math.floor(speedline.speedIndex), 561);
+      });
+  });
+
+  it('does not change order of events in traces', () => {
+    // Use fresh trace in case it has been altered by other require()s.
+    const pwaJson = fs.readFileSync(__dirname +
+        '/../../fixtures/traces/progressive-app.json', 'utf8');
+    const pwaTrace = JSON.parse(pwaJson);
+    return computedArtifacts.requestSpeedline({traceEvents: pwaTrace})
+      .then(_ => {
+        // assert.deepEqual has issue with diffing large array, so manually loop.
+        const freshTrace = JSON.parse(pwaJson);
+        assert.strictEqual(pwaTrace.length, freshTrace.length);
+        for (let i = 0; i < pwaTrace.length; i++) {
+          assert.deepStrictEqual(pwaTrace[i], freshTrace[i]);
+        }
       });
   });
 });

@@ -1,17 +1,7 @@
 /**
- * Copyright 2017 Google Inc. All rights reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * @license Copyright 2017 Google Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
  */
 'use strict';
 
@@ -19,6 +9,7 @@ const TraceOfTab = require('../../../gather/computed/trace-of-tab');
 const traceOfTab = new TraceOfTab();
 
 const assert = require('assert');
+const fs = require('fs');
 const badNavStartTrace = require('../../fixtures/traces/bad-nav-start-ts.json');
 const lateTracingStartedTrace = require('../../fixtures/traces/tracingstarted-after-navstart.json');
 const preactTrace = require('../../fixtures/traces/preactjs.com_ts_of_undefined.json');
@@ -53,11 +44,11 @@ describe('Trace of Tab computed artifact:', () => {
 
   it('computes timestamps of each event', () => {
     const trace = traceOfTab.compute_(lateTracingStartedTrace);
-    assert.equal(Math.round(trace.timestamps.navigationStart), 29343541);
-    assert.equal(Math.round(trace.timestamps.firstPaint), 29343621);
-    assert.equal(Math.round(trace.timestamps.firstContentfulPaint), 29343621);
-    assert.equal(Math.round(trace.timestamps.firstMeaningfulPaint), 29344071);
-    assert.equal(Math.round(trace.timestamps.traceEnd), 29344190);
+    assert.equal(Math.round(trace.timestamps.navigationStart), 29343540951);
+    assert.equal(Math.round(trace.timestamps.firstPaint), 29343620997);
+    assert.equal(Math.round(trace.timestamps.firstContentfulPaint), 29343621005);
+    assert.equal(Math.round(trace.timestamps.firstMeaningfulPaint), 29344070867);
+    assert.equal(Math.round(trace.timestamps.traceEnd), 29344190223);
   });
 
   describe('finds correct FMP', () => {
@@ -114,5 +105,35 @@ describe('Trace of Tab computed artifact:', () => {
     );
     assert.equal(trace.firstContentfulPaintEvt, undefined, 'bad fcp');
     assert.equal(trace.firstMeaningfulPaintEvt, undefined, 'bad fmp');
+  });
+
+  it('stably sorts events', () => {
+    const traceJson = fs.readFileSync(__dirname +
+        '/../../fixtures/traces/tracingstarted-after-navstart.json', 'utf8');
+    const trace = traceOfTab.compute_(JSON.parse(traceJson));
+    const mainPid = trace.mainThreadEvents[0].pid;
+
+    const freshProcessEvents = JSON.parse(traceJson).traceEvents
+        .filter(e => e.pid === mainPid);
+
+    // Group all events with the same timestamp in original trace order.
+    const tsMap = new Map();
+    for (const event of freshProcessEvents) {
+      const tsGroup = tsMap.get(event.ts) || [];
+      tsGroup.push(event);
+      tsMap.set(event.ts, tsGroup);
+    }
+
+    // Assert that groups of same-timestamped events are in the same order in
+    // processed events.
+    for (const [ts, tsGroup] of tsMap) {
+      if (tsGroup.length === 1) {
+        continue;
+      }
+
+      // .filter overhead could be slow, but only a handful of tsGroups.
+      const sortedEvents = trace.processEvents.filter(e => e.ts === ts);
+      assert.deepStrictEqual(sortedEvents, tsGroup);
+    }
   });
 });

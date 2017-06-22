@@ -1,17 +1,7 @@
 /**
- * Copyright 2016 Google Inc. All rights reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * @license Copyright 2016 Google Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
  */
 'use strict';
 
@@ -172,6 +162,30 @@ describe('URL Shim', () => {
       assert.equal(getResult('/img/logo.jpg'), 'g.co/img/logo.jpg');
       assert.equal(getResult('//logo.jpg'), 'g.co//logo.jpg');
       assert.equal(getResult('/a/b/logo.jpg'), 'g.co/\u2026b/logo.jpg');
+    });
+  });
+
+  describe('elideDataURI', () => {
+    it('elides long data URIs', () => {
+      let longDataURI = '';
+      for (let i = 0; i < 1000; i++) {
+        longDataURI += 'abcde';
+      }
+
+      const elided = URL.elideDataURI(`data:image/jpeg;base64,${longDataURI}`);
+      assert.ok(elided.length < longDataURI.length, 'did not shorten string');
+    });
+
+    it('returns all other inputs', () => {
+      const urls = [
+        'data:image/jpeg;base64,foobar',
+        'https://example.com/page?query=string#hash',
+        'http://example-2.com',
+        'chrome://settings',
+        'blob://something',
+      ];
+
+      urls.forEach(url => assert.equal(URL.elideDataURI(url), url));
     });
   });
 

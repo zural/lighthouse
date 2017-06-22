@@ -1,17 +1,7 @@
 /**
- * Copyright 2016 Google Inc. All rights reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * @license Copyright 2016 Google Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
  */
 'use strict';
 
@@ -49,7 +39,7 @@ describe('Security: HTTPS audit', () => {
     ])).then(result => {
       assert.strictEqual(result.rawValue, false);
       assert.ok(result.displayValue.includes('request found'));
-      assert.deepEqual(result.extendedInfo.value[0], {url: 'insecure.com/image.jpeg'});
+      assert.deepEqual(result.extendedInfo.value[0], {url: 'http://insecure.com/image.jpeg'});
     });
   });
 
@@ -77,6 +67,7 @@ describe('Security: HTTPS audit', () => {
       assert.strictEqual(Audit.isSecureRecord({scheme: 'wss', domain: 'my-service.com'}), true);
       assert.strictEqual(Audit.isSecureRecord({scheme: 'data', domain: ''}), true);
       assert.strictEqual(Audit.isSecureRecord({scheme: 'blob', domain: ''}), true);
+      assert.strictEqual(Audit.isSecureRecord({scheme: '', protocol: 'blob', domain: ''}), true);
       assert.strictEqual(Audit.isSecureRecord({scheme: 'chrome', domain: ''}), true);
       assert.strictEqual(Audit.isSecureRecord({scheme: 'chrome-extension', domain: ''}), true);
     });

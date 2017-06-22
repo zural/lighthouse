@@ -54,19 +54,6 @@ both why the audit is important and how to fix it.
 
 # For Maintainers
 
-## Updating traceviewer source
-
-```sh
-cd lighthouse-core
-# if not already there, clone catapult and copy license over
-git clone --depth=1 https://github.com/catapult-project/catapult.git third_party/src/catapult
-cp third_party/src/catapult/LICENSE third_party/traceviewer-js/
-# pull for latest
-git -C "./third_party/src/catapult/" pull
-# run our conversion script
-node scripts/build-traceviewer-module.js
-```
-
 ## Release guide
 
 ```sh
@@ -110,7 +97,7 @@ echo "Upload the package zip to CWS dev dashboard"
 
 echo "Verify the npm package won't include unncessary files"
 yarn global add irish-pub pkgfiles
-irish-pub; pkgfiles;  
+irish-pub; pkgfiles;
 
 echo "ship it"
 npm publish
@@ -121,6 +108,18 @@ echo "Generate the release notes, and update the release page"
 
 # * Tell the world!!! *
 echo "Inform various peoples"
+```
+
+### Releasing chrome launcher.
+
+```sh
+cd chrome-launcher
+echo "build the launcher source code"
+yarn build
+yarn version --no-git-tag-version
+git commit -am "launcher to 0.x.x"
+echo "commit (but without a tag, as it gets mixed up with LH rls tags)"
+npm publish
 ```
 
 ### Canary release

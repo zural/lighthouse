@@ -1,18 +1,7 @@
 /**
- * @license
- * Copyright 2016 Google Inc. All rights reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * @license Copyright 2016 Google Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
  */
 'use strict';
 
@@ -21,7 +10,7 @@ const GatherRunner = require('./gather/gather-runner');
 const ReportGeneratorV2 = require('./report/v2/report-generator');
 const Audit = require('./audits/audit');
 const emulation = require('./lib/emulation');
-const log = require('./lib/log');
+const log = require('lighthouse-logger');
 const fs = require('fs');
 const path = require('path');
 const URL = require('./lib/url-shim');
@@ -128,7 +117,7 @@ class Runner {
       return Promise.reject(err);
     }
 
-    // Format and aggregate results before returning.
+    // Format and generate JSON report before returning.
     run = run
       .then(runResults => {
         log.log('status', 'Generating results...');
@@ -138,14 +127,12 @@ class Runner {
           return results;
         }, {});
 
-        let aggregations = [];
         let reportCategories = [];
         let score = 0;
         if (config.categories) {
           const reportGenerator = new ReportGeneratorV2();
           const report = reportGenerator.generateReportJson(config, resultsById);
           reportCategories = report.categories;
-          aggregations = report.aggregations;
           score = report.score;
         }
 
@@ -161,7 +148,6 @@ class Runner {
           score,
           reportCategories,
           reportGroups: config.groups,
-          aggregations
         };
       });
 
