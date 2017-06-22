@@ -147,6 +147,7 @@ class DetailsRenderer {
     if (!details.items.length) return this._dom.createElement('span');
 
     const element = this._dom.createElement('details', 'lh-details');
+    element.open = true;
     if (details.header) {
       element.appendChild(this._dom.createElement('summary')).textContent = details.header;
     }
