@@ -325,7 +325,6 @@ span.lh-node:hover {
 }
 
 .lh-toggle-arrow {
-<<<<<<< HEAD
   background: var(--collapsed-icon-url) no-repeat center center / 12px 12px;
   background-color: transparent;
   width: 12px;
@@ -496,7 +495,7 @@ span.lh-node:hover {
 }
 
 .lh-perf-hint__summary .lh-toggle-arrow {
-  margin-top: calc((var(--subheader-line-height) - 12px) / 2);  
+  margin-top: calc((var(--subheader-line-height) - 12px) / 2);
 }
 
 .lh-perf-hint__title {
@@ -727,7 +726,6 @@ span.lh-node:hover {
   display: flex;
   justify-content: center;
   overflow-x: hidden;
-  margin: var(--report-header-height) 0 0 0;
   padding: var(--section-padding);
   border-bottom: 1px solid var(--report-border-color);
 }
