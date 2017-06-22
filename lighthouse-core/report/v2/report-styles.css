@@ -48,7 +48,7 @@
   --lh-sparkline-height: 8px;
   --lh-sparkline-thin-height: 3px;
   --lh-filmstrip-thumbnail-width: 60px;
-  --lh-audit-score-width: calc(5 * var(--body-font-size));
+  --lh-audit-score-width: calc(3 * var(--body-font-size));
   --lh-category-score-width: calc(5 * var(--body-font-size));
   --lh-audit-vpadding: 8px;
   --lh-audit-hgap: 12px;
@@ -56,8 +56,6 @@
   --lh-section-vpadding: 12px;
   --pass-icon-url: url('data:image/svg+xml;utf8,<svg width="12" height="12" viewBox="0 0 12 12" xmlns="http://www.w3.org/2000/svg"><path stroke="#007F04" stroke-width="1.5" d="M1 5.75l3.5 3.5 6.5-6.5" fill="none" fill-rule="evenodd"/></svg>');
   --fail-icon-url: url('data:image/svg+xml;utf8,<svg width="12" height="12" viewBox="0 0 12 12" xmlns="http://www.w3.org/2000/svg"><g stroke="#EE1D0A" stroke-width="1.5" fill="none" fill-rule="evenodd"><path d="M2 10l8-8M10 10L2 2"/></g></svg>');
-  --collapsed-icon-url: url('data:image/svg+xml;utf8,<svg width="12" height="12" viewBox="0 0 12 12" xmlns="http://www.w3.org/2000/svg"><g fill="none" fill-rule="evenodd"><path fill="none" d="M0 0h12v12H0z"/><path fill="#999" d="M3 2l6 4-6 4z"/></g></svg>');
-  --expanded-icon-url: url('data:image/svg+xml;utf8,<svg width="12" height="12" viewBox="0 0 12 12" xmlns="http://www.w3.org/2000/svg"><g fill="none" fill-rule="evenodd"><path fill="none" d="M0 0h12v12H0z"/><path fill="#999" d="M10 3L6 9 2 3z"/></g></svg>');
 }
 
 .lh-vars.lh-devtools {
@@ -229,14 +227,14 @@ span.lh-node:hover {
   width: var(--lh-audit-score-width);
   position: relative;
   font-weight: bold;
-  top: 1px;
-  text-align: right;
+  top: 3px;
+  text-align: left;
 }
 
 .lh-score__value::after {
   content: '';
   position: absolute;
-  right: 0;
+  left: 6px;
   top: 0;
   bottom: 0;
   border-radius: inherit;
@@ -325,17 +323,17 @@ span.lh-node:hover {
 }
 
 .lh-toggle-arrow {
-  background: var(--collapsed-icon-url) no-repeat center center / 12px 12px;
+  background: url('data:image/svg+xml;utf8,<svg fill="hsl(0, 0%, 62%)" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M8.59 16.34l4.58-4.59-4.58-4.59L10 5.75l6 6-6 6z"/><path d="M0-.25h24v24H0z" fill="none"/></svg>') no-repeat 50% 50%;
+  background-size: contain;
   background-color: transparent;
-  width: 12px;
-  height: 12px;
+  width: 20px;
+  height: 20px;
   flex: none;
+  margin-left: calc(var(--default-padding) / 2);
   transition: transform 150ms ease-in-out;
   cursor: pointer;
   border: none;
-  order: -1;
-  margin-right: calc(var(--expandable-indent) - 12px);
-  align-self: flex-start;
+  transform: rotateZ(90deg);
 }
 
 /* Expandable Details (Audit Groups, Audits) */
@@ -346,8 +344,11 @@ span.lh-node:hover {
 }
 
 .lh-score__header {
-  order: -1;
   flex: 1;
+}
+
+.lh-score--category .lh-score__header {
+  order: -1;
 }
 
 .lh-expandable-details__summary {
@@ -357,16 +358,16 @@ span.lh-node:hover {
   margin-left: calc(0px - var(--expandable-indent));
 }
 
-.lh-expandable-details__summary:focus {
+/* .lh-expandable-details__summary:focus {
   outline: 0;
-}
+} */
 
 .lh-expandable-details__header {
   flex: 1;
 }
 
 .lh-expandable-details[open] > .lh-expandable-details__summary > .lh-toggle-arrow {
-  background-image: var(--expanded-icon-url);
+  transform: rotateZ(-90deg);
 }
 
 .lh-expandable-details__summary::-webkit-details-marker {
@@ -412,14 +413,16 @@ span.lh-node:hover {
   display: flex;
 }
 
-.lh-timeline-metric__details {
-  order: -1;
-}
 
 .lh-timeline-metric__title {
   font-size: var(--body-font-size);
   line-height: var(--body-line-height);
   display: flex;
+}
+
+.lh-timeline-metric__title::after {
+  margin-right: 10px;
+  content: ':';
 }
 
 .lh-timeline-metric__name {
@@ -431,8 +434,7 @@ span.lh-node:hover {
 }
 
 .lh-timeline-metric__value {
-  width: var(--lh-audit-score-width);
-  text-align: right;
+  flex: 1;
 }
 
 .lh-timeline-metric--pass .lh-timeline-metric__value {
@@ -516,7 +518,7 @@ span.lh-node:hover {
 
 .lh-perf-hint__stats {
   text-align: right;
-  flex: 0 0 var(--lh-audit-score-width);
+  flex: 0 0 70px;
 }
 
 .lh-perf-hint__primary-stat {
