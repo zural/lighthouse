@@ -633,12 +633,13 @@ span.lh-node:hover {
 
 .lh-category > .lh-audit-group.lh-audit-group--manual {
   border-top: none;
-  margin-left: var(--default-padding);
 }
 
 .lh-audit-group__header {
   font-size: var(--subheader-font-size);
   line-height: var(--subheader-line-height);
+  margin-bottom: var(--lh-audit-group-vpadding);
+  margin-left: calc(0px - var(--expandable-indent));
 }
 
 .lh-audit-group--manual .lh-audit-group__summary {
@@ -660,18 +661,11 @@ span.lh-node:hover {
   background: var(--manual-color) !important;
 }
 
-.lh-audit-group__summary {
-  margin-bottom: var(--lh-audit-group-vpadding);
-}
-
-.lh-audit-group__summary .lh-toggle-arrow {
-  margin-top: calc((var(--subheader-line-height) - 12px) / 2);
-}
 
 .lh-audit-group__description {
   font-size: var(--body-font-size);
   color: var(--secondary-text-color);
-  margin-top: calc(0px - var(--lh-audit-group-vpadding));
+  margin-top: calc(0px - var(--lh-audit-group-vpadding) / 2);
   margin-bottom: var(--lh-audit-group-vpadding);
   line-height: var(--body-line-height);
 }
