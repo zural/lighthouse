@@ -14,8 +14,8 @@ class RequestChains extends ComputedArtifact {
   }
 
   /**
-   *
-   * @param {!} record
+   * @param {!WebInspector.NetworkRequest} record
+   * @return {{url: string, startTime: number, endTime: number, responseReceivedTime: number, transferSize: number}}
    */
   static flattenRecord(record) {
     return {
@@ -28,10 +28,11 @@ class RequestChains extends ComputedArtifact {
   }
 
   /**
+   * Links together network requests (filtered by predicate) with their initiator, building a DAG.
    *
    * @param {!Array<!WebInspector.NetworkRequest>} networkRecords
    * @param {function(!WebInspector.NetworkRequest):boolean=} predicate
-   * @return {!ComputedArtifacts}
+   * @return {{request: !Object, children: !Object}}
    */
   static extractChain(networkRecords, predicate) {
     predicate = predicate || (() => true);
