@@ -29,6 +29,8 @@ class RequestChains extends ComputedArtifact {
 
   /**
    * Links together network requests (filtered by predicate) with their initiator, building a DAG.
+   * When the predicate function returns false for a network request, that request and all of its children
+   * will be excluded from the graph. If no predicate is provided, all requests are included.
    *
    * @param {!Array<!WebInspector.NetworkRequest>} networkRecords
    * @param {function(!WebInspector.NetworkRequest):boolean=} predicate
