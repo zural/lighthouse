@@ -15,8 +15,8 @@
 class CriticalRequestChainRenderer {
   /**
    * Create render context for critical-request-chain tree display.
-   * @param {!Object<string, !CriticalRequestChainRenderer.CRCNode>} tree
-   * @return {{tree: !Object<string, !CriticalRequestChainRenderer.CRCNode>, startTime: number, transferSize: number}}
+   * @param {!Object<string, !CriticalRequestChainRenderer.RequestNode>} tree
+   * @return {{tree: !Object<string, !CriticalRequestChainRenderer.RequestNode>, startTime: number, transferSize: number}}
    */
   static initTree(tree) {
     let startTime = 0;
@@ -34,7 +34,7 @@ class CriticalRequestChainRenderer {
    * parent. Calculates if this node is the last child, whether it has any
    * children itself and what the tree looks like all the way back up to the root,
    * so the tree markers can be drawn correctly.
-   * @param {!Object<string, !CriticalRequestChainRenderer.CRCNode>} parent
+   * @param {!Object<string, !CriticalRequestChainRenderer.RequestNode>} parent
    * @param {string} id
    * @param {number} startTime
    * @param {number} transferSize
@@ -187,7 +187,7 @@ if (typeof module !== 'undefined' && module.exports) {
  *     type: string,
  *     header: {text: string},
  *     longestChain: {duration: number, length: number, transferSize: number},
- *     chains: !Object<string, !CriticalRequestChainRenderer.CRCNode>
+ *     chains: !Object<string, !CriticalRequestChainRenderer.RequestNode>
  * }}
  */
 CriticalRequestChainRenderer.CRCDetailsJSON; // eslint-disable-line no-unused-expressions
@@ -203,20 +203,20 @@ CriticalRequestChainRenderer.CRCDetailsJSON; // eslint-disable-line no-unused-ex
 CriticalRequestChainRenderer.CRCRequest; // eslint-disable-line no-unused-expressions
 
 /**
- * Record type so children can circularly have CRCNode values.
+ * Record type so children can circularly have RequestNode values.
  * @struct
  * @record
  */
-CriticalRequestChainRenderer.CRCNode = function() {};
+CriticalRequestChainRenderer.RequestNode = function() {};
 
-/** @type {!Object<string, !CriticalRequestChainRenderer.CRCNode>} */
-CriticalRequestChainRenderer.CRCNode.prototype.children; // eslint-disable-line no-unused-expressions
+/** @type {!Object<string, !CriticalRequestChainRenderer.RequestNode>} */
+CriticalRequestChainRenderer.RequestNode.prototype.children; // eslint-disable-line no-unused-expressions
 
 /** @type {!CriticalRequestChainRenderer.CRCRequest} */
-CriticalRequestChainRenderer.CRCNode.prototype.request; // eslint-disable-line no-unused-expressions
+CriticalRequestChainRenderer.RequestNode.prototype.request; // eslint-disable-line no-unused-expressions
 
 /** @typedef {{
- *     node: !CriticalRequestChainRenderer.CRCNode,
+ *     node: !CriticalRequestChainRenderer.RequestNode,
  *     isLastChild: boolean,
  *     hasChildren: boolean,
  *     startTime: number,

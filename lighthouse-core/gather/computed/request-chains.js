@@ -15,10 +15,11 @@ class RequestChains extends ComputedArtifact {
 
   /**
    * @param {!WebInspector.NetworkRequest} record
-   * @return {{url: string, startTime: number, endTime: number, responseReceivedTime: number, transferSize: number}}
+   * @return {!CriticalRequestChainRenderer.CRCRequest}
    */
   static flattenRecord(record) {
     return {
+      requestId: record.requestId,
       url: record._url,
       startTime: record.startTime,
       endTime: record.endTime,
@@ -58,10 +59,9 @@ class RequestChains extends ComputedArtifact {
       let ancestorRequest = request.initiatorRequest();
       let node = requestChains;
       while (ancestorRequest) {
-        // If the parent request isn't a high priority request it won't be in the
-        // requestIdToRequests map, and so we can break the chain here. We should also
-        // break it if we've seen this request before because this is some kind of circular
-        // reference, and that's bad.
+        // If the parent request doesn't match the predicate it won't be in requestIdToRequests,
+        // and so we can break the chain here. We should also break it if we've seen this request
+        // before because this is some kind of circular reference, and that's bad.
         if (!predicate(ancestorRequest) || ancestors.includes(ancestorRequest.requestId)) {
           // Set the ancestors to an empty array and unset node so that we don't add
           // the request in to the tree.
@@ -113,7 +113,7 @@ class RequestChains extends ComputedArtifact {
   /**
    * @param {!DevtoolsLog} devtoolsLog
    * @param {!ComputedArtifacts} artifacts
-   * @return {!Promise<!Object>}
+   * @return {!Promise<!CriticalRequestChainRenderer.RequestNode>}
    */
   compute_(devtoolsLog, artifacts) {
     return artifacts.requestNetworkRecords(devtoolsLog)
