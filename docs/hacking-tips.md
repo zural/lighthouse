@@ -46,24 +46,6 @@ const html = new ReportGeneratorV2().generateReportHtml(results);
 console.log(html);
 ```
 
-## Iterating on the v1 report
-
-```sh
-node generate_report.js > temp.report.html; open temp.report.html
-```
-
-```js
-// generate_report.js
-'use strict';
-
-const ReportGenerator = require('./lighthouse-core/report/report-generator');
-const results = require('./lighthouse-core/test/results/sample.json');
-const reportGenerator = new ReportGenerator();
-const html = reportGenerator.generateHTML(results, 'devtools');
-
-console.log(html);
-```
-
 ## Debugging Travis via docker image
 
 You can do a local docker image install of Travis to better inspect a travis build:
@@ -72,10 +54,21 @@ You can do a local docker image install of Travis to better inspect a travis bui
 * [Common Build Problems - Travis CI](https://docs.travis-ci.com/user/common-build-problems/#Troubleshooting-Locally-in-a-Docker-Image)
 
 ```sh
-docker run -it quay.io/travisci/travis-node-js /bin/bash
+docker run --name travis-debug -dit travisci/ci-garnet:packer-1496954857 /sbin/init
+docker exec -it travis-debug bash -l
+
+# once inside, change to travis user, rather than root
+su - travis
+
+# once on the travis user, make a clone of lighthouse and play around
 ```
 
-FWIW, the non-quay images mentioned in the official docs may be more recent. YMMV!
+```sh
+# you may also want to mount a local folder into your docker instance. 
+# This will mount your local machines's ~/temp/trav folder into the container's /home/travis/mountpoint folder
+docker run -v $HOME/temp/trav:/home/travis/mountpoint --name travis-debug -dit travisci/ci-garnet:packer-1496954857 /sbin/init
+
+```
 
 You can then run the travis commands (e.g. `travis compile`) to install an environment and run the build script:
 

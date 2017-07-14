@@ -77,8 +77,6 @@ Options:
   --disable-device-emulation    Disable Nexus 5X emulation                                                                                 [boolean]
   --disable-cpu-throttling      Disable CPU throttling                                                                    [boolean] [default: false]
   --disable-network-throttling  Disable network throttling                                                                                 [boolean]
-  --skip-autolaunch             Skip autolaunch of Chrome when already running instance is not found                                       [boolean]
-  --select-chrome               Interactively choose version of Chrome to use when multiple installations are found                        [boolean]
   --interactive                 Open Lighthouse in interactive mode                                                                        [boolean]
 
 Examples:
@@ -244,12 +242,18 @@ yarn compile-devtools
 * **[lighthouse-hue](https://github.com/ebidel/lighthouse-hue)** - set the color of Philips Hue lights based on a Lighthouse score
 * **[lighthouse-batch](https://www.npmjs.com/package/lighthouse-batch)** - run Lighthouse over a number of sites and generate a summary of their metrics/scores.
 * **[lighthouse-cron](https://github.com/thearegee/lighthouse-cron)** - Cron multiple batch Lighthouse audits and emit results for sending to remote server.
+* **[lightcrawler](https://github.com/github/lightcrawler)** - Crawl a website and run each page found through Lighthouse.
+
 
 ## FAQ
 
 ### How does Lighthouse work?
 
 See [Lighthouse Architecture](./docs/architecture.md).
+
+### Can I configure the lighthouse run?
+
+Yes! Details in [Lighthouse configuration](./docs/configuration.md).
 
 ### What is "Do Better Web"?
 

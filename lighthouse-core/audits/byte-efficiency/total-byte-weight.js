@@ -9,7 +9,6 @@
 'use strict';
 
 const ByteEfficiencyAudit = require('./byte-efficiency-audit');
-const Formatter = require('../../report/formatter');
 const statistics = require('../../lib/statistics');
 
 // Parameters for log-normal CDF scoring. See https://www.desmos.com/calculator/gpmjeykbwr
@@ -28,6 +27,7 @@ class TotalByteWeight extends ByteEfficiencyAudit {
       name: 'total-byte-weight',
       optimalValue: `< ${this.bytesToKbString(OPTIMAL_VALUE)}`,
       description: 'Avoids enormous network payloads',
+      failureDescription: 'Has enormous network payloads',
       helpText:
           'Network transfer size [costs users real money](https://whatdoesmysitecost.com/) ' +
           'and is [highly correlated](http://httparchive.org/interesting.php#onLoad) with long load times. ' +
@@ -81,8 +81,7 @@ class TotalByteWeight extends ByteEfficiencyAudit {
         {key: 'totalMs', itemType: 'text', text: 'Transfer Time'},
       ];
 
-      const v1TableHeadings = ByteEfficiencyAudit.makeV1TableHeadings(headings);
-      const v2TableDetails = ByteEfficiencyAudit.makeV2TableDetails(headings, results);
+      const tableDetails = ByteEfficiencyAudit.makeTableDetails(headings, results);
 
       return {
         rawValue: totalBytes,
@@ -90,13 +89,11 @@ class TotalByteWeight extends ByteEfficiencyAudit {
         displayValue: `Total size was ${ByteEfficiencyAudit.bytesToKbString(totalBytes)}`,
         score: Math.round(Math.max(0, Math.min(score, 100))),
         extendedInfo: {
-          formatter: Formatter.SUPPORTED_FORMATS.TABLE,
           value: {
             results,
-            tableHeadings: v1TableHeadings
           }
         },
-        details: v2TableDetails
+        details: tableDetails
       };
     });
   }

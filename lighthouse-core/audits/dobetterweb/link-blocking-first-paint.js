@@ -11,7 +11,7 @@
 'use strict';
 
 const Audit = require('../audit');
-const Formatter = require('../../report/formatter');
+const Util = require('../../report/v2/renderer/util.js');
 const scoreForWastedMs = require('../byte-efficiency/byte-efficiency-audit').scoreForWastedMs;
 
 // Because of the way we detect blocking stylesheets, asynchronously loaded
@@ -66,17 +66,18 @@ class LinkBlockingFirstPaintAudit extends Audit {
 
       return {
         url: item.tag.url,
-        totalKb: `${Math.round(item.transferSize / 1024)} KB`,
-        totalMs: `${Math.round((item.endTime - startTime) * 1000)}ms`
+        totalKb: Util.formatBytesToKB(item.transferSize),
+        totalMs: Util.formatMilliseconds(Math.round((item.endTime - startTime) * 1000), 1)
       };
     });
 
-    const delayTime = Math.round((endTime - startTime) * 1000);
+    const rawDelayTime = Math.round((endTime - startTime) * 1000);
+    const delayTime = Util.formatMilliseconds(rawDelayTime, 1);
     let displayValue = '';
     if (results.length > 1) {
-      displayValue = `${results.length} resources delayed first paint by ${delayTime}ms`;
+      displayValue = `${results.length} resources delayed first paint by ${delayTime}`;
     } else if (results.length === 1) {
-      displayValue = `${results.length} resource delayed first paint by ${delayTime}ms`;
+      displayValue = `${results.length} resource delayed first paint by ${delayTime}`;
     }
 
     const headings = [
@@ -85,22 +86,19 @@ class LinkBlockingFirstPaintAudit extends Audit {
       {key: 'totalMs', itemType: 'text', text: 'Delayed Paint By (ms)'},
     ];
 
-    const v1TableHeadings = Audit.makeV1TableHeadings(headings);
-    const v2TableDetails = Audit.makeV2TableDetails(headings, results);
+    const tableDetails = Audit.makeTableDetails(headings, results);
 
     return {
       displayValue,
-      score: scoreForWastedMs(delayTime),
-      rawValue: delayTime,
+      score: scoreForWastedMs(rawDelayTime),
+      rawValue: rawDelayTime,
       extendedInfo: {
-        formatter: Formatter.SUPPORTED_FORMATS.TABLE,
         value: {
           wastedMs: delayTime,
           results,
-          tableHeadings: v1TableHeadings
         }
       },
-      details: v2TableDetails
+      details: tableDetails
     };
   }
 

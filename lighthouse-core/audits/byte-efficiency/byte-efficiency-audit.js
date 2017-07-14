@@ -6,7 +6,7 @@
 'use strict';
 
 const Audit = require('../audit');
-const Formatter = require('../../report/formatter');
+const Util = require('../../report/v2/renderer/util');
 
 const KB_IN_BYTES = 1024;
 
@@ -34,7 +34,7 @@ class UnusedBytes extends Audit {
    * @return {string}
    */
   static bytesToKbString(bytes) {
-    return Math.round(bytes / KB_IN_BYTES).toLocaleString() + ' KB';
+    return Util.formatBytesToKB(bytes, 0);
   }
 
   /**
@@ -44,7 +44,7 @@ class UnusedBytes extends Audit {
    */
   static toSavingsString(bytes = 0, percent = 0) {
     const kbDisplay = this.bytesToKbString(bytes);
-    const percentDisplay = Math.round(percent).toLocaleString() + '%';
+    const percentDisplay = Util.formatNumber(Math.round(percent)) + '%';
     return `${kbDisplay} (${percentDisplay})`;
   }
 
@@ -54,7 +54,7 @@ class UnusedBytes extends Audit {
    * @return {string}
    */
   static bytesToMsString(bytes, networkThroughput) {
-    return (Math.round(bytes / networkThroughput * 100) * 10).toLocaleString() + 'ms';
+    return Util.formatMilliseconds(bytes / networkThroughput * 1000, 10);
   }
 
   /**
@@ -105,8 +105,7 @@ class UnusedBytes extends Audit {
       displayValue = `Potential savings of ${wastedKbDisplay} (~${wastedMsDisplay})`;
     }
 
-    const v1TableHeadings = Audit.makeV1TableHeadings(result.headings);
-    const v2TableDetails = Audit.makeV2TableDetails(result.headings, results);
+    const tableDetails = Audit.makeTableDetails(result.headings, results);
 
     return {
       debugString,
@@ -114,15 +113,13 @@ class UnusedBytes extends Audit {
       rawValue: wastedMs,
       score: UnusedBytes.scoreForWastedMs(wastedMs),
       extendedInfo: {
-        formatter: Formatter.SUPPORTED_FORMATS.TABLE,
         value: {
           wastedMs,
           wastedKb,
           results,
-          tableHeadings: v1TableHeadings,
         },
       },
-      details: v2TableDetails
+      details: tableDetails
     };
   }
 

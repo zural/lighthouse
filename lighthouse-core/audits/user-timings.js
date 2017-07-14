@@ -6,7 +6,7 @@
 'use strict';
 
 const Audit = require('./audit');
-const Formatter = require('../report/formatter');
+const Util = require('../report/v2/renderer/util');
 
 class UserTimings extends Audit {
   /**
@@ -116,7 +116,7 @@ class UserTimings extends Audit {
         return {
           name: item.name,
           timingType: item.isMark ? 'Mark' : 'Measure',
-          time: time.toLocaleString() + ' ms',
+          time: Util.formatMilliseconds(time, 0.001),
           timeAsNumber: time,
         };
       }).sort((itemA, itemB) => {
@@ -137,14 +137,13 @@ class UserTimings extends Audit {
         {key: 'time', itemType: 'text', text: 'Time'},
       ];
 
-      const details = Audit.makeV2TableDetails(headings, tableRows);
+      const details = Audit.makeTableDetails(headings, tableRows);
 
       return {
         // mark the audit as failed if there are user timings to display
         rawValue: userTimings.length === 0,
         displayValue: userTimings.length,
         extendedInfo: {
-          formatter: Formatter.SUPPORTED_FORMATS.USER_TIMINGS,
           value: userTimings
         },
         details,

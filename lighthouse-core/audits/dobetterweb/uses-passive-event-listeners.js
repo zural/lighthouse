@@ -12,7 +12,6 @@
 'use strict';
 
 const ViolationAudit = require('../violation-audit');
-const Formatter = require('../../report/formatter');
 
 class PassiveEventsAudit extends ViolationAudit {
   /**
@@ -23,6 +22,7 @@ class PassiveEventsAudit extends ViolationAudit {
       category: 'JavaScript',
       name: 'uses-passive-event-listeners',
       description: 'Uses passive listeners to improve scrolling performance',
+      failureDescription: 'Does not use passive listeners to improve scrolling performance',
       helpText: 'Consider marking your touch and wheel event listeners as `passive` ' +
           'to improve your page\'s scroll performance. ' +
           '[Learn more](https://developers.google.com/web/tools/lighthouse/audits/passive-event-listeners).',
@@ -41,12 +41,11 @@ class PassiveEventsAudit extends ViolationAudit {
       {key: 'url', itemType: 'url', text: 'URL'},
       {key: 'label', itemType: 'text', text: 'Location'},
     ];
-    const details = ViolationAudit.makeV2TableDetails(headings, results);
+    const details = ViolationAudit.makeTableDetails(headings, results);
 
     return {
       rawValue: results.length === 0,
       extendedInfo: {
-        formatter: Formatter.SUPPORTED_FORMATS.URL_LIST,
         value: results,
       },
       details,

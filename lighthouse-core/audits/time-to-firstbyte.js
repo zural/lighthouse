@@ -6,7 +6,7 @@
 'use strict';
 
 const Audit = require('./audit');
-const Formatter = require('../report/formatter');
+const Util = require('../report/v2/renderer/util');
 const URL = require('../lib/url-shim');
 
 const TTFB_THRESHOLD = 200;
@@ -53,7 +53,7 @@ class TTFBMetric extends Audit {
           const ttfb = TTFBMetric.caclulateTTFB(networkRecord);
           results.push({
             url: URL.getURLDisplayName(networkRecord._url),
-            ttfb: `${Math.round(ttfb).toLocaleString()} ms`,
+            ttfb: Util.formatMilliseconds(Math.round(ttfb), 1),
             rawTTFB: ttfb
           });
         }
@@ -72,15 +72,16 @@ class TTFBMetric extends Audit {
       let displayValue;
 
       if (recordsOverBudget.length) {
-        displayValue = recordsOverBudget.length +
-          ` critical request(s) went over the ${TTFB_THRESHOLD} ms threshold`;
+        const thresholdDisplay = Util.formatMiliseconds(TTFB_THRESHOLD, 1);
+        const recordsOverBudgetDisplay = Util.formatNumber(recordsOverBudget.length);
+        displayValue = `${recordsOverBudgetDisplay} critical request(s) went over` +
+          ` the ${thresholdDisplay} threshold`;
       }
 
       return {
         rawValue: recordsOverBudget.length === 0,
         displayValue,
         extendedInfo: {
-          formatter: Formatter.SUPPORTED_FORMATS.TABLE,
           value: {
             results,
             tableHeadings: {

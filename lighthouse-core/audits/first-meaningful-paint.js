@@ -8,7 +8,6 @@
 const Audit = require('./audit');
 const Util = require('../report/v2/renderer/util.js');
 const statistics = require('../lib/statistics');
-const Formatter = require('../report/formatter');
 
 // Parameters (in ms) for log-normal CDF scoring. To see the curve:
 // https://www.desmos.com/calculator/joz3pqttdq
@@ -25,7 +24,7 @@ class FirstMeaningfulPaint extends Audit {
       category: 'Performance',
       name: 'first-meaningful-paint',
       description: 'First meaningful paint',
-      optimalValue: `< ${SCORING_POINT_OF_DIMINISHING_RETURNS.toLocaleString()} ms`,
+      optimalValue: `< ${Util.formatMilliseconds(SCORING_POINT_OF_DIMINISHING_RETURNS, 1)}`,
       helpText: 'First meaningful paint measures when the primary content of a page is visible. ' +
           '[Learn more](https://developers.google.com/web/tools/lighthouse/audits/first-meaningful-paint).',
       scoringMode: Audit.SCORING_MODES.NUMERIC,
@@ -63,7 +62,6 @@ class FirstMeaningfulPaint extends Audit {
         optimalValue: this.meta.optimalValue,
         extendedInfo: {
           value: result.extendedInfo,
-          formatter: Formatter.SUPPORTED_FORMATS.NULL
         }
       };
     });

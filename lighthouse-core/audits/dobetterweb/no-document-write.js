@@ -11,7 +11,6 @@
 'use strict';
 
 const ViolationAudit = require('../violation-audit');
-const Formatter = require('../../report/formatter');
 
 class NoDocWriteAudit extends ViolationAudit {
 
@@ -23,6 +22,7 @@ class NoDocWriteAudit extends ViolationAudit {
       category: 'Performance',
       name: 'no-document-write',
       description: 'Avoids `document.write()`',
+      failureDescription: 'Uses `document.write()`',
       helpText: 'For users on slow connections, external scripts dynamically injected via ' +
           '`document.write()` can delay page load by tens of seconds. ' +
           '[Learn more](https://developers.google.com/web/tools/lighthouse/audits/document-write).',
@@ -41,12 +41,11 @@ class NoDocWriteAudit extends ViolationAudit {
       {key: 'url', itemType: 'url', text: 'URL'},
       {key: 'label', itemType: 'text', text: 'Location'},
     ];
-    const details = ViolationAudit.makeV2TableDetails(headings, results);
+    const details = ViolationAudit.makeTableDetails(headings, results);
 
     return {
       rawValue: results.length === 0,
       extendedInfo: {
-        formatter: Formatter.SUPPORTED_FORMATS.URL_LIST,
         value: results
       },
       details,

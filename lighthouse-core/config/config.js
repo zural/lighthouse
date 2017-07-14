@@ -7,6 +7,7 @@
 
 const defaultConfigPath = './default.js';
 const defaultConfig = require('./default.js');
+const fullConfig = require('./full-config.js');
 
 const GatherRunner = require('../gather/gather-runner');
 const log = require('lighthouse-logger');
@@ -188,6 +189,13 @@ function assertValidAudit(auditDefinition, auditPath) {
     );
   }
 
+  // If it'll have a ✔ or ✖ displayed alongside the result, it should have failureDescription
+  if (typeof auditDefinition.meta.failureDescription !== 'string' &&
+    auditDefinition.meta.informative !== true &&
+    auditDefinition.meta.scoringMode !== Audit.SCORING_MODES.NUMERIC) {
+    log.warn('config', `${auditName} has no failureDescription and should.`);
+  }
+
   if (typeof auditDefinition.meta.helpText !== 'string') {
     throw new Error(
       `${auditName} has no meta.helpText property, or the property is not a string.`
@@ -285,8 +293,12 @@ class Config {
       configJSON.audits = Array.from(inputConfig.audits);
     }
 
-    // Extend the default config if specified
-    if (configJSON.extends) {
+    // Extend the default or full config if specified
+    if (configJSON.extends === 'lighthouse:full') {
+      const explodedFullConfig = Config.extendConfigJSON(deepClone(defaultConfig),
+          deepClone(fullConfig));
+      configJSON = Config.extendConfigJSON(explodedFullConfig, configJSON);
+    } else if (configJSON.extends) {
       configJSON = Config.extendConfigJSON(deepClone(defaultConfig), configJSON);
     }
 
@@ -381,9 +393,17 @@ class Config {
    * @param {!Array<string>=} skipAuditIds
    * @return {!Object<string, {audits: !Array<{id: string}>}>}
    */
-  static filterCategoriesAndAudits(oldCategories, categoryIds = [], auditIds = [],
-      skipAuditIds = []) {
+  static filterCategoriesAndAudits(oldCategories, categoryIds, auditIds, skipAuditIds) {
+    if (auditIds && skipAuditIds) {
+      throw new Error('Cannot set both skipAudits and onlyAudits');
+    }
+
     const categories = {};
+    const filterByIncludedCategory = !!categoryIds;
+    const filterByIncludedAudit = !!auditIds;
+    categoryIds = categoryIds || [];
+    auditIds = auditIds || [];
+    skipAuditIds = skipAuditIds || [];
 
     // warn if the category is not found
     categoryIds.forEach(categoryId => {
@@ -400,10 +420,6 @@ class Config {
         return audits.find(candidate => candidate.id === auditId);
       });
 
-      if (skipAuditIds.includes(auditId) && auditIds.includes(auditId)) {
-        log.warn('config', `audit '${auditId}' in 'onlyAudits' was also found in 'skipAudits'`);
-      }
-
       if (!foundCategory) {
         const parentKeyName = skipAuditIds.includes(auditId) ? 'skipAudits' : 'onlyAudits';
         log.warn('config', `unrecognized audit in '${parentKeyName}': ${auditId}`);
@@ -418,8 +434,17 @@ class Config {
     Object.keys(oldCategories).forEach(categoryId => {
       const category = deepClone(oldCategories[categoryId]);
 
-      // filter to the audit whitelist if we didn't include the whole category
-      if (!categoryIds.includes(categoryId)) {
+      if (filterByIncludedCategory && filterByIncludedAudit) {
+        // If we're filtering to the category and audit whitelist, include the union of the two
+        if (!categoryIds.includes(categoryId)) {
+          category.audits = category.audits.filter(audit => auditIds.includes(audit.id));
+        }
+      } else if (filterByIncludedCategory) {
+        // If we're filtering to just the category whitelist and the category is not included, skip it
+        if (!categoryIds.includes(categoryId)) {
+          return;
+        }
+      } else if (filterByIncludedAudit) {
         category.audits = category.audits.filter(audit => auditIds.includes(audit.id));
       }
 
@@ -515,6 +540,8 @@ class Config {
     }).filter(pass => {
       // remove any passes lacking concrete gatherers, unless they are dependent on the trace
       if (pass.recordTrace) return true;
+      // Always keep defaultPass
+      if (pass.passName === 'defaultPass') return true;
       return pass.gatherers.length > 0;
     });
     return filteredPasses;

@@ -14,7 +14,6 @@
 const Audit = require('../audit');
 const URL = require('../../lib/url-shim');
 const StyleHelpers = require('../../lib/styles-helpers');
-const Formatter = require('../../report/formatter');
 
 class NoOldFlexboxAudit extends Audit {
 
@@ -26,6 +25,7 @@ class NoOldFlexboxAudit extends Audit {
       category: 'CSS',
       name: 'no-old-flexbox',
       description: 'Avoids old CSS flexbox',
+      failureDescription: 'Uses old CSS flexbox',
       helpText: 'The 2009 spec of Flexbox is deprecated and is 2.3x slower than the latest ' +
           'spec. [Learn more](https://developers.google.com/web/tools/lighthouse/audits/old-flexbox).',
       requiredArtifacts: ['Styles', 'URL']
@@ -72,7 +72,6 @@ class NoOldFlexboxAudit extends Audit {
     return {
       rawValue: sheetsUsingOldFlexbox.length === 0,
       extendedInfo: {
-        formatter: Formatter.SUPPORTED_FORMATS.TABLE,
         value: {
           results: urlList,
           tableHeadings: {

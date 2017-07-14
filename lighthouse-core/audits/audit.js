@@ -46,23 +46,13 @@ class Audit {
   }
 
   /**
-   * @param {!Audit.Headings} headings
-   * @return {!Array<string>}
-   */
-  static makeV1TableHeadings(headings) {
-    const tableHeadings = {};
-    headings.forEach(heading => tableHeadings[heading.key] = heading.text);
-    return tableHeadings;
-  }
-
-  /**
    * Table cells will use the type specified in headings[x].itemType. However a custom type
    * can be provided: results[x].propName = {type: 'code', text: '...'}
    * @param {!Audit.Headings} headings
    * @param {!Array<!Object<string, *>>} results
    * @return {!Array<!DetailsRenderer.DetailsJSON>}
    */
-  static makeV2TableRows(headings, results) {
+  static makeTableRows(headings, results) {
     const tableRows = results.map(item => {
       return headings.map(heading => {
         const value = item[heading.key];
@@ -81,7 +71,7 @@ class Audit {
    * @param {!Audit.Headings} headings
    * @return {!Array<!DetailsRenderer.DetailsJSON>}
    */
-  static makeV2TableHeaders(headings) {
+  static makeTableHeaders(headings) {
     return headings.map(heading => ({
       type: 'text',
       itemType: heading.itemType,
@@ -94,14 +84,14 @@ class Audit {
    * @param {!Array<!Object<string, string>>} results
    * @return {!DetailsRenderer.DetailsJSON}
    */
-  static makeV2TableDetails(headings, results) {
-    const v2TableHeaders = Audit.makeV2TableHeaders(headings);
-    const v2TableRows = Audit.makeV2TableRows(headings, results);
+  static makeTableDetails(headings, results) {
+    const tableHeaders = Audit.makeTableHeaders(headings);
+    const tableRows = Audit.makeTableRows(headings, results);
     return {
       type: 'table',
       header: 'View Details',
-      itemHeaders: v2TableHeaders,
-      items: v2TableRows
+      itemHeaders: tableHeaders,
+      items: tableRows
     };
   }
 
@@ -125,7 +115,12 @@ class Audit {
     if (displayValue === score) {
       displayValue = '';
     }
-
+    let auditDescription = audit.meta.description;
+    if (audit.meta.failureDescription) {
+      if (!score || (typeof score === 'number' && score < 100)) {
+        auditDescription = audit.meta.failureDescription;
+      }
+    }
     return {
       score,
       displayValue: `${displayValue}`,
@@ -139,7 +134,7 @@ class Audit {
       manual: audit.meta.manual,
       name: audit.meta.name,
       category: audit.meta.category,
-      description: audit.meta.description,
+      description: auditDescription,
       helpText: audit.meta.helpText,
       details: result.details,
     };

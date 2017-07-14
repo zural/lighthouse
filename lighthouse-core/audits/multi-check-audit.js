@@ -10,7 +10,6 @@
  */
 
 const Audit = require('./audit');
-const Formatter = require('../report/formatter');
 
 class MultiCheckAudit extends Audit {
   /**
@@ -28,7 +27,6 @@ class MultiCheckAudit extends Audit {
   static createAuditResult(result) {
     const extendedInfo = {
       value: result,
-      formatter: Formatter.SUPPORTED_FORMATS.NULL
     };
 
     // If we fail, share the failures
@@ -40,10 +38,16 @@ class MultiCheckAudit extends Audit {
       };
     }
 
+    let debugString;
+    if (result.warnings && result.warnings.length > 0) {
+      debugString = `Warnings: ${result.warnings.join(', ')}`;
+    }
+
     // Otherwise, we pass
     return {
       rawValue: true,
-      extendedInfo
+      extendedInfo,
+      debugString,
     };
   }
 

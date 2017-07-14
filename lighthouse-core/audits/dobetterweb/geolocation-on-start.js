@@ -12,7 +12,6 @@
 'use strict';
 
 const ViolationAudit = require('../violation-audit');
-const Formatter = require('../../report/formatter');
 
 class GeolocationOnStart extends ViolationAudit {
   /**
@@ -23,6 +22,7 @@ class GeolocationOnStart extends ViolationAudit {
       category: 'UX',
       name: 'geolocation-on-start',
       description: 'Avoids requesting the geolocation permission on page load',
+      failureDescription: 'Requests the geolocation permission on page load',
       helpText: 'Users are mistrustful of or confused by sites that request their ' +
           'location without context. Consider tying the request to user gestures instead. ' +
           '[Learn more](https://developers.google.com/web/tools/lighthouse/audits/geolocation-on-load).',
@@ -41,12 +41,11 @@ class GeolocationOnStart extends ViolationAudit {
       {key: 'url', itemType: 'url', text: 'URL'},
       {key: 'label', itemType: 'text', text: 'Location'},
     ];
-    const details = ViolationAudit.makeV2TableDetails(headings, results);
+    const details = ViolationAudit.makeTableDetails(headings, results);
 
     return {
       rawValue: results.length === 0,
       extendedInfo: {
-        formatter: Formatter.SUPPORTED_FORMATS.URL_LIST,
         value: results
       },
       details,
