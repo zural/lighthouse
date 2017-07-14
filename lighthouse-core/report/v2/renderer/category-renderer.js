@@ -208,27 +208,25 @@ class CategoryRenderer {
    * @param {!ReportRenderer.GroupJSON} group
    * @return {!HTMLDetailsElement}
    */
-  _renderAuditGroup(group) {
-    const auditGroupElem = /** @type {!HTMLDetailsElement} */ (this._dom.createElement('details',
+  _renderAuditGroup(group, {expandable}) {
+    const auditGroupElem = /** @type {!HTMLDetailsElement} */ (
+          this._dom.createElement(expandable ? 'details' :'div',
           'lh-audit-group lh-expandable-details'));
-    const auditGroupHeader = this._dom.createElement('div',
-          'lh-audit-group__header lh-expandable-details__header');
-    auditGroupHeader.textContent = group.title;
-
-    const auditGroupSummary = this._dom.createElement('summary',
+    const auditGroupSummary = this._dom.createChildOf(auditGroupElem, 'summary',
           'lh-audit-group__summary lh-expandable-details__summary');
-    const auditGroupArrow = this._dom.createElement('div', 'lh-toggle-arrow', {
-      title: 'See audits',
-    });
-    auditGroupSummary.appendChild(auditGroupHeader);
-    auditGroupSummary.appendChild(auditGroupArrow);
-    auditGroupElem.appendChild(auditGroupSummary);
+    const auditGroupHeader = this._dom.createChildOf(auditGroupSummary, 'div',
+          'lh-audit-group__header lh-expandable-details__header');
+    this._dom.createChildOf(auditGroupSummary, 'div',
+      `lh-toggle-arrow  ${expandable ? '' : ' lh--toggle-arrow-unexpandable'}`, {
+        title: 'See audits',
+      });
 
     if (group.description) {
       const auditGroupDescription = this._dom.createElement('div', 'lh-audit-group__description');
       auditGroupDescription.appendChild(this._dom.convertMarkdownLinkSnippets(group.description));
       auditGroupElem.appendChild(auditGroupDescription);
     }
+    auditGroupHeader.textContent = group.title;
 
     return auditGroupElem;
   }
@@ -240,7 +238,7 @@ class CategoryRenderer {
   _renderPassedAuditsSection(elements) {
     const passedElem = this._renderAuditGroup({
       title: `${elements.length} Passed Audits`,
-    });
+    }, {expandable: true});
     passedElem.classList.add('lh-passed-audits');
     elements.forEach(elem => passedElem.appendChild(elem));
     return passedElem;
@@ -262,7 +260,7 @@ class CategoryRenderer {
 
     Object.keys(auditsGroupedByGroup).forEach(groupId => {
       const group = groupDefinitions[groupId];
-      const auditGroupElem = this._renderAuditGroup(group);
+      const auditGroupElem = this._renderAuditGroup(group, {expandable: true});
       auditGroupElem.classList.add('lh-audit-group--manual');
 
       auditsGroupedByGroup[groupId].forEach(audit => {
@@ -344,7 +342,7 @@ class CategoryRenderer {
 
     const nonPassedElem = this._renderAuditGroup({
       title: `${nonPassedAudits.length} failed audits`,
-    });
+    }, {expandable: false});
     nonPassedElem.open = true;
     nonPassedAudits.forEach(audit => nonPassedElem.appendChild(this._renderAudit(audit)));
     element.appendChild(nonPassedElem);
@@ -374,7 +372,7 @@ class CategoryRenderer {
     element.appendChild(this._renderCategoryScore(category));
 
     const metricAudits = category.audits.filter(audit => audit.group === 'perf-metric');
-    const metricAuditsEl = this._renderAuditGroup(groups['perf-metric']);
+    const metricAuditsEl = this._renderAuditGroup(groups['perf-metric'], {expandable: false});
     const timelineContainerEl = this._dom.createChildOf(metricAuditsEl, 'div',
         'lh-timeline-container');
     const timelineEl = this._dom.createChildOf(timelineContainerEl, 'div', 'lh-timeline');
@@ -413,7 +411,7 @@ class CategoryRenderer {
     if (hintAudits.length) {
       const maxWaste = Math.max(...hintAudits.map(audit => audit.result.rawValue));
       const scale = Math.ceil(maxWaste / 1000) * 1000;
-      const hintAuditsEl = this._renderAuditGroup(groups['perf-hint']);
+      const hintAuditsEl = this._renderAuditGroup(groups['perf-hint'], {expandable: false});
       hintAudits.forEach(item => hintAuditsEl.appendChild(this._renderPerfHintAudit(item, scale)));
       hintAuditsEl.open = true;
       element.appendChild(hintAuditsEl);
@@ -422,7 +420,7 @@ class CategoryRenderer {
     const infoAudits = category.audits
         .filter(audit => audit.group === 'perf-info' && audit.score < 100);
     if (infoAudits.length) {
-      const infoAuditsEl = this._renderAuditGroup(groups['perf-info']);
+      const infoAuditsEl = this._renderAuditGroup(groups['perf-info'], {expandable: false});
       infoAudits.forEach(item => infoAuditsEl.appendChild(this._renderAudit(item)));
       infoAuditsEl.open = true;
       element.appendChild(infoAuditsEl);
@@ -471,14 +469,14 @@ class CategoryRenderer {
       const group = groupDefinitions[groupId];
       const groups = auditsGroupedByGroup[groupId];
       if (groups.failed.length) {
-        const auditGroupElem = this._renderAuditGroup(group);
+        const auditGroupElem = this._renderAuditGroup(group, {expandable: false});
         groups.failed.forEach(item => auditGroupElem.appendChild(this._renderAudit(item)));
         auditGroupElem.open = true;
         element.appendChild(auditGroupElem);
       }
 
       if (groups.passed.length) {
-        const auditGroupElem = this._renderAuditGroup(group);
+        const auditGroupElem = this._renderAuditGroup(group, {expandable: true});
         groups.passed.forEach(item => auditGroupElem.appendChild(this._renderAudit(item)));
         passedElements.push(auditGroupElem);
       }

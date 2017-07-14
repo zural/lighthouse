@@ -338,6 +338,10 @@ span.lh-node:hover {
   align-self: flex-start;
 }
 
+.lh--toggle-arrow-unexpandable {
+  visibility: hidden;
+}
+
 /* Expandable Details (Audit Groups, Audits) */
 
 .lh-expandable-details {
