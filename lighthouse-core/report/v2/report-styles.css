@@ -629,33 +629,9 @@ span.lh-node:hover {
   padding-left: var(--expandable-indent);
 }
 
-.lh-category > .lh-audit-group.lh-audit-group--manual {
-  border-top: none;
-  margin-left: var(--default-padding);
-}
-
 .lh-audit-group__header {
   font-size: var(--subheader-font-size);
   line-height: var(--subheader-line-height);
-}
-
-.lh-audit-group--manual .lh-audit-group__summary {
-  display: flex;
-  align-items: center;
-  font-size: 15px;
-}
-
-.lh-audit-group--manual .lh-audit-group__summary .lh-audit-group__header  {
-  font-size: inherit;
-}
-
-.lh-audit-group--manual .lh-audit-group__summary .lh-toggle-arrow {
-  display: none;
-}
-
-.lh-audit-group--manual .lh-audit-group__summary::-webkit-details-marker {
-  display: initial;
-  background: var(--manual-color) !important;
 }
 
 .lh-audit-group__summary {
