@@ -361,10 +361,6 @@ span.lh-node:hover {
   margin-left: calc(0px - var(--expandable-indent));
 }
 
-.lh-expandable-details__summary:focus {
-  outline: 0;
-}
-
 .lh-expandable-details__header {
   flex: 1;
 }
