@@ -373,10 +373,6 @@ span.lh-node:hover {
   display: none;
 }
 
-/*.lh-score__snippet:focus .lh-score__title {
-  outline: rgb(59, 153, 252) auto 5px;
-}*/
-
 .lh-score__snippet .lh-toggle-arrow {
   margin-top: calc((var(--body-line-height) - 12px) / 2);
 }
@@ -806,23 +802,16 @@ summary.lh-passed-audits-summary::-webkit-details-marker,
   transform: translateY(0);
 }
 
-@media screen and (min-width: 960px) {
-  .lh-report {
-    width: var(--report-width);
-  }
-}
-
-@media screen and (max-width: 720px) {
+/* 964 fits the min-width of the filmstrip */
+@media screen and (max-width: 964px) {
   .lh-report {
     margin-left: 0;
     width: 100%;
     min-width: 400px;
   }
-  .lh-category {
-  }
 }
 
-@media print {
+.lh-leftnav print {
   body {
     -webkit-print-color-adjust: exact; /* print background colors */
   }
