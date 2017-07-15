@@ -675,6 +675,7 @@ span.lh-node:hover {
 .lh-container {
   display: flex;
   max-width: var(--report-content-width);
+  word-wrap: break-word;
   margin: 0 auto;
 }
 
