@@ -99,6 +99,10 @@
   scroll-behavior: smooth;
 }
 
+.lh-root :focus {
+    outline: -webkit-focus-ring-color auto 3px;
+}
+
 .lh-root [hidden] {
   display: none !important;
 }
