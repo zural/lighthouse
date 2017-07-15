@@ -163,9 +163,12 @@ class CategoryRenderer {
     const titleEl = this._dom.createChildOf(summary, 'div', 'lh-perf-hint__title');
     titleEl.textContent = audit.result.description;
 
+    this._dom.createChildOf(summary, 'div', 'lh-toggle-arrow', {title: 'See resources'});
+
     if (!extendedInfo || typeof audit.result.rawValue !== 'number') {
-      const debugStrEl = this._dom.createChildOf(summary, 'div', 'lh-debug');
+      const debugStrEl = this._dom.createChildOf(element, 'div', 'lh-debug');
       debugStrEl.textContent = audit.result.debugString || 'Report error: no extended information';
+      element.open = true;
       return element;
     }
 
@@ -178,8 +181,6 @@ class CategoryRenderer {
     const statsEl = this._dom.createChildOf(summary, 'div', 'lh-perf-hint__stats', tooltipAttrs);
     const statsMsEl = this._dom.createChildOf(statsEl, 'div', 'lh-perf-hint__primary-stat');
     statsMsEl.textContent = Util.formatMilliseconds(audit.result.rawValue);
-
-    this._dom.createChildOf(summary, 'div', 'lh-toggle-arrow', {title: 'See resources'});
 
     if (extendedInfo.value.wastedKb) {
       const statsKbEl = this._dom.createChildOf(statsEl, 'div', 'lh-perf-hint__secondary-stat');
