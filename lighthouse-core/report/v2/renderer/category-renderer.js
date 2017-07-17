@@ -205,9 +205,11 @@ class CategoryRenderer {
    * Renders the group container for a group of audits. Individual audit elements can be added
    * directly to the returned element.
    * @param {!ReportRenderer.GroupJSON} group
+   * @param {{expandable: boolean}} opts
    * @return {!HTMLDetailsElement}
    */
-  _renderAuditGroup(group, {expandable}) {
+  _renderAuditGroup(group, opts) {
+    const expandable = opts.expandable;
     const auditGroupElem = /** @type {!HTMLDetailsElement} */ (
           this._dom.createElement(expandable ? 'details' :'div',
           'lh-audit-group lh-expandable-details'));
