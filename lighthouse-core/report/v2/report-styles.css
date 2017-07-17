@@ -491,11 +491,17 @@ span.lh-node:hover {
 .lh-perf-hint__summary {
   display: flex;
   align-items: flex-start;
+  flex-wrap: wrap;
   min-height: calc(var(--body-line-height) + var(--caption-line-height));
 }
 
 .lh-perf-hint__summary .lh-toggle-arrow {
   margin-top: calc((var(--subheader-line-height) - 12px) / 2);
+}
+
+.lh-perf-hint__summary .lh-debug {
+  width: calc(100% - var(--expandable-indent));
+  margin: 0 var(--expandable-indent);
 }
 
 .lh-perf-hint__title {

@@ -166,9 +166,8 @@ class CategoryRenderer {
     this._dom.createChildOf(summary, 'div', 'lh-toggle-arrow', {title: 'See resources'});
 
     if (!extendedInfo || typeof audit.result.rawValue !== 'number') {
-      const debugStrEl = this._dom.createChildOf(element, 'div', 'lh-debug');
+      const debugStrEl = this._dom.createChildOf(summary, 'div', 'lh-debug');
       debugStrEl.textContent = audit.result.debugString || 'Report error: no extended information';
-      element.open = true;
       return element;
     }
 
@@ -191,9 +190,8 @@ class CategoryRenderer {
     descriptionEl.appendChild(this._dom.convertMarkdownLinkSnippets(audit.result.helpText));
 
     if (audit.result.debugString) {
-      const debugStrEl = this._dom.createChildOf(element, 'div', 'lh-debug');
+      const debugStrEl = this._dom.createChildOf(summary, 'div', 'lh-debug');
       debugStrEl.textContent = audit.result.debugString;
-      element.open = true;
     }
 
     if (audit.result.details) {
