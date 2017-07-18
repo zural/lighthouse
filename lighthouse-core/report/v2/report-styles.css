@@ -695,6 +695,7 @@ span.lh-node:hover {
 
 .lh-report {
   margin-left: var(--report-menu-width);
+  width: var(--report-width);
   background-color: #fff;
   padding-top: var(--report-header-height);
 }
@@ -808,12 +809,6 @@ summary.lh-passed-audits-summary {
   transform: translateY(0);
 }
 
-@media screen and (min-width: 960px) {
-  .lh-report {
-    width: var(--report-width);
-  }
-}
-
 /* 964 fits the min-width of the filmstrip */
 @media screen and (max-width: 964px) {
   .lh-report {
@@ -823,7 +818,7 @@ summary.lh-passed-audits-summary {
   }
 }
 
-.lh-leftnav print {
+@media print {
   body {
     -webkit-print-color-adjust: exact; /* print background colors */
   }
