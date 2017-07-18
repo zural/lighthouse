@@ -71,7 +71,7 @@
   --header-line-height: 20px;
   --title-font-size: 20px;
   --title-line-height: 24px;
-  --caption-font-size: 12px;
+  --caption-font-size: 11px;
   --caption-line-height: 14px;
   --default-padding: 12px;
   --section-padding: 16px;
@@ -669,6 +669,7 @@ span.lh-node:hover {
   font-size: var(--caption-font-size);
   line-height: var(--caption-line-height);
   color: var(--fail-color);
+  margin-top: 3px;
 }
 
 .lh-debug::before {
