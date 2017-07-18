@@ -120,8 +120,16 @@ summary {
   margin-top: var(--default-padding);
 }
 
+.lh-details summary {
+  font-size: 13px;
+}
+
 .lh-details[open] summary {
   margin-bottom: var(--default-padding);
+}
+
+.lh-details summary::-webkit-details-marker {
+  color: #9e9e9e;
 }
 
 .lh-details.flex .lh-code {
@@ -772,19 +780,6 @@ summary.lh-passed-audits-summary {
   font-size: 15px;
   display: flex;
   align-items: center;
-}
-
-summary.lh-passed-audits-summary::-webkit-details-marker,
-.lh-audit-group--manual > summary::-webkit-details-marker {
-  background: var(--pass-color);
-  color: white;
-  padding: 3px 3px 3px 6px;
-  border-radius: 2px;
-}
-
-.lh-passed-audits[open] summary.lh-passed-audits-summary::-webkit-details-marker,
-.lh-audit-group--manual[open] > summary::-webkit-details-marker {
-  padding: 3px 5px 3px 4px;
 }
 
 #lh-log {
