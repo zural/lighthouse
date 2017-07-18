@@ -695,9 +695,13 @@ span.lh-node:hover {
 
 .lh-report {
   margin-left: var(--report-menu-width);
-  width: var(--report-width);
   background-color: #fff;
   padding-top: var(--report-header-height);
+}
+@media screen {
+  .lh-report {
+    width: var(--report-width);
+  }
 }
 
 .lh-exception {
@@ -822,8 +826,12 @@ summary.lh-passed-audits-summary {
   body {
     -webkit-print-color-adjust: exact; /* print background colors */
   }
+  .lh-container {
+    display: block;
+  }
   .lh-report {
     margin-left: 0;
+    padding-top: 0;
   }
   .lh-categories {
     margin-top: 0;
