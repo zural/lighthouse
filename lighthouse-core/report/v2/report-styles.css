@@ -200,7 +200,7 @@ span.lh-node:hover {
   display: flex;
   align-items: center;
   justify-content: center;
-  flex: 0 0 180px;
+  flex: 0 0 calc(12 * var(--body-font-size));
   flex-direction: column;
   padding: var(--default-padding);
   padding-top: calc(32px + var(--default-padding));
@@ -222,7 +222,7 @@ span.lh-node:hover {
   padding: calc(var(--default-padding) / 2);
 }
 .lh-scorecard__value {
-  font-size: 28px;
+  font-size: calc(1.6 * var(--body-font-size));
 }
 .lh-scorecard__target {
   margin-top: calc(var(--default-padding) / 2);
@@ -238,7 +238,7 @@ span.lh-node:hover {
 .lh-score__value {
   flex: none;
   margin-left: var(--lh-score-margin);
-  width: var(--lh-audit-score-width);
+  width: calc(var(--lh-audit-score-width) - var(--lh-score-margin));
   position: relative;
   font-weight: bold;
   top: 1px;
