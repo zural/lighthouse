@@ -45,7 +45,7 @@
   --lh-score-margin: 12px;
   --lh-table-header-bg: #ccc;
   --lh-table-higlight-bg: #fafafa;
-  --lh-sparkline-height: 8px;
+  --lh-sparkline-height: 5px;
   --lh-sparkline-thin-height: 3px;
   --lh-filmstrip-thumbnail-width: 60px;
   --lh-audit-score-width: calc(5 * var(--body-font-size));
