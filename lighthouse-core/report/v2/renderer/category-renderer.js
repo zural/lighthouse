@@ -332,7 +332,7 @@ class CategoryRenderer {
    */
   _renderDefaultCategory(category, groupDefinitions) {
     const element = this._dom.createElement('div', 'lh-category');
-    element.id = category.id;
+    this._createPermalinkSpan(element, category.id);
     element.appendChild(this._renderCategoryScore(category));
 
     const manualAudits = category.audits.filter(audit => audit.result.manual);
@@ -369,7 +369,7 @@ class CategoryRenderer {
    */
   _renderPerformanceCategory(category, groups) {
     const element = this._dom.createElement('div', 'lh-category');
-    element.id = category.id;
+    this._createPermalinkSpan(element, category.id);
     element.appendChild(this._renderCategoryScore(category));
 
     const metricAudits = category.audits.filter(audit => audit.group === 'perf-metric');
@@ -446,7 +446,7 @@ class CategoryRenderer {
    */
   _renderAccessibilityCategory(category, groupDefinitions) {
     const element = this._dom.createElement('div', 'lh-category');
-    element.id = category.id;
+    this._createPermalinkSpan(element, category.id);
     element.appendChild(this._renderCategoryScore(category));
 
     const auditsGroupedByGroup = /** @type {!Object<string,
@@ -489,6 +489,11 @@ class CategoryRenderer {
     const passedElem = this._renderPassedAuditsSection(passedElements);
     element.appendChild(passedElem);
     return element;
+  }
+
+  _createPermalinkSpan(element, id) {
+    const permalinkEl = this._dom.createChildOf(element, 'span', 'lh-permalink');
+    permalinkEl.id = id;
   }
 }
 
