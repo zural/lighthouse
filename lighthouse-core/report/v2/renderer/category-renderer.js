@@ -206,30 +206,26 @@ class CategoryRenderer {
    * directly to the returned element.
    * @param {!ReportRenderer.GroupJSON} group
    * @param {{expandable: boolean}} opts
-   * @return {!HTMLDetailsElement}
+   * @return {!Element}
    */
   _renderAuditGroup(group, opts) {
     const expandable = opts.expandable;
-    const auditGroupElem = /** @type {!HTMLDetailsElement} */ (
-          this._dom.createElement(expandable ? 'details' :'div',
-          'lh-audit-group lh-expandable-details'));
-    const auditGroupSummary = this._dom.createChildOf(auditGroupElem, 'summary',
-          'lh-audit-group__summary lh-expandable-details__summary');
-    const auditGroupHeader = this._dom.createChildOf(auditGroupSummary, 'div',
-          'lh-audit-group__header lh-expandable-details__header');
-    this._dom.createChildOf(auditGroupSummary, 'div',
-      `lh-toggle-arrow  ${expandable ? '' : ' lh--toggle-arrow-unexpandable'}`, {
+    const element = this._dom.createElement(expandable ? 'details' :'div', 'lh-audit-group');
+    const summmaryEl = this._dom.createChildOf(element, 'summary', 'lh-audit-group__summary');
+    const headerEl = this._dom.createChildOf(summmaryEl, 'div', 'lh-audit-group__header');
+    this._dom.createChildOf(summmaryEl, 'div',
+      `lh-toggle-arrow  ${expandable ? '' : ' lh-toggle-arrow-unexpandable'}`, {
         title: 'See audits',
       });
 
     if (group.description) {
       const auditGroupDescription = this._dom.createElement('div', 'lh-audit-group__description');
       auditGroupDescription.appendChild(this._dom.convertMarkdownLinkSnippets(group.description));
-      auditGroupElem.appendChild(auditGroupDescription);
+      element.appendChild(auditGroupDescription);
     }
-    auditGroupHeader.textContent = group.title;
+    headerEl.textContent = group.title;
 
-    return auditGroupElem;
+    return element;
   }
 
   /**
@@ -491,6 +487,11 @@ class CategoryRenderer {
     return element;
   }
 
+  /**
+   * Create a non-semantic span used for hash navigation of categories
+   * @param {!Element} element
+   * @param {string} id
+   */
   _createPermalinkSpan(element, id) {
     const permalinkEl = this._dom.createChildOf(element, 'span', 'lh-permalink');
     permalinkEl.id = id;
