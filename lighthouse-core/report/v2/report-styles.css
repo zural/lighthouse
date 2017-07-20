@@ -636,8 +636,6 @@ span.lh-node:hover {
 .lh-audit-group {
   padding-top: var(--lh-audit-group-vpadding);
   border-top: 1px solid var(--report-secondary-border-color);
-
-
   padding-left: var(--expandable-indent);
 }
 
