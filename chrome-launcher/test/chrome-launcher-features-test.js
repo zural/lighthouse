@@ -6,11 +6,31 @@
 'use strict';
 
 const {Launcher} = require('../chrome-launcher');
+const {spy, stub} = require('sinon');
 const assert = require('assert');
 const stream = require('stream');
 
+const fsMock = {
+  writeFileSync: () => {},
+  createWriteStream: () => {
+    return new stream.Writable();
+  }
+};
+
 /* eslint-env mocha */
 describe('Launcher features', () => {
+  function createMockChildProcess() {
+    const mockedStream = new stream.Readable();
+    Object.defineProperty(mockedStream, '_read', {
+      value: _ => { }
+    });
+    return {
+      pid: 'some_pid',
+      stdout: mockedStream,
+      stderr: mockedStream
+    };
+  }
+
   describe('getActivePort', () => {
     // A child process-like stub
     function createMockChrome() {
@@ -72,5 +92,29 @@ describe('Launcher features', () => {
       mockChrome.stderr.emit('end');
       return p;
     });
+  });
+
+  describe('isDebuggerReady', () => {
+    it('tries to connect to a specific port if provided', () => {
+      const requestedPort = 6789;
+
+      const isReadySpy = spy();
+      const prepareSpy = spy();
+      const spawnStub = stub().returns(createMockChildProcess());
+
+      const chromeInstance = new Launcher(
+          {port: requestedPort, enableExtensions: true},
+          {fs: fsMock, rimraf: spy(), spawn: spawnStub});
+
+      chromeInstance.isDebuggerReady = isReadySpy.bind(chromeInstance);
+      chromeInstance.prepare = prepareSpy.bind(chromeInstance);
+      stub(chromeInstance, 'waitUntilReady').returns(Promise.resolve());
+      stub(chromeInstance, 'getActivePort').returns(Promise.resolve());
+
+      return chromeInstance.launch().then(_ => {
+        assert.equal(isReadySpy.thisValues[0].requestedPort, 6789);
+        assert.ok(isReadySpy.calledBefore(prepareSpy), 'isDebuggerReady not called before prepare');
+      });
+    }).timeout(2000);
   });
 });

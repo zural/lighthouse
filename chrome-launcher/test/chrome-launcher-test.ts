@@ -14,7 +14,7 @@ const log = require('lighthouse-logger');
 const fsMock = {
   writeFileSync: () => {},
   createWriteStream: () => {
-    return new stream.Writable()
+    return new stream.Writable();
   }
 };
 

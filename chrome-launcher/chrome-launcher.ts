@@ -154,11 +154,10 @@ export class Launcher {
 
   async launch() {
     if (this.requestedPort !== 0) {
-      this.port = this.requestedPort;
 
       // If an explict port is passed first look for an open connection...
       try {
-        return await this.isDebuggerReady();
+        return await this.isDebuggerReady(this.requestedPort);
       } catch (err) {
         log.log(
             'ChromeLauncher',
@@ -190,7 +189,7 @@ export class Launcher {
         log.log('ChromeLauncher', `Chrome already running with pid ${this.chrome.pid}.`);
         return resolve(this.chrome.pid);
       }
-      this.port = this.requestedPort;
+
 
       log.verbose(
           'ChromeLauncher', `Launching with command:\n"${execPath}" ${this.flags.join(' ')}`);
@@ -224,8 +223,6 @@ export class Launcher {
     p = new Promise(resolve => { fulfill = resolve;});
     stderr.on('data', (data:string) => {
       // As of https://chromium-review.googlesource.com/c/596719 Chrome will output the full browser WS target rather than simple port
-      // "DevTools listening on ws://127.0.0.1:63567/devtools/browser/2f168fe0-2d64-48aa-a22c-6ccaff6e9b24"
-      // "DevTools listening on 127.0.0.1:64223"
       const match = data.trim().match(/DevTools listening on (.*:(\d+)(\/.*)?)/);
       if (!match) return;
       const port = Number.parseInt(match[2], 10)
@@ -251,9 +248,9 @@ export class Launcher {
   }
 
   // resolves if ready, rejects otherwise
-  private isDebuggerReady(): Promise<{}> {
+  private isDebuggerReady(port): Promise<{}> {
     return new Promise((resolve, reject) => {
-      const client = net.createConnection(this.port!);
+      const client = net.createConnection(port);
       client.once('error', err => {
         this.cleanup(client);
         reject(err);
@@ -281,7 +278,7 @@ export class Launcher {
         waitStatus += '..';
         log.log('ChromeLauncher', waitStatus);
 
-        launcher.isDebuggerReady()
+        launcher.isDebuggerReady(this.port)
             .then(() => {
               log.log('ChromeLauncher', waitStatus + `${log.greenify(log.tick)}`);
               resolve();
