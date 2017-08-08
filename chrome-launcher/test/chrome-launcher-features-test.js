@@ -95,7 +95,7 @@ describe('Launcher features', () => {
   });
 
   describe('isDebuggerReady', () => {
-    it('tries to connect to a specific port if provided', () => {
+    it('tries to first connect to a specific port if provided', () => {
       const requestedPort = 6789;
 
       const isReadySpy = spy();
@@ -112,7 +112,7 @@ describe('Launcher features', () => {
       stub(chromeInstance, 'getActivePort').returns(Promise.resolve());
 
       return chromeInstance.launch().then(_ => {
-        assert.equal(isReadySpy.thisValues[0].requestedPort, 6789);
+        assert.ok(isReadySpy.alwaysCalledWithExactly(6789), isReadySpy.args);
         assert.ok(isReadySpy.calledBefore(prepareSpy), 'isDebuggerReady not called before prepare');
       });
     }).timeout(2000);
