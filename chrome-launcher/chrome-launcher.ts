@@ -306,8 +306,11 @@ export class Launcher {
 
   kill() {
     return new Promise(resolve => {
-      if (this.chrome) {
-        this.chrome.on('close', () => {
+      if (!this.chrome) {
+        // fail silently as we did not start chrome
+        resolve();
+      } else {
+        this.chrome.on('exit', () => {
           this.destroyTmp().then(resolve);
         });
 
@@ -323,9 +326,6 @@ export class Launcher {
         }
 
         delete this.chrome;
-      } else {
-        // fail silently as we did not start chrome
-        resolve();
       }
     });
   }
