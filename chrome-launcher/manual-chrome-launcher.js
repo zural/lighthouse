@@ -38,4 +38,6 @@ launch({
   port,
   enableExtensions,
   chromeFlags,
-}).then(v => console.log(`✨  Chrome debugging port: ${v.port}`));
+}).then(v => {
+  console.log(`✨  Chrome debugging port: ${v.port}`);
+});
