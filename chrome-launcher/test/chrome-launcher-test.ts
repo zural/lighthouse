@@ -8,12 +8,14 @@
 import {Launcher} from '../chrome-launcher';
 import {spy, stub} from 'sinon';
 import * as assert from 'assert';
+import * as stream from 'stream';
 
 const log = require('lighthouse-logger');
 const fsMock = {
-  openSync: () => {},
-  closeSync: () => {},
-  writeFileSync: () => {}
+  writeFileSync: () => {},
+  createWriteStream: () => {
+    return new stream.Writable()
+  }
 };
 
 describe('Launcher', () => {
@@ -25,13 +27,26 @@ describe('Launcher', () => {
     log.setLevel('');
   });
 
-  it('sets default launching flags', async () => {
-    const spawnStub = stub().returns({pid: 'some_pid'});
+  function createMockChildProcess() {
+    const mockedStream = new stream.Readable();
+    Object.defineProperty(mockedStream, '_read', {
+      value: (size:number) => { size; }
+    });
+    return {
+      pid: 'some_pid',
+      stdout: mockedStream,
+      stderr: mockedStream
+    };
+  }
 
+  it('sets default launching flags', async () => {
+
+    const spawnStub = stub().returns(createMockChildProcess());
     const chromeInstance = new Launcher(
         {userDataDir: 'some_path'},
         {fs: fsMock as any, rimraf: spy() as any, spawn: spawnStub as any});
     stub(chromeInstance, 'waitUntilReady').returns(Promise.resolve());
+    stub(chromeInstance, 'getActivePort').returns(Promise.resolve({port: 1234, browserWs: null}));
 
     chromeInstance.prepare();
 
@@ -46,7 +61,7 @@ describe('Launcher', () => {
     assert.ok(chromeFlags.find(f => f.startsWith('--remote-debugging-port')))
     assert.ok(chromeFlags.find(f => f.startsWith('--disable-background-networking')))
     assert.strictEqual(chromeFlags[chromeFlags.length - 1], 'about:blank');
-  });
+  }).timeout(5000);
 
   it('accepts and uses a custom path', async () => {
     const rimrafMock = spy();
@@ -89,27 +104,30 @@ describe('Launcher', () => {
 
   it('doesn\'t fail when killed twice', async () => {
     const chromeInstance = new Launcher();
+
     await chromeInstance.launch();
     await chromeInstance.kill();
     await chromeInstance.kill();
-  });
+  }).timeout(5000);
 
   it('doesn\'t launch multiple chrome processes', async () => {
     const chromeInstance = new Launcher();
+
     await chromeInstance.launch();
     let pid = chromeInstance.pid!;
     await chromeInstance.launch();
     assert.strictEqual(pid, chromeInstance.pid);
     await chromeInstance.kill();
-  });
+  }).timeout(5000);
 
   it('removes --disable-extensions from flags on enableExtensions', async () => {
-    const spawnStub = stub().returns({pid: 'some_pid'});
+    const spawnStub = stub().returns(createMockChildProcess());
 
     const chromeInstance = new Launcher(
         {enableExtensions: true},
         {fs: fsMock as any, rimraf: spy() as any, spawn: spawnStub as any});
     stub(chromeInstance, 'waitUntilReady').returns(Promise.resolve());
+    stub(chromeInstance, 'getActivePort').returns(Promise.resolve({port: 1234, browserWs: null}));
 
     chromeInstance.prepare();
 
@@ -121,5 +139,5 @@ describe('Launcher', () => {
 
     const chromeFlags = spawnStub.getCall(0).args[1] as string[];
     assert.ok(!chromeFlags.includes('--disable-extensions'));
-  });
+  }).timeout(2000);
 });
