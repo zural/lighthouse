@@ -46,6 +46,11 @@ export interface ModuleOverrides {
   spawn?: typeof childProcess.spawn;
 }
 
+export interface ProtocolPortDetails {
+  port: number;
+  browserWs: string|null;
+}
+
 export async function launch(opts: Options = {}): Promise<LaunchedChrome> {
   opts.handleSIGINT = defaults(opts.handleSIGINT, true);
 
@@ -79,7 +84,7 @@ export class Launcher {
   private chromePath?: string;
   private enableExtensions?: boolean;
   private chromeFlags: string[];
-  private requestedPort?: number;
+  private requestedPort: number;
   private chrome?: childProcess.ChildProcess;
   private fs: typeof fs;
   private rimraf: typeof rimraf;
@@ -215,10 +220,10 @@ export class Launcher {
     return pid;
   }
 
-  private async getActivePort(chrome: childProcess.ChildProcess): Promise<{port: number, browserWs: string|null}> {
+  private async getActivePort(chrome: childProcess.ChildProcess): Promise<ProtocolPortDetails> {
     const stderr = chrome.stderr;
     let fulfill: Function;
-    let p: Promise<{port: number, browserWs: string|null}>|undefined;
+    let p: Promise<ProtocolPortDetails>;
 
     p = new Promise(resolve => { fulfill = resolve;});
     stderr.on('data', (data:string) => {
@@ -248,7 +253,7 @@ export class Launcher {
   }
 
   // resolves if ready, rejects otherwise
-  private isDebuggerReady(port): Promise<{}> {
+  private isDebuggerReady(port: number): Promise<{}> {
     return new Promise((resolve, reject) => {
       const client = net.createConnection(port);
       client.once('error', err => {

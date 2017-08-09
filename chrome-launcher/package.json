@@ -4,9 +4,7 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsc -w",
-    "test": "yarn test:js && yarn test:ts",
-    "test:js": "mocha --reporter=dot test/**/*-test.js",
-    "test:ts": "mocha --require ts-node/register --reporter=dot test/**/*-test.ts",
+    "test": "mocha --require ts-node/register --reporter=dot test/**/*-test.ts",
     "coverage": "nyc yarn test && nyc report --reporter=text-lcov > lcov.info",
     "test-formatting": "test/check-formatting.sh",
     "format": "clang-format -i -style=file **/*.ts *.ts"
