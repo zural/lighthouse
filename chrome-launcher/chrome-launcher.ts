@@ -11,6 +11,7 @@ import * as chromeFinder from './chrome-finder';
 import {DEFAULT_FLAGS} from './flags';
 import {makeTmpDir, defaults, delay} from './utils';
 import * as net from 'net';
+import * as stream from 'stream';
 const rimraf = require('rimraf');
 const log = require('lighthouse-logger');
 const spawn = childProcess.spawn;
@@ -79,8 +80,8 @@ export class Launcher {
   private pollInterval: number = 500;
   private pidFile: string;
   private startingUrl: string;
-  private outStream?: NodeJS.WritableStream;
-  private errStream?: NodeJS.WritableStream;
+  private outFsStream?: NodeJS.WritableStream;
+  private errFsStream?: NodeJS.WritableStream;
   private chromePath?: string;
   private enableExtensions?: boolean;
   private chromeFlags: string[];
@@ -101,7 +102,7 @@ export class Launcher {
     this.rimraf = moduleOverrides.rimraf || rimraf;
     this.spawn = moduleOverrides.spawn || spawn;
 
-    log.setLevel(defaults(this.opts.logLevel, 'silent'));
+    log.setLevel(defaults(this.opts.logLevel, 'verbose'));
 
     // choose the first one (default)
     this.startingUrl = defaults(this.opts.startingUrl, 'about:blank');
@@ -145,8 +146,8 @@ export class Launcher {
     }
 
     this.userDataDir = this.opts.userDataDir || this.makeTmpDir();
-    this.outStream = this.fs.createWriteStream(`${this.userDataDir}/chrome-out.log`, {flags: 'a'});
-    this.errStream = this.fs.createWriteStream(`${this.userDataDir}/chrome-err.log`, {flags: 'a'});
+    this.outFsStream = this.fs.createWriteStream(`${this.userDataDir}/chrome-out.log`, {flags: 'a'});
+    this.errFsStream = this.fs.createWriteStream(`${this.userDataDir}/chrome-err.log`, {flags: 'a'});
 
     // fix for Node4
     // you can't pass a fd to fs.writeFileSync
@@ -195,21 +196,26 @@ export class Launcher {
         return resolve(this.chrome.pid);
       }
 
-
       log.verbose(
           'ChromeLauncher', `Launching with command:\n"${execPath}" ${this.flags.join(' ')}`);
       const chrome = this.spawn(
           execPath, this.flags, {detached: true, stdio: ['ignore', 'pipe', 'pipe']});
 
-      chrome.stdout.setEncoding('utf8');
-      chrome.stderr.setEncoding('utf8');
-      chrome.stdout.pipe(this.outStream!);
-      chrome.stderr.pipe(this.errStream!);
-      const {port, browserWs} = await this.getActivePort(chrome);
+      const outStream = new stdioStream({fileStream: this.outFsStream})
+      chrome.stdout.pipe(outStream);
 
+      /*
+        process.stderr | errStream -> .on('data' listener in getActivePort
+                             \
+                              \_ write to err.log file
+       */
+      const errStream = new stdioStream({fileStream: this.errFsStream})
+      const {port, browserWs} = await this.getActivePort(errStream);
+      chrome.stderr.pipe(errStream);
+
+      this.chrome = chrome;
       this.port = port;
       this.browserWs = browserWs;
-      this.chrome = chrome;
       this.fs.writeFileSync(this.pidFile, chrome.pid.toString());
       log.verbose('ChromeLauncher', `Chrome running with pid ${chrome.pid} on port ${this.port}.`);
       resolve(chrome.pid);
@@ -220,13 +226,14 @@ export class Launcher {
     return pid;
   }
 
-  private async getActivePort(chrome: childProcess.ChildProcess): Promise<ProtocolPortDetails> {
-    const stderr = chrome.stderr;
+  private async getActivePort(errStream: stdioStream): Promise<ProtocolPortDetails> {
+    const stderr = errStream;
     let fulfill: Function;
     let p: Promise<ProtocolPortDetails>;
 
     p = new Promise(resolve => { fulfill = resolve;});
     stderr.on('data', (data:string) => {
+      console.log({data})
       // As of https://chromium-review.googlesource.com/c/596719 Chrome will output the full browser WS target rather than simple port
       const match = data.trim().match(/DevTools listening on (.*:(\d+)(\/.*)?)/);
       if (!match) return;
@@ -283,7 +290,7 @@ export class Launcher {
         waitStatus += '..';
         log.log('ChromeLauncher', waitStatus);
 
-        launcher.isDebuggerReady(this.port)
+        launcher.isDebuggerReady(this.port!)
             .then(() => {
               log.log('ChromeLauncher', waitStatus + `${log.greenify(log.tick)}`);
               resolve();
@@ -339,17 +346,42 @@ export class Launcher {
         return resolve();
       }
 
-      if (this.outStream) {
-        this.outStream.end();
-        delete this.outStream;
+      if (this.outFsStream) {
+        this.outFsStream.end();
+        delete this.outFsStream;
       }
 
-      if (this.errStream) {
-        this.errStream.end();
-        delete this.errStream;
+      if (this.errFsStream) {
+        this.errFsStream.end();
+        delete this.errFsStream;
       }
 
       this.rimraf(this.userDataDir, () => resolve());
     });
+  }
+};
+
+
+interface stdioStreamOptions extends stream.TransformOptions {
+  fileStream?: NodeJS.WritableStream
+}
+
+class stdioStream extends stream.Transform {
+  private fileStream?: NodeJS.WritableStream;
+
+  constructor(opts: stdioStreamOptions) {
+    super(opts);
+    this.fileStream = opts.fileStream;
+    // this.setEncoding('utf8');
+  }
+
+  transform(chunk:string, encoding:string, callback:Function) {
+    console.log('sdlfkjsdf', chunk)
+    // save to the file
+    if (this.fileStream)
+      this.fileStream.write(chunk, encoding);
+
+    this.push(chunk, encoding);
+    callback();
   }
 };
