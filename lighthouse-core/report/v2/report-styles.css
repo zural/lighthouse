@@ -719,6 +719,16 @@ span.lh-node:hover {
   top: 5px;
 }
 
+.lh-warning-banner {
+  font-size: var(--body-font-size);
+  margin: 0;
+  padding: var(--section-padding);
+  border-bottom: 1px solid var(--report-border-color);
+  line-height: var(--header-line-height);
+}
+.lh-warning-banner::before {
+  display: inline-block;
+}
 
 /* Report */
 

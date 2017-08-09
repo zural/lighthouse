@@ -103,6 +103,15 @@ describe('ReportRenderer V2', () => {
       });
     });
 
+    it('renders a warning when using headless chrome', () => {
+      const container = renderer._dom._document.body;
+      const reportJson = Object.assign(sampleResults, {
+        userAgent: 'HeadlessChrome/62.0.3180.0 Safari/537.36'
+      });
+      const output = renderer.renderReport(reportJson, container);
+      assert.ok(output.querySelector('.lh-warning-banner'), 'contains headless chrome warning');
+    });
+
     it('renders a left nav', () => {
       const header = renderer._renderReportNav(sampleResults);
       assert.equal(header.querySelectorAll('.lh-leftnav__item').length, 4);

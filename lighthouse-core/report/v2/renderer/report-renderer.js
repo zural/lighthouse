@@ -138,6 +138,12 @@ class ReportRenderer {
       categories.appendChild(this._categoryRenderer.render(category, report.reportGroups));
     }
 
+    // Render a warning that perf numbers may be off when using headless chrome.
+    if (/HeadlessChrome/.test(report.userAgent)) {
+      const warning = this._dom.cloneTemplate('#tmpl-lh-headless-warning', this._templateContext);
+      reportSection.insertBefore(warning, categories);
+    }
+
     reportSection.appendChild(this._renderReportFooter(report));
 
     return container;
