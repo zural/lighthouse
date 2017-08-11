@@ -9,8 +9,9 @@ const Audit = require('./audit');
 const Util = require('../report/v2/renderer/util');
 
 // Parameters (in ms) for log-normal CDF scoring. To see the curve:
-// https://www.desmos.com/calculator/mdgjzchijg
-const SCORING_POINT_OF_DIMINISHING_RETURNS = 1250;
+// https://www.desmos.com/calculator/rva61mekla
+const SCORING_POINT_OF_DIMINISHING_RETURNS = 1840;
+const SCORING_TARGET = 1250; // Ideal. Users receive score of 100.
 const SCORING_MEDIAN = 5500;
 
 class SpeedIndexMetric extends Audit {
@@ -24,7 +25,7 @@ class SpeedIndexMetric extends Audit {
       description: 'Perceptual Speed Index',
       helpText: 'Speed Index shows how quickly the contents of a page are visibly populated. ' +
           '[Learn more](https://developers.google.com/web/tools/lighthouse/audits/speed-index).',
-      optimalValue: `< ${Util.formatNumber(SCORING_POINT_OF_DIMINISHING_RETURNS)}`,
+      optimalValue: `< ${Util.formatNumber(SCORING_TARGET)}`,
       scoringMode: Audit.SCORING_MODES.NUMERIC,
       requiredArtifacts: ['traces']
     };
@@ -57,11 +58,12 @@ class SpeedIndexMetric extends Audit {
       });
 
       // Use the CDF of a log-normal distribution for scoring.
-      //  10th Percentile = 2,240
-      //  25th Percentile = 3,430
-      //  Median = 5,500
-      //  75th Percentile = 8,820
-      //  95th Percentile = 17,400
+      //   10th Percentile = 2,621
+      //   25th Percentile = 3,731
+      //   Median = 5,500
+      //   75th Percentile = 8,107
+      //   95th Percentile = 14,161
+      // Users receive a LH score of 100 if they achieve a PI <= 1250.
       const score = Audit.computeLogNormalScore(
         speedline.perceptualSpeedIndex,
         SCORING_POINT_OF_DIMINISHING_RETURNS,
