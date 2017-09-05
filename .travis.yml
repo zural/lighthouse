@@ -78,10 +78,10 @@ jobs:
         - 'if [ "${LINT}" = "true" ]; then yarn test-launcher-formatting; fi'
         - 'if [ "${LINT}" = "true" ]; then yarn lint; fi'
         - 'if [ "${LINT}" = "true" ]; then yarn closure; fi'
-        - 'if [ "${UNIT}" = "true" ]; then yarn install-cli; yarn build-cli; yarn unit; fi'
+        - 'if [ "${UNIT}" = "true" ]; then yarn install-launcher && yarn build-launcher && yarn install-cli && yarn build-cli &&yarn unit; fi'
         - 'if [ "${UNIT}" = "true" ]; then yarn smoke; fi'
-        - 'if [ "${SMOKE}" = "true" ] && [ "$TRAVIS_NODE_VERSION" = "6.9.1" ]; then yarn install-extension; yarn build-extension; yarn compile-devtools; fi'
-        - 'if [ "${SMOKE}" = "true" ]; then yarn install-cli; yarn build-cli; yarn smokehouse; fi'
+        - 'if [ "${SMOKE}" = "true" ] && [ "$TRAVIS_NODE_VERSION" = "6.9.1" ]; then yarn install-extension && yarn build-extension && yarn compile-devtools; fi'
+        - 'if [ "${SMOKE}" = "true" ]; then yarn install-cli && yarn build-cli && yarn smokehouse; fi'
       after_failure:
         - 'if [ "${SMOKE}" = "true" ]; then grep "No screenshots" perf.json && gem install travis-artifacts && travis-artifacts upload --path perf-0.trace.json; fi'
       after_success:
