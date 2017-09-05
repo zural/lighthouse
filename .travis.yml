@@ -36,12 +36,14 @@ jobs:
         - UNIT=true
       script:
         - chmod +x travis/install_gcloud.sh
-        - travis_wait ./travis/install_gcloud.sh
-        - source ${HOME}/google-cloud-sdk/path.bash.inc
         - yarn build-ci
-        - tar -czf ${ARTIFACT_NAME}-${TRAVIS_NODE_VERSION}.tar.gz ./**
-        - gcloud auth activate-service-account --key-file gcloud-credentials.json
-        - gsutil cp ${ARTIFACT_NAME}-${TRAVIS_NODE_VERSION}.tar.gz gs://lighthouse-ci
+        - |
+          if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then
+            travis_wait ./travis/install_gcloud.sh;
+            source ${HOME}/google-cloud-sdk/path.bash.inc;
+            tar -czf ${ARTIFACT_NAME}-${TRAVIS_NODE_VERSION}.tar.gz ./**;
+            gsutil cp ${ARTIFACT_NAME}-${TRAVIS_NODE_VERSION}.tar.gz gs://lighthouse-ci;
+          fi
       node_js: "6.9.1"
     - <<: *prep-cache
       env:
@@ -62,11 +64,12 @@ jobs:
         - LINT=true
       script:
         - chmod +x travis/install_gcloud.sh
-        - travis_wait ./travis/install_gcloud.sh
-        - source ${HOME}/google-cloud-sdk/path.bash.inc
-        - gcloud auth activate-service-account --key-file gcloud-credentials.json
-        - gsutil cp gs://lighthouse-ci/${ARTIFACT_NAME}-${TRAVIS_NODE_VERSION}.tar.gz ./
-        - tar -xzf ${ARTIFACT_NAME}-${TRAVIS_NODE_VERSION}.tar.gz
+        - |
+          if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then
+            travis_wait ./travis/install_gcloud.sh;
+            gsutil cp gs://lighthouse-ci/${ARTIFACT_NAME}-${TRAVIS_NODE_VERSION}.tar.gz ./
+            tar -xzf ${ARTIFACT_NAME}-${TRAVIS_NODE_VERSION}.tar.gz
+          fi
         - export CHROME_PATH=$(which google-chrome-stable)
         - 'if [ "${UNIT}" = "true" ] || [ "${SMOKE}" = "true" ]; then sh -e /etc/init.d/xvfb start; sleep 3; fi;'
         - 'if [ "${LINT}" = "true" ]; then yarn test-cli-formatting; fi'
@@ -119,11 +122,12 @@ jobs:
         - SMOKE=true
         - UNIT=true
       script:
-        - chmod +x travis/install_gcloud.sh
-        - travis_wait ./travis/install_gcloud.sh
-        - source ${HOME}/google-cloud-sdk/path.bash.inc
-        - gcloud auth activate-service-account --key-file gcloud-credentials.json
-        - gsutil rm gs://lighthouse-ci/${ARTIFACT_NAME}-${TRAVIS_NODE_VERSION}.tar.gz
+        - |
+          if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then
+            chmod +x travis/install_gcloud.sh
+            travis_wait ./travis/install_gcloud.sh
+            gsutil rm gs://lighthouse-ci/${ARTIFACT_NAME}-${TRAVIS_NODE_VERSION}.tar.gz
+          fi
       node_js: "6.9.1"
     - <<: *cleanup
       node_js: "7"

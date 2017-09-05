@@ -7,3 +7,5 @@ if [ ! -d $HOME/google-cloud-sdk/bin ]; then
   curl https://sdk.cloud.google.com | bash;
 fi;
 
+source ${HOME}/google-cloud-sdk/path.bash.inc
+gcloud auth activate-service-account --key-file gcloud-credentials.json
