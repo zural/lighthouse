@@ -71,6 +71,7 @@ jobs:
             gsutil cp gs://lighthouse-ci/${ARTIFACT_NAME}-${TRAVIS_NODE_VERSION}.tar.gz ./
             tar -xzf ${ARTIFACT_NAME}-${TRAVIS_NODE_VERSION}.tar.gz
           fi
+        - 'if [ "$USE_GCLOUD" = "false" ]; then yarn; fi'
         - export CHROME_PATH=$(which google-chrome-stable)
         - 'if [ "${UNIT}" = "true" ] || [ "${SMOKE}" = "true" ]; then sh -e /etc/init.d/xvfb start; sleep 3; fi;'
         - 'if [ "${LINT}" = "true" ]; then yarn test-cli-formatting; fi'
