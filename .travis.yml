@@ -24,7 +24,7 @@ before_install:
 install:
   # stop travis when PR and not node 6.9.1
   - 'if [ "$TRAVIS_PULL_REQUEST" != "false" ] && [ "$TRAVIS_NODE_VERSION" != "6.9.1" ]; then travis_terminate 0; fi'
-  - yarn run install-all:task:windows
+  - yarn; yarn install-all:task:windows
 script: "echo \"do nothing\""
 jobs:
   include:
