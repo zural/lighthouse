@@ -86,6 +86,7 @@ module.exports = {
     'content-width',
     'image-aspect-ratio',
     'deprecations',
+    'page-execution-timings',
     'manual/pwa-cross-browser',
     'manual/pwa-page-transitions',
     'manual/pwa-each-page-has-url',
@@ -243,6 +244,7 @@ module.exports = {
         {id: 'critical-request-chains', weight: 0, group: 'perf-info'},
         {id: 'user-timings', weight: 0, group: 'perf-info'},
         {id: 'screenshot-thumbnails', weight: 0},
+        {id: 'page-execution-timings', weight: 0, group: 'perf-info'},
       ],
     },
     'accessibility': {
