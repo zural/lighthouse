@@ -237,6 +237,8 @@ This section details projects that have integrated Lighthouse. If you're working
 
 * **[Web Page Test](https://www.webpagetest.org)** — An [open source](https://github.com/WPO-Foundation/webpagetest) tool for measuring and analyzing the performance of web pages on real devices. Users can choose to produce a Lighthouse report alongside the analysis of WebPageTest results.
 
+* **[Treo](https://treo.sh/)** — Tool for developers to run Lighthouse at scale. It provides regression testing, geographical regions, custom networks, and integrations with Github & Slack. Note that Treo has both a paid and free version of the product. 
+
 ## Related Projects
 
 * **[webpack-lighthouse-plugin](https://github.com/addyosmani/webpack-lighthouse-plugin)** - run Lighthouse from a Webpack build.
