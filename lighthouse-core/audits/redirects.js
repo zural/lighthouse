@@ -39,20 +39,17 @@ class Redirects extends Audit {
         let totalWastedMs = 0;
         const pageRedirects = [];
 
-        for (let i = 0; i < redirectRequests.length; i++) {
+        // Kickoff the results table (with the initial request) if there are > 1 redirects
+        if (redirectRequests.length > 1) {
+          pageRedirects.push({
+            url: `(Initial: ${redirectRequests[0].url})`,
+            wastedMs: 'n/a',
+          });
+        }
+
+        for (let i = 1; i < redirectRequests.length; i++) {
           const initialRequest = redirectRequests[i - 1];
           const redirectedRequest = redirectRequests[i];
-
-          // Only create a table (with the initial request) if there are > 1 redirects
-          if (!initialRequest) {
-            if (redirectRequests.length > 1) {
-              pageRedirects.push({
-                url: `(Initial: ${redirectedRequest.url})`,
-                wastedMs: 'n/a',
-              });
-            }
-            continue;
-          }
 
           const wastedMs = (redirectedRequest.startTime - initialRequest.startTime) * 1000;
           totalWastedMs += wastedMs;
