@@ -24,6 +24,10 @@ const timelineCategories = [
     group: 'JavaScript',
   },
   {
+    name: 'Run Microtasks',
+    group: 'JavaScript',
+  },
+  {
     name: 'Minor GC',
     group: 'JavaScript',
   },
@@ -36,6 +40,10 @@ const timelineCategories = [
     group: 'JavaScript',
   },
   {
+    name: 'XHR Load',
+    group: 'JavaScript',
+  },
+  {
     name: 'Layout',
     group: 'Paint/Layout',
   },
@@ -45,6 +53,10 @@ const timelineCategories = [
   },
   {
     name: 'Composite Layers',
+    group: 'Paint/Layout',
+  },
+  {
+    name: 'Update Layer Tree',
     group: 'Paint/Layout',
   },
   {
