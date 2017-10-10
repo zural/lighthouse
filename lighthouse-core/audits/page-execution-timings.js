@@ -15,19 +15,58 @@ const Util = require('../report/v2/renderer/util');
 const DevtoolsTimelineModel = require('../lib/traces/devtools-timeline-model');
 
 const timelineCategories = [
-  'Compile Script',
-  'Evaluate Script',
-  'Minor GC',
-  'Major GC',
-  'XHR Ready State Change',
-  'Layout',
-  'Paint',
-  'Composite Layers',
-  'Recalculate Style',
-  'Parse HTML',
-  'Parse Stylesheet',
-  'DOM GC',
-  'Image Decode',
+  {
+    name: 'Compile Script',
+    group: 'JavaScript',
+  },
+  {
+    name: 'Evaluate Script',
+    group: 'JavaScript',
+  },
+  {
+    name: 'Minor GC',
+    group: 'JavaScript',
+  },
+  {
+    name: 'Major GC',
+    group: 'JavaScript',
+  },
+  {
+    name: 'XHR Ready State Change',
+    group: 'JavaScript',
+  },
+  {
+    name: 'Layout',
+    group: 'Paint/Layout',
+  },
+  {
+    name: 'Paint',
+    group: 'Paint/Layout',
+  },
+  {
+    name: 'Composite Layers',
+    group: 'Paint/Layout',
+  },
+  {
+    name: 'Recalculate Style',
+    group: 'Paint/Layout',
+  },
+  {
+    name: 'Parse HTML',
+    group: 'DOM/CSS',
+  },
+  {
+    name: 'Parse Stylesheet',
+    group: 'DOM/CSS',
+  },
+  {
+    name: 'DOM GC',
+    group: 'DOM/CSS',
+  },
+  {
+    name: 'Image Decode',
+    group: 'Images',
+  },
 ];
 
 class PageExecutionTimings extends Audit {
@@ -38,8 +77,8 @@ class PageExecutionTimings extends Audit {
   static get meta() {
     return {
       category: 'Performance',
-      name: 'boot-up-time',
-      description: 'Boot-up time is high',
+      name: 'page-execution-timings',
+      description: 'Page executiontime is high',
       informative: true,
       helpText: 'Consider reducing the time spent parsing, compiling and executing JS.' +
         'You may find delivering smaller JS payloads helps with this.',
@@ -81,22 +120,25 @@ class PageExecutionTimings extends Audit {
     let totalExecutionTime = 0;
 
     const results = timelineCategories.map(category => {
-      const timing = Number(executionTimings.get(category) || 0);
+      const timing = Number(executionTimings.get(category.name) || 0);
       totalExecutionTime += timing;
 
       return {
-        category,
+        category: category.name,
+        group: category.group,
         duration: Util.formatMilliseconds(timing, 1),
       }
     });
 
     const headings = [
       {key: 'category', itemType: 'text', text: 'Category'},
+      {key: 'group', itemType: 'text', text: 'Task Category'},
       {key: 'duration', itemType: 'text', text: 'Time spent'},
     ];
     const tableDetails = PageExecutionTimings.makeTableDetails(headings, results);
 
     return {
+      score: false,
       rawValue: totalExecutionTime,
       displayValue: Util.formatMilliseconds(totalExecutionTime),
       details: tableDetails,
