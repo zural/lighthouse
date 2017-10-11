@@ -127,6 +127,7 @@ class CacheHeaders extends ByteEfficiencyAudit {
 
     if (headers.has('expires')) {
       const expires = new Date(headers.get('expires')).getTime();
+      // Invalid expires values MUST be treated as already expired
       if (!expires) return 0;
       return Math.max(0, (Date.now() - expires) / 1000);
     }
