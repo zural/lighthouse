@@ -38,6 +38,13 @@ const RESOURCE_AGE_IN_HOURS_DECILES = [0, 0.2, 1, 3, 8, 12, 24, 48, 72, 168, 876
 
 class CacheHeaders extends ByteEfficiencyAudit {
   /**
+   * @return {number}
+   */
+  static get WASTED_BYTES_DISCOUNT_MULTIPLIER() {
+    return WASTED_BYTES_DISCOUNT_MULTIPLIER;
+  }
+
+  /**
    * @return {!AuditMeta}
    */
   static get meta() {
@@ -129,7 +136,7 @@ class CacheHeaders extends ByteEfficiencyAudit {
       const expires = new Date(headers.get('expires')).getTime();
       // Invalid expires values MUST be treated as already expired
       if (!expires) return 0;
-      return Math.max(0, (Date.now() - expires) / 1000);
+      return Math.max(0, Math.ceil((expires - Date.now()) / 1000));
     }
 
     return null;
