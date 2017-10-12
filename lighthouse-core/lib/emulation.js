@@ -123,15 +123,15 @@ function enableNexus5X(driver) {
 }
 
 function enableNetworkThrottling(driver) {
-  return driver.sendCommand('Network.emulateNetworkConditions', TYPICAL_MOBILE_THROTTLING_METRICS);
+  return driver.sendCommand('Network.emulateNetworkConditions', TYPICAL_MOBILE_THROTTLING_METRICS, {shareWithSW: true});
 }
 
 function disableNetworkThrottling(driver) {
-  return driver.sendCommand('Network.emulateNetworkConditions', NO_THROTTLING_METRICS);
+  return driver.sendCommand('Network.emulateNetworkConditions', NO_THROTTLING_METRICS, {shareWithSW: true});
 }
 
 function goOffline(driver) {
-  return driver.sendCommand('Network.emulateNetworkConditions', OFFLINE_METRICS);
+  return driver.sendCommand('Network.emulateNetworkConditions', OFFLINE_METRICS, {shareWithSW: true});
 }
 
 function enableCPUThrottling(driver) {

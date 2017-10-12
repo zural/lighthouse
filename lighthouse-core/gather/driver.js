@@ -14,6 +14,7 @@ const TraceParser = require('../lib/traces/trace-parser');
 
 const log = require('lighthouse-logger');
 const DevtoolsLog = require('./devtools-log');
+const SWManager = require('./connections/sw-manager');
 
 // Controls how long to wait after onLoad before continuing
 const DEFAULT_PAUSE_AFTER_LOAD = 0;
@@ -53,6 +54,8 @@ class Driver {
      * @private {?string}
      */
     this._monitoredUrl = null;
+
+
 
     connection.on('notification', event => {
       this._devtoolsLog.record(event);
@@ -101,6 +104,14 @@ class Driver {
 
   disconnect() {
     return this._connection.disconnect();
+  }
+
+  /**
+   * @return {!Promise<null>}
+   */
+  attachToServiceWorkers() {
+    this._swManager = new SWManager(this._connection, {requiredType: 'service_worker'});
+    return this._swManager.listen();
   }
 
   /**
@@ -179,10 +190,10 @@ class Driver {
    * Call protocol methods
    * @param {!string} method
    * @param {!Object} params
-   * @param {{silent: boolean}=} cmdOpts
+   * @param {{silent: boolean, shareWithSW: boolean}=} cmdOpts
    * @return {!Promise}
    */
-  sendCommand(method, params, cmdOpts) {
+  sendCommand(method, params, cmdOpts = {}) {
     const domainCommand = /^(\w+)\.(enable|disable)$/.exec(method);
     if (domainCommand) {
       const enable = domainCommand[2] === 'enable';
@@ -191,7 +202,15 @@ class Driver {
       }
     }
 
+    if (cmdOpts.shareWithSW) {
+      this.sendCommandToSubTargets(method, params);
+    }
+
     return this._connection.sendCommand(method, params, cmdOpts);
+  }
+
+  sendCommandToSubTargets(method, params) {
+    return this._swManager.sendCommandToSubTargets(method, params);
   }
 
   /**
@@ -628,7 +647,7 @@ class Driver {
         // We don't want to wait for Page.navigate's resolution, as it can now
         // happen _after_ onload: https://crbug.com/768961
         this.sendCommand('Page.enable');
-        this.sendCommand('Emulation.setScriptExecutionDisabled', {value: disableJS});
+        this.sendCommand('Emulation.setScriptExecutionDisabled', {value: disableJS}, {shareWithSW: true});
         this.sendCommand('Page.navigate', {url});
       })
       .then(_ => waitForLoad && this._waitForFullyLoaded(pauseAfterLoadMs,

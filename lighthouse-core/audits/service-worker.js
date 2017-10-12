@@ -21,7 +21,7 @@ class ServiceWorker extends Audit {
       helpText: 'The service worker is the technology that enables your app to use many ' +
          'Progressive Web App features, such as offline, add to homescreen, and push ' +
          'notifications. [Learn more](https://developers.google.com/web/tools/lighthouse/audits/registered-service-worker).',
-      requiredArtifacts: ['URL', 'ServiceWorker'],
+      requiredArtifacts: ['URL', 'ServiceWorker', 'ServiceWorkerClients'],
     };
   }
 
@@ -33,6 +33,9 @@ class ServiceWorker extends Audit {
     // Find active service worker for this URL. Match against
     // artifacts.URL.finalUrl so audit accounts for any redirects.
     const versions = artifacts.ServiceWorker.versions;
+    // const clients = artifacts.ServiceWorkerClients;
+
+
     const url = artifacts.URL.finalUrl;
 
     const origin = new URL(url).origin;

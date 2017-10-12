@@ -352,6 +352,7 @@ class GatherRunner {
     const gathererResults = {};
 
     return driver.connect()
+      .then(_ => driver.attachToServiceWorkers())
       .then(_ => GatherRunner.loadBlank(driver))
       .then(_ => GatherRunner.setupDriver(driver, gathererResults, options))
 
