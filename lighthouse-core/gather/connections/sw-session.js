@@ -15,7 +15,6 @@ class SWSession extends Connection {
     this._parent = parentConnection;
 
     this._parent.on('notification', this._onEvent.bind(this));
-    // now we repeat and do this again. we need to autoattach and grab a type: `worker` within
   }
 
   sessionId() {

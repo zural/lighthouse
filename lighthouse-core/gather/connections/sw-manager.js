@@ -5,8 +5,12 @@
  */
 'use strict';
 
-const SWSession = require('./sw');
+const SWSession = require('./sw-session');
 
+/**
+ * @overview Sending messages to subtargets is "fun".
+ * @see https://github.com/cyrus-and/chrome-remote-interface/wiki/Inspect-subtargets-like-a-service-worker
+ */
 class SWManager {
   constructor(connection, {subtargetType}) {
     this._connection = connection;
@@ -71,7 +75,8 @@ class SWManager {
     // setup message passing to wrap/unwrap Target messages
     const session = new SWSession(sessionId, targetInfo, this._connection);
 
-    // `service_worker` targets are phantom pages. They have a `worker` target within that we want
+    // `service_worker` targets are phantom pages. The SW JS context is within a `worker` target
+    // So we'll do this again, autoattaching, and looking for `worker` subtargets
     let manager;
     if (this._subtargetType === 'service_worker') {
       manager = new SWManager(session, {subtargetType: 'worker'});
