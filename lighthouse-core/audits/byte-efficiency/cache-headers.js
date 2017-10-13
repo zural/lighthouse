@@ -202,6 +202,7 @@ class CacheHeaders extends ByteEfficiencyAudit {
 
         results.push({
           url: URL.elideDataURI(record._url),
+          cacheControl,
           cacheLifetimeInSeconds,
           cacheLifetimeDisplay,
           cacheMissLikelihood,
