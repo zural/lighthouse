@@ -55,8 +55,6 @@ class Driver {
      */
     this._monitoredUrl = null;
 
-
-
     connection.on('notification', event => {
       this._devtoolsLog.record(event);
       if (this._networkStatusMonitor) {
@@ -110,7 +108,7 @@ class Driver {
    * @return {!Promise<null>}
    */
   attachToServiceWorkers() {
-    this._swManager = new SWManager(this._connection, {requiredType: 'service_worker'});
+    this._swManager = new SWManager(this._connection, {subtargetType: 'service_worker'});
     return this._swManager.listen();
   }
 
@@ -203,14 +201,14 @@ class Driver {
     }
 
     if (cmdOpts.shareWithSW) {
-      this.sendCommandToSubTargets(method, params);
+      this.sendCommandToSubtargets(method, params);
     }
 
     return this._connection.sendCommand(method, params, cmdOpts);
   }
 
-  sendCommandToSubTargets(method, params) {
-    return this._swManager.sendCommandToSubTargets(method, params);
+  sendCommandToSubtargets(method, params) {
+    return this._swManager.sendCommandToSubtargets(method, params);
   }
 
   /**
@@ -647,7 +645,7 @@ class Driver {
         // We don't want to wait for Page.navigate's resolution, as it can now
         // happen _after_ onload: https://crbug.com/768961
         this.sendCommand('Page.enable');
-        this.sendCommand('Emulation.setScriptExecutionDisabled', {value: disableJS}, {shareWithSW: true});
+        this.sendCommand('Emulation.setScriptExecutionDisabled', {value: disableJS});
         this.sendCommand('Page.navigate', {url});
       })
       .then(_ => waitForLoad && this._waitForFullyLoaded(pauseAfterLoadMs,

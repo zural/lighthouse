@@ -8,10 +8,10 @@
 const SWSession = require('./sw');
 
 class SWManager {
-  constructor(connection, {requiredType}) {
+  constructor(connection, {subtargetType}) {
     this._connection = connection;
-    this._requiredType = requiredType;
-    this._subTargets = [];
+    this._subtargetType = subtargetType;
+    this._subtargets = [];
   }
 
   listen() {
@@ -22,41 +22,71 @@ class SWManager {
       if (event.method === 'Target.detachedFromTarget') this.onTargetDetached(event.params);
     });
 
-    return this._connection.sendCommand('Target.setAutoAttach', opts)
+    return this._connection
+      .sendCommand('Target.setAutoAttach', opts)
       .then(_ => this._connection.sendCommand('Runtime.runIfWaitingForDebugger'));
   }
 
-  sendCommandToSubTargets(method, params) {
+  sendCommandToSubtargets(method, params) {
+    if (this._subtargets.length === 0) {
+      console.warn(`No subtargets yet for ${method}`);
+    }
+    // Some protocol domains are not supported by the dedicated worker but by the SW page
+    // Note: Log and Network are technically supported in both, but not completely,
+    // so we pick where we'd prefer each to run.
+    let destinationType;
+    const methodDomain = method.split('.')[0];
+    if (['Runtime', 'Profiler', 'Debugger', ' HeapProfiler'].includes(methodDomain)) {
+      destinationType = 'worker';
+    } else if (['Log', 'Network', 'Target'].includes(methodDomain)) {
+      destinationType = 'service_worker';
+    } else {
+      const err = new Error(`Unknown subtarget destination for ${method} message`);
+      err.fatal = true;
+      throw err;
+    }
+    return this._dispatchToSubTargets(destinationType, method, params);
+  }
+
+  _dispatchToSubTargets(destination, method, params) {
     const _flatten = arr => [].concat(...arr);
 
-    const p = this._subTargets.map(({session, manager}) => {
-      if (manager) return manager.sendCommandToSubTargets(method, params);
-      else return session.sendCommand(method, params);
+    const p = this._subtargets.map(({session, manager}) => {
+      if (destination === this._subtargetType) {
+        return session.sendCommand(method, params);
+      } else {
+        if (!manager) {
+          console.log('ruh roh');
+          console.log(this._subtargetType, manager, session);
+        }
+        return manager._dispatchToSubTargets(destination, method, params);
+      }
     });
     return Promise.all(p).then(arr => _flatten(arr));
   }
 
   onTargetAttached({sessionId, targetInfo}) {
-    if (targetInfo.type !== this._requiredType) return;
+    if (targetInfo.type !== this._subtargetType) return;
 
     // setup message passing to wrap/unwrap Target messages
     const session = new SWSession(sessionId, targetInfo, this._connection);
 
     // `service_worker` targets are phantom pages. They have a `worker` target within that we want
     let manager;
-    if (this._requiredType === 'service_worker') {
-      manager = new SWManager(session, {requiredType: 'worker'});
+    if (this._subtargetType === 'service_worker') {
+      manager = new SWManager(session, {subtargetType: 'worker'});
       manager.listen();
     }
 
-    this._subTargets.push({session, manager});
+    this._subtargets.push({session, manager});
   }
 
   onTargetDetached(data) {
     const detatchedSessionId = data.sessionId;
-    this._subTargets = this._subTargets.filter(({session}) => session.sessionId() !== detatchedSessionId);
+    this._subtargets = this._subtargets.filter(
+      ({session}) => session.sessionId() !== detatchedSessionId
+    );
   }
 }
-
 
 module.exports = SWManager;
