@@ -134,7 +134,7 @@ class PageExecutionTimings extends Audit {
    * @return {!AuditResult}
    */
   static audit(artifacts) {
-    const trace = artifacts.traces[PageExecutionTimings.DEFAULT_PASS].traceEvents;
+    const trace = artifacts.traces[PageExecutionTimings.DEFAULT_PASS];
     const executionTimings = PageExecutionTimings.getExecutionTimingsByCategory(trace);
     let totalExecutionTime = 0;
 
