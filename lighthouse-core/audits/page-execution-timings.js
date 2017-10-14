@@ -105,7 +105,7 @@ class PageExecutionTimings extends Audit {
     return {
       category: 'Performance',
       name: 'page-execution-timings',
-      description: 'Page executiontime is high',
+      description: 'Page execution time is high',
       informative: true,
       helpText: 'Consider reducing the time spent parsing, compiling and executing JS.' +
         'You may find delivering smaller JS payloads helps with this.',
