@@ -98,7 +98,6 @@ const taskToGroup = {
 };
 
 class PageExecutionTimings extends Audit {
-
   /**
    * @return {!AuditMeta}
    */
