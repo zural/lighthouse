@@ -7,6 +7,7 @@
 
 const Audit = require('./audit');
 const DevtoolsTimelineModel = require('../lib/traces/devtools-timeline-model');
+const WebInspector = require('../lib/web-inspector');
 const Util = require('../report/v2/renderer/util.js');
 
 class BootupTime extends Audit {
@@ -33,21 +34,20 @@ class BootupTime extends Audit {
     const timelineModel = new DevtoolsTimelineModel(trace);
     const bottomUpByName = timelineModel.bottomUpGroupBy('URL');
     const result = new Map();
-    bottomUpByName.children.forEach((value, url) => {
+
+    bottomUpByName.children.forEach((perUrlNode, url) => {
       // when url is "", we skip it
       if (!url) {
         return;
       }
 
-      const evaluateTime = value.children.get('EvaluateScript:@' + url) || {};
-      const compileTime = value.children.get('v8.compile:@' + url) || {};
-
-      if (evaluateTime.selfTime || compileTime.selfTime) {
-        result.set(url, {
-          evaluate: Number((evaluateTime.selfTime || 0).toFixed(1)),
-          compile: Number((compileTime.selfTime || 0).toFixed(1)),
-        });
-      }
+      const tasks = {};
+      perUrlNode.children.forEach((perTaskPerUrlNode) => {
+        const taskGroup = WebInspector.TimelineUIUtils.eventStyle(perTaskPerUrlNode.event);
+        tasks[taskGroup.title] = tasks[taskGroup.title] || 0;
+        tasks[taskGroup.title] += Number((perTaskPerUrlNode.selfTime || 0).toFixed(1));
+      });
+      result.set(url, tasks);
     });
 
     return result;
@@ -64,22 +64,22 @@ class BootupTime extends Audit {
     let totalBootupTime = 0;
 
     const extendedInfo = {};
+    const headings = [
+      {key: 'url', itemType: 'url', text: 'URL'},
+    ];
     const results = Array.from(bootupTimings).map(([url, durations]) => {
       totalBootupTime += durations.evaluate + durations.compile;
       extendedInfo[url] = durations;
 
-      return {
+      Object.keys(durations).forEach(key => {
+        headings.push({ key, itemType: 'text', text: key });
+      });
+
+      return Object.assign({}, {
         url: url,
-        evaluate: Util.formatMilliseconds(durations.evaluate, 1),
-        compile: Util.formatMilliseconds(durations.compile, 1),
-      };
+      }, durations);
     });
 
-    const headings = [
-      {key: 'url', itemType: 'url', text: 'URL'},
-      {key: 'evaluate', itemType: 'text', text: 'Time To Evaluate'},
-      {key: 'compile', itemType: 'text', text: 'Time To Compile'},
-    ];
     const tableDetails = BootupTime.makeTableDetails(headings, results);
 
     return {
