@@ -14,6 +14,7 @@ const Audit = require('./audit');
 const Util = require('../report/v2/renderer/util');
 const DevtoolsTimelineModel = require('../lib/traces/devtools-timeline-model');
 
+// We group all trace events into groups to show a highlevel breakdown of the page
 const group = {
   loading: 'Network request loading',
   parseHTML: 'Parsing DOM',
@@ -104,7 +105,7 @@ class PageExecutionTimings extends Audit {
   static get meta() {
     return {
       category: 'Performance',
-      name: 'mainthread-work-breakdown ',
+      name: 'mainthread-work-breakdown',
       description: 'Main thread work breakdown',
       informative: true,
       helpText: 'Consider reducing the time spent parsing, compiling and executing JS.' +

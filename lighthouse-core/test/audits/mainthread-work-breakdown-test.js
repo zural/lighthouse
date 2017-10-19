@@ -6,7 +6,7 @@
 'use strict';
 
 /* eslint-env mocha */
-const PageExecutionTimings = require('../../audits/page-execution-timings.js');
+const PageExecutionTimings = require('../../audits/mainthread-work-breakdown.js');
 const fs = require('fs');
 const assert = require('assert');
 
