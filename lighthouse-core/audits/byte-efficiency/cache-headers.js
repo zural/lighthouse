@@ -7,34 +7,15 @@
 
 const parseCacheControl = require('parse-cache-control');
 const ByteEfficiencyAudit = require('./byte-efficiency-audit');
+const formatDuration = require('../../report/v2/renderer/util.js').formatDuration;
 const WebInspector = require('../../lib/web-inspector');
 const URL = require('../../lib/url-shim');
 
 // Ignore assets that have low likelihood for cache miss.
 const IGNORE_THRESHOLD_IN_PERCENT = 0.1;
-// Discount the wasted bytes by some multiplier to reflect that these savings are only for repeat visits.
+// As this savings is only for repeat visits, we discount the savings considerably.
+// Basically we assume a 10% chance of repeat visit.
 const WASTED_BYTES_DISCOUNT_MULTIPLIER = 0.1;
-
-const SECONDS_IN_MINUTE = 60;
-const SECONDS_IN_HOUR = 60 * SECONDS_IN_MINUTE;
-const SECONDS_IN_DAY = 24 * SECONDS_IN_HOUR;
-
-const CACHEABLE_STATUS_CODES = new Set([200, 203, 206]);
-
-const STATIC_RESOURCE_TYPES = new Set([
-  WebInspector.resourceTypes.Font,
-  WebInspector.resourceTypes.Image,
-  WebInspector.resourceTypes.Media,
-  WebInspector.resourceTypes.Script,
-  WebInspector.resourceTypes.Stylesheet,
-]);
-
-// This array contains the hand wavy distribution of the age of a resource in hours at the time of
-// cache hit at 0th, 10th, 20th, 30th, etc percentiles. This is used to compute `wastedMs` since there
-// are clearly diminishing returns to cache duration i.e. 6 months is not 2x better than 3 months.
-// Based on UMA stats for HttpCache.StaleEntry.Validated.Age, see https://www.desmos.com/calculator/7v0qh1nzvh
-// Example: a max-age of 12 hours already covers ~50% of cases, doubling to 24 hours covers ~10% more.
-const RESOURCE_AGE_IN_HOURS_DECILES = [0, 0.2, 1, 3, 8, 12, 24, 48, 72, 168, 8760, Infinity];
 
 class CacheHeaders extends ByteEfficiencyAudit {
   /**
@@ -55,38 +36,23 @@ class CacheHeaders extends ByteEfficiencyAudit {
       helpText:
         'A well-defined cache policy can speed up repeat visits to your page. ' +
         '[Learn more](https://developers.google.com/speed/docs/insights/LeverageBrowserCaching).',
-      description: 'Leverage browser caching',
+      description: 'Leverage browser caching for static assets',
       requiredArtifacts: ['devtoolsLogs'],
     };
   }
 
   /**
-   * Converts a time in seconds into a duration string, i.e. `1d 2h 13m 52s`
-   * @param {number} maxAgeInSeconds
-   * @return {string}
+   * Interpolates the y value at a point x on the line defined by (x0, y0) and (x1, y1)
+   * @param {number} x0
+   * @param {number} y0
+   * @param {number} x1
+   * @param {number} y1
+   * @param {number} x
+   * @return {number}
    */
-  static toDurationDisplay(maxAgeInSeconds) {
-    if (maxAgeInSeconds === 0) {
-      return 'None';
-    }
-
-    const parts = [];
-    const unitLabels = [
-      ['d', SECONDS_IN_DAY],
-      ['h', SECONDS_IN_HOUR],
-      ['m', SECONDS_IN_MINUTE],
-      ['s', 1],
-    ];
-
-    for (const [label, unit] of unitLabels) {
-      const numberOfUnits = Math.floor(maxAgeInSeconds / unit);
-      if (numberOfUnits > 0) {
-        maxAgeInSeconds -= numberOfUnits * unit;
-        parts.push(`${numberOfUnits}\xa0${label}`);
-      }
-    }
-
-    return parts.join(' ');
+  static linearInterpolation(x0, y0, x1, y1, x) {
+    const slope = (y1 - y0) / (x1 - x0);
+    return y0 + (x - x0) * slope;
   }
 
   /**
@@ -96,40 +62,52 @@ class CacheHeaders extends ByteEfficiencyAudit {
    * @return {number}
    */
   static getCacheHitLikelihood(maxAgeInSeconds) {
+    // This array contains the hand wavy distribution of the age of a resource in hours at the time of
+    // cache hit at 0th, 10th, 20th, 30th, etc percentiles. This is used to compute `wastedMs` since there
+    // are clearly diminishing returns to cache duration i.e. 6 months is not 2x better than 3 months.
+    // Based on UMA stats for HttpCache.StaleEntry.Validated.Age, see https://www.desmos.com/calculator/7v0qh1nzvh
+    // Example: a max-age of 12 hours already covers ~50% of cases, doubling to 24 hours covers ~10% more.
+    const RESOURCE_AGE_IN_HOURS_DECILES = [0, 0.2, 1, 3, 8, 12, 24, 48, 72, 168, 8760, Infinity];
+
     const maxAgeInHours = maxAgeInSeconds / 3600;
     const upperDecileIndex = RESOURCE_AGE_IN_HOURS_DECILES.findIndex(
       decile => decile >= maxAgeInHours
     );
-    if (upperDecileIndex === 11) return 1;
+
+    if (upperDecileIndex === RESOURCE_AGE_IN_HOURS_DECILES.length - 1) return 1;
     if (upperDecileIndex === 0) return 0;
 
     const upperDecile = RESOURCE_AGE_IN_HOURS_DECILES[upperDecileIndex];
     const lowerDecile = RESOURCE_AGE_IN_HOURS_DECILES[upperDecileIndex - 1];
+    const upperDecileLikelihood = upperDecileIndex / 10;
+    const lowerDecileLikelihood = (upperDecileIndex - 1) / 10;
 
-    const tenthsPlace = upperDecileIndex;
-    // approximate the position between deciles as linear
-    const hundredthsPlace = 10 * (maxAgeInHours - lowerDecile) / (upperDecile - lowerDecile);
-    return tenthsPlace / 10 + hundredthsPlace / 100;
+    // approximate the position between the two points as linear
+    return CacheHeaders.linearInterpolation(
+      lowerDecile,
+      lowerDecileLikelihood,
+      upperDecile,
+      upperDecileLikelihood,
+      maxAgeInHours
+    );
   }
 
   /**
    * Computes the user-specified cache lifetime, 0 if explicit no-cache policy is in effect, and null if not
-   * user-specified. See https://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html.
+   * user-specified. See https://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html
    *
    * @param {!Map<string,string>} headers
    * @param {!Object} cacheControl Follows the potential settings of cache-control, see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control
    * @return {?number}
    */
   static computeCacheLifetimeInSeconds(headers, cacheControl) {
-    // Pragma controls caching if cache-control is not set, see https://tools.ietf.org/html/rfc7234#section-5.4
-    if (!cacheControl && (headers.get('pragma') || '').includes('no-cache')) {
-      return 0;
-    }
-
-    // Cache-Control takes precendence over expires
     if (cacheControl) {
+      // Cache-Control takes precendence over expires
       if (cacheControl['no-cache'] || cacheControl['no-store']) return 0;
       if (Number.isFinite(cacheControl['max-age'])) return Math.max(cacheControl['max-age'], 0);
+    } else if ((headers.get('pragma') || '').includes('no-cache')) {
+      // Pragma can disable caching if cache-control is not set, see https://tools.ietf.org/html/rfc7234#section-5.4
+      return 0;
     }
 
     if (headers.has('expires')) {
@@ -154,6 +132,16 @@ class CacheHeaders extends ByteEfficiencyAudit {
    * @return {boolean}
    */
   static isCacheableAsset(record) {
+    const CACHEABLE_STATUS_CODES = new Set([200, 203, 206]);
+
+    const STATIC_RESOURCE_TYPES = new Set([
+      WebInspector.resourceTypes.Font,
+      WebInspector.resourceTypes.Image,
+      WebInspector.resourceTypes.Media,
+      WebInspector.resourceTypes.Script,
+      WebInspector.resourceTypes.Stylesheet,
+    ]);
+
     const resourceUrl = record._url;
     return (
       CACHEABLE_STATUS_CODES.has(record.statusCode) &&
@@ -179,7 +167,8 @@ class CacheHeaders extends ByteEfficiencyAudit {
           headers.set(header.name, header.value);
         }
 
-        // Ignore assets that have an etag since they will not be re-downloaded as long as they are valid.
+        // Ignore assets that have an etag since the server should be sending a 304 that excludes the
+        // body on subsequent requests if the asset has not changed.
         if (headers.has('etag')) continue;
 
         const cacheControl = parseCacheControl(headers.get('cache-control'));
@@ -197,7 +186,7 @@ class CacheHeaders extends ByteEfficiencyAudit {
 
         const totalBytes = record._transferSize;
         const wastedBytes = cacheMissLikelihood * totalBytes * WASTED_BYTES_DISCOUNT_MULTIPLIER;
-        const cacheLifetimeDisplay = CacheHeaders.toDurationDisplay(cacheLifetimeInSeconds);
+        const cacheLifetimeDisplay = formatDuration(cacheLifetimeInSeconds);
         cacheMissLikelihood = `${Math.round(cacheMissLikelihood * 100)}%`;
 
         results.push({
@@ -213,8 +202,8 @@ class CacheHeaders extends ByteEfficiencyAudit {
 
       const headings = [
         {key: 'url', itemType: 'url', text: 'URL'},
-        {key: 'cacheLifetimeDisplay', itemType: 'text', text: 'Cache Lifetime'},
-        {key: 'cacheMissLikelihood', itemType: 'text', text: 'Cache Miss Likelihood (%)'},
+        {key: 'cacheLifetimeDisplay', itemType: 'text', text: 'Cache TTL'},
+        {key: 'cacheMissLikelihood', itemType: 'text', text: 'Est. Likelihood of Cache Miss (%)'},
         {key: 'totalKb', itemType: 'text', text: 'Size (KB)'},
       ];
 

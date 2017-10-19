@@ -83,6 +83,37 @@ class Util {
     }
     return formatter.format(new Date(date));
   }
+  /**
+   * Converts a time in seconds into a duration string, i.e. `1d 2h 13m 52s`
+   * @param {number} timeInSeconds
+   * @param {string=} zeroLabel
+   * @return {string}
+   */
+  static formatDuration(timeInSeconds, zeroLabel = 'None') {
+    if (timeInSeconds === 0) {
+      return zeroLabel;
+    }
+
+    const parts = [];
+    const unitLabels = /** @type {!Array<!Array>} */ ([
+      ['d', 60 * 60 * 24],
+      ['h', 60 * 60],
+      ['m', 60],
+      ['s', 1],
+    ]);
+
+    for (const unitLabel of unitLabels) {
+      const label = /** @type {string} */ (unitLabel[0]);
+      const unit = /** @type {number} */ (unitLabel[1]);
+      const numberOfUnits = Math.floor(timeInSeconds / unit);
+      if (numberOfUnits > 0) {
+        timeInSeconds -= numberOfUnits * unit;
+        parts.push(`${numberOfUnits}\xa0${label}`);
+      }
+    }
+
+    return parts.join(' ');
+  }
 
   /**
    * @param {!URL} parsedUrl

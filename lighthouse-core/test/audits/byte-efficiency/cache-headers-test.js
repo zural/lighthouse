@@ -40,6 +40,22 @@ describe('Cache headers audit', () => {
     };
   });
 
+  describe('#linearInterpolation', () => {
+    it('correctly interpolates when slope is 2', () => {
+      const slopeOf2 = x => CacheHeadersAudit.linearInterpolation(0, 0, 10, 20, x);
+      assert.equal(slopeOf2(-10), -20);
+      assert.equal(slopeOf2(5), 10);
+      assert.equal(slopeOf2(10), 20);
+    });
+
+    it('correctly interpolates when slope is 0', () => {
+      const slopeOf0 = x => CacheHeadersAudit.linearInterpolation(0, 0, 10, 0, x);
+      assert.equal(slopeOf0(-10), 0);
+      assert.equal(slopeOf0(5), 0);
+      assert.equal(slopeOf0(10), 0);
+    });
+  });
+
   it('detects missing cache headers', () => {
     networkRecords = [networkRecord()];
     return CacheHeadersAudit.audit(artifacts).then(result => {
@@ -62,9 +78,9 @@ describe('Cache headers audit', () => {
       assert.equal(items.length, 2);
       assert.equal(items[0].cacheLifetimeInSeconds, 3600);
       assert.equal(items[0].cacheLifetimeDisplay, '1\xa0h');
-      assert.equal(Math.round(items[0].wastedBytes), 1000 * .7 * DISCOUNT_MULTIPLIER);
+      assert.equal(Math.round(items[0].wastedBytes), 1000 * .8 * DISCOUNT_MULTIPLIER);
       assert.equal(items[1].cacheLifetimeDisplay, '1\xa0d');
-      assert.equal(Math.round(items[1].wastedBytes), 1000 * .3 * DISCOUNT_MULTIPLIER);
+      assert.equal(Math.round(items[1].wastedBytes), 1000 * .4 * DISCOUNT_MULTIPLIER);
     });
   });
 
@@ -81,9 +97,9 @@ describe('Cache headers audit', () => {
       const items = result.extendedInfo.value.results;
       assert.equal(items.length, 2);
       assert.ok(Math.abs(items[0].cacheLifetimeInSeconds - 3600) <= 1, 'invalid expires parsing');
-      assert.equal(Math.round(items[0].wastedBytes), 1000 * .7 * DISCOUNT_MULTIPLIER);
+      assert.equal(Math.round(items[0].wastedBytes), 1000 * .8 * DISCOUNT_MULTIPLIER);
       assert.ok(Math.abs(items[1].cacheLifetimeInSeconds - 86400) <= 1, 'invalid expires parsing');
-      assert.equal(Math.round(items[1].wastedBytes), 1000 * .3 * DISCOUNT_MULTIPLIER);
+      assert.equal(Math.round(items[1].wastedBytes), 1000 * .4 * DISCOUNT_MULTIPLIER);
     });
   });
 
@@ -105,9 +121,9 @@ describe('Cache headers audit', () => {
       const items = result.extendedInfo.value.results;
       assert.equal(items.length, 2);
       assert.ok(Math.abs(items[0].cacheLifetimeInSeconds - 3600) <= 1, 'invalid expires parsing');
-      assert.equal(Math.round(items[0].wastedBytes), 1000 * .7 * DISCOUNT_MULTIPLIER);
+      assert.equal(Math.round(items[0].wastedBytes), 1000 * .8 * DISCOUNT_MULTIPLIER);
       assert.ok(Math.abs(items[1].cacheLifetimeInSeconds - 86400) <= 1, 'invalid expires parsing');
-      assert.equal(Math.round(items[1].wastedBytes), 1000 * .3 * DISCOUNT_MULTIPLIER);
+      assert.equal(Math.round(items[1].wastedBytes), 1000 * .4 * DISCOUNT_MULTIPLIER);
     });
   });
 
