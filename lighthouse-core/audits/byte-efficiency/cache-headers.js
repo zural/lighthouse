@@ -5,24 +5,24 @@
  */
 'use strict';
 
+const assert = require('assert');
 const parseCacheControl = require('parse-cache-control');
 const ByteEfficiencyAudit = require('./byte-efficiency-audit');
 const formatDuration = require('../../report/v2/renderer/util.js').formatDuration;
 const WebInspector = require('../../lib/web-inspector');
 const URL = require('../../lib/url-shim');
 
-// Ignore assets that have low likelihood for cache miss.
-const IGNORE_THRESHOLD_IN_PERCENT = 0.1;
-// As this savings is only for repeat visits, we discount the savings considerably.
+// Ignore assets that have very high likelihood of cache hit
+const IGNORE_THRESHOLD_IN_PERCENT = 0.9;
 // Basically we assume a 10% chance of repeat visit.
-const WASTED_BYTES_DISCOUNT_MULTIPLIER = 0.1;
+const PROBABILITY_OF_RETURN_VISIT = 0.1;
 
 class CacheHeaders extends ByteEfficiencyAudit {
   /**
    * @return {number}
    */
-  static get WASTED_BYTES_DISCOUNT_MULTIPLIER() {
-    return WASTED_BYTES_DISCOUNT_MULTIPLIER;
+  static get PROBABILITY_OF_RETURN_VISIT() {
+    return PROBABILITY_OF_RETURN_VISIT;
   }
 
   /**
@@ -57,32 +57,35 @@ class CacheHeaders extends ByteEfficiencyAudit {
 
   /**
    * Computes the percent likelihood that a return visit will be within the cache lifetime, based on
-   * Chrome UMA stats see the note above.
+   * Chrome UMA stats see the note below.
    * @param {number} maxAgeInSeconds
    * @return {number}
    */
-  static getCacheHitLikelihood(maxAgeInSeconds) {
+  static getCacheHitProbability(maxAgeInSeconds) {
     // This array contains the hand wavy distribution of the age of a resource in hours at the time of
     // cache hit at 0th, 10th, 20th, 30th, etc percentiles. This is used to compute `wastedMs` since there
     // are clearly diminishing returns to cache duration i.e. 6 months is not 2x better than 3 months.
     // Based on UMA stats for HttpCache.StaleEntry.Validated.Age, see https://www.desmos.com/calculator/7v0qh1nzvh
     // Example: a max-age of 12 hours already covers ~50% of cases, doubling to 24 hours covers ~10% more.
     const RESOURCE_AGE_IN_HOURS_DECILES = [0, 0.2, 1, 3, 8, 12, 24, 48, 72, 168, 8760, Infinity];
+    assert.ok(RESOURCE_AGE_IN_HOURS_DECILES.length === 12, '1 for each decile, 1 on each boundary');
 
     const maxAgeInHours = maxAgeInSeconds / 3600;
     const upperDecileIndex = RESOURCE_AGE_IN_HOURS_DECILES.findIndex(
       decile => decile >= maxAgeInHours
     );
 
+    // Clip the likelihood between 0 and 1
     if (upperDecileIndex === RESOURCE_AGE_IN_HOURS_DECILES.length - 1) return 1;
     if (upperDecileIndex === 0) return 0;
 
+    // Use the two closest decile points as control points
     const upperDecile = RESOURCE_AGE_IN_HOURS_DECILES[upperDecileIndex];
     const lowerDecile = RESOURCE_AGE_IN_HOURS_DECILES[upperDecileIndex - 1];
     const upperDecileLikelihood = upperDecileIndex / 10;
     const lowerDecileLikelihood = (upperDecileIndex - 1) / 10;
 
-    // approximate the position between the two points as linear
+    // Approximate the real likelihood with linear interpolation
     return CacheHeaders.linearInterpolation(
       lowerDecile,
       lowerDecileLikelihood,
@@ -106,7 +109,7 @@ class CacheHeaders extends ByteEfficiencyAudit {
       if (cacheControl['no-cache'] || cacheControl['no-store']) return 0;
       if (Number.isFinite(cacheControl['max-age'])) return Math.max(cacheControl['max-age'], 0);
     } else if ((headers.get('pragma') || '').includes('no-cache')) {
-      // Pragma can disable caching if cache-control is not set, see https://tools.ietf.org/html/rfc7234#section-5.4
+      // The HTTP/1.0 Pragma header can disable caching if cache-control is not set, see https://tools.ietf.org/html/rfc7234#section-5.4
       return 0;
     }
 
@@ -127,6 +130,10 @@ class CacheHeaders extends ByteEfficiencyAudit {
    *  1. Has a cacheable status code
    *  2. Has a resource type that corresponds to static assets (image, script, stylesheet, etc).
    *  3. It does not have a query string.
+   *
+   * Ignoring assets with a query string is debatable, PSI considered them non-cacheable with a similar
+   * caveat. Consider experimenting with this requirement to see what changes. See discussion
+   * https://github.com/GoogleChrome/lighthouse/pull/3531#discussion_r145585790
    *
    * @param {!WebInspector.NetworkRequest} record
    * @return {boolean}
@@ -181,20 +188,20 @@ class CacheHeaders extends ByteEfficiencyAudit {
         if (cacheLifetimeInSeconds === 0) continue;
         cacheLifetimeInSeconds = cacheLifetimeInSeconds || 0;
 
-        let cacheMissLikelihood = 1 - CacheHeaders.getCacheHitLikelihood(cacheLifetimeInSeconds);
-        if (cacheMissLikelihood < IGNORE_THRESHOLD_IN_PERCENT) continue;
+        let cacheHitProbability = CacheHeaders.getCacheHitProbability(cacheLifetimeInSeconds);
+        if (cacheHitProbability >= IGNORE_THRESHOLD_IN_PERCENT) continue;
 
         const totalBytes = record._transferSize;
-        const wastedBytes = cacheMissLikelihood * totalBytes * WASTED_BYTES_DISCOUNT_MULTIPLIER;
+        const wastedBytes = (1 - cacheHitProbability) * totalBytes * PROBABILITY_OF_RETURN_VISIT;
         const cacheLifetimeDisplay = formatDuration(cacheLifetimeInSeconds);
-        cacheMissLikelihood = `${Math.round(cacheMissLikelihood * 100)}%`;
+        cacheHitProbability = `~${Math.round(cacheHitProbability * 100)}%`;
 
         results.push({
           url: URL.elideDataURI(record._url),
           cacheControl,
           cacheLifetimeInSeconds,
           cacheLifetimeDisplay,
-          cacheMissLikelihood,
+          cacheHitProbability,
           totalBytes,
           wastedBytes,
         });
@@ -202,9 +209,9 @@ class CacheHeaders extends ByteEfficiencyAudit {
 
       const headings = [
         {key: 'url', itemType: 'url', text: 'URL'},
-        {key: 'cacheLifetimeDisplay', itemType: 'text', text: 'Cache TTL'},
-        {key: 'cacheMissLikelihood', itemType: 'text', text: 'Est. Likelihood of Cache Miss (%)'},
         {key: 'totalKb', itemType: 'text', text: 'Size (KB)'},
+        {key: 'cacheLifetimeDisplay', itemType: 'text', text: 'Cache TTL'},
+        {key: 'probabilityOfCacheHit', itemType: 'text', text: 'Probability of Cache Hit (%)'},
       ];
 
       return {

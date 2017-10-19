@@ -26,7 +26,7 @@ function networkRecord(options = {}) {
   };
 }
 
-const DISCOUNT_MULTIPLIER = CacheHeadersAudit.WASTED_BYTES_DISCOUNT_MULTIPLIER;
+const DISCOUNT_MULTIPLIER = CacheHeadersAudit.PROBABILITY_OF_RETURN_VISIT;
 
 describe('Cache headers audit', () => {
   let artifacts;
@@ -78,6 +78,7 @@ describe('Cache headers audit', () => {
       assert.equal(items.length, 2);
       assert.equal(items[0].cacheLifetimeInSeconds, 3600);
       assert.equal(items[0].cacheLifetimeDisplay, '1\xa0h');
+      assert.equal(items[0].cacheHitProbability, '~20%');
       assert.equal(Math.round(items[0].wastedBytes), 1000 * .8 * DISCOUNT_MULTIPLIER);
       assert.equal(items[1].cacheLifetimeDisplay, '1\xa0d');
       assert.equal(Math.round(items[1].wastedBytes), 1000 * .4 * DISCOUNT_MULTIPLIER);
