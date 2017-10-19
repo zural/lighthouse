@@ -5,7 +5,7 @@
  */
 
 /**
- * @fileoverview Audit a page to see if it does not use <link> that block first paint.
+ * @fileoverview Audit a page to show a breakdown of execution timings on the main thread
  */
 
 'use strict';
@@ -104,8 +104,8 @@ class PageExecutionTimings extends Audit {
   static get meta() {
     return {
       category: 'Performance',
-      name: 'page-execution-timings',
-      description: 'Page execution time is high',
+      name: 'mainthread-work-breakdown ',
+      description: 'Main thread work breakdown',
       informative: true,
       helpText: 'Consider reducing the time spent parsing, compiling and executing JS.' +
         'You may find delivering smaller JS payloads helps with this.',
@@ -114,16 +114,16 @@ class PageExecutionTimings extends Audit {
   }
 
   /**
-   * @param {!Array<TraceEvent>=} trace
-   * @return {!Map<string, Number>}
+   * @param {!Array<TraceEvent>} trace
+   * @return {!Map<string, number>}
    */
   static getExecutionTimingsByCategory(trace) {
     const timelineModel = new DevtoolsTimelineModel(trace);
     const bottomUpByName = timelineModel.bottomUpGroupBy('EventName');
 
     const result = new Map();
-    bottomUpByName.children.forEach((value, key) =>
-      result.set(key, Number(value.selfTime.toFixed(1))));
+    bottomUpByName.children.forEach((event, eventName) =>
+      result.set(eventName, event.selfTime));
 
     return result;
   }
