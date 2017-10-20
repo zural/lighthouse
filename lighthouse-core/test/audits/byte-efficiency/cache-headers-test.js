@@ -70,7 +70,7 @@ describe('Cache headers audit', () => {
     networkRecords = [
       networkRecord({headers: {'cache-control': 'max-age=3600'}}), // an hour
       networkRecord({headers: {'cache-control': 'max-age=86400'}}), // a day
-      networkRecord({headers: {'cache-control': 'max-age=604800'}}), // a week
+      networkRecord({headers: {'cache-control': 'max-age=31536000'}}), // a year
     ];
 
     return CacheHeadersAudit.audit(artifacts).then(result => {
@@ -87,20 +87,24 @@ describe('Cache headers audit', () => {
 
   it('detects low value expires headers', () => {
     const expiresIn = seconds => new Date(Date.now() + seconds * 1000).toGMTString();
+    const closeEnough = (actual, exp) => assert.ok(Math.abs(actual - exp) <= 1, 'invalid expires');
 
     networkRecords = [
       networkRecord({headers: {expires: expiresIn(3600)}}), // an hour
       networkRecord({headers: {expires: expiresIn(86400)}}), // a day
-      networkRecord({headers: {expires: expiresIn(604800)}}), // a week
+      networkRecord({headers: {expires: expiresIn(86400 * 90)}}), // 3 months
+      networkRecord({headers: {expires: expiresIn(86400 * 365)}}), // a year
     ];
 
     return CacheHeadersAudit.audit(artifacts).then(result => {
       const items = result.extendedInfo.value.results;
-      assert.equal(items.length, 2);
-      assert.ok(Math.abs(items[0].cacheLifetimeInSeconds - 3600) <= 1, 'invalid expires parsing');
+      assert.equal(items.length, 3);
+      closeEnough(items[0].cacheLifetimeInSeconds, 3600);
       assert.equal(Math.round(items[0].wastedBytes), 1000 * .8 * DISCOUNT_MULTIPLIER);
-      assert.ok(Math.abs(items[1].cacheLifetimeInSeconds - 86400) <= 1, 'invalid expires parsing');
+      closeEnough(items[1].cacheLifetimeInSeconds, 86400);
       assert.equal(Math.round(items[1].wastedBytes), 1000 * .4 * DISCOUNT_MULTIPLIER);
+      closeEnough(items[2].cacheLifetimeInSeconds, 86400 * 90);
+      assert.equal(Math.round(items[2].wastedBytes), 1000 * .08 * DISCOUNT_MULTIPLIER);
     });
   });
 
@@ -165,7 +169,8 @@ describe('Cache headers audit', () => {
 
     return CacheHeadersAudit.audit(artifacts).then(result => {
       const items = result.extendedInfo.value.results;
-      assert.equal(items.length, 0);
+      assert.equal(items.length, 1);
+      assert.equal(result.extendedInfo.value.queryStringCount, 1);
     });
   });
 });

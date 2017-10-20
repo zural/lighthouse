@@ -95,22 +95,21 @@ class Util {
     }
 
     const parts = [];
-    const unitLabels = /** @type {!Array<!Array>} */ ([
-      ['d', 60 * 60 * 24],
-      ['h', 60 * 60],
-      ['m', 60],
-      ['s', 1],
-    ]);
+    const unitLabels = /** @type {!Object<string, number>} */ ({
+      d: 60 * 60 * 24,
+      h: 60 * 60,
+      m: 60,
+      s: 1,
+    });
 
-    for (const unitLabel of unitLabels) {
-      const label = /** @type {string} */ (unitLabel[0]);
-      const unit = /** @type {number} */ (unitLabel[1]);
+    Object.keys(unitLabels).forEach(label => {
+      const unit = unitLabels[label];
       const numberOfUnits = Math.floor(timeInSeconds / unit);
       if (numberOfUnits > 0) {
         timeInSeconds -= numberOfUnits * unit;
         parts.push(`${numberOfUnits}\xa0${label}`);
       }
-    }
+    });
 
     return parts.join(' ');
   }

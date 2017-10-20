@@ -13,7 +13,7 @@ const WebInspector = require('../../lib/web-inspector');
 const URL = require('../../lib/url-shim');
 
 // Ignore assets that have very high likelihood of cache hit
-const IGNORE_THRESHOLD_IN_PERCENT = 0.9;
+const IGNORE_THRESHOLD_IN_PERCENT = 0.95;
 // Basically we assume a 10% chance of repeat visit.
 const PROBABILITY_OF_RETURN_VISIT = 0.1;
 
@@ -68,7 +68,7 @@ class CacheHeaders extends ByteEfficiencyAudit {
     // Based on UMA stats for HttpCache.StaleEntry.Validated.Age, see https://www.desmos.com/calculator/7v0qh1nzvh
     // Example: a max-age of 12 hours already covers ~50% of cases, doubling to 24 hours covers ~10% more.
     const RESOURCE_AGE_IN_HOURS_DECILES = [0, 0.2, 1, 3, 8, 12, 24, 48, 72, 168, 8760, Infinity];
-    assert.ok(RESOURCE_AGE_IN_HOURS_DECILES.length === 12, '1 for each decile, 1 on each boundary');
+    assert.ok(RESOURCE_AGE_IN_HOURS_DECILES.length === 12, 'deciles 0-10 and 1 for overflow');
 
     const maxAgeInHours = maxAgeInSeconds / 3600;
     const upperDecileIndex = RESOURCE_AGE_IN_HOURS_DECILES.findIndex(
@@ -80,17 +80,17 @@ class CacheHeaders extends ByteEfficiencyAudit {
     if (upperDecileIndex === 0) return 0;
 
     // Use the two closest decile points as control points
-    const upperDecile = RESOURCE_AGE_IN_HOURS_DECILES[upperDecileIndex];
-    const lowerDecile = RESOURCE_AGE_IN_HOURS_DECILES[upperDecileIndex - 1];
-    const upperDecileLikelihood = upperDecileIndex / 10;
-    const lowerDecileLikelihood = (upperDecileIndex - 1) / 10;
+    const upperDecileValue = RESOURCE_AGE_IN_HOURS_DECILES[upperDecileIndex];
+    const lowerDecileValue = RESOURCE_AGE_IN_HOURS_DECILES[upperDecileIndex - 1];
+    const upperDecile = upperDecileIndex / 10;
+    const lowerDecile = (upperDecileIndex - 1) / 10;
 
     // Approximate the real likelihood with linear interpolation
     return CacheHeaders.linearInterpolation(
+      lowerDecileValue,
       lowerDecile,
-      lowerDecileLikelihood,
+      upperDecileValue,
       upperDecile,
-      upperDecileLikelihood,
       maxAgeInHours
     );
   }
@@ -129,11 +129,11 @@ class CacheHeaders extends ByteEfficiencyAudit {
    *
    *  1. Has a cacheable status code
    *  2. Has a resource type that corresponds to static assets (image, script, stylesheet, etc).
-   *  3. It does not have a query string.
    *
-   * Ignoring assets with a query string is debatable, PSI considered them non-cacheable with a similar
-   * caveat. Consider experimenting with this requirement to see what changes. See discussion
-   * https://github.com/GoogleChrome/lighthouse/pull/3531#discussion_r145585790
+   * Allowing assets with a query string is debatable, PSI considered them non-cacheable with a similar
+   * caveat.
+   *
+   * TODO: Investigate impact in HTTPArchive, experiment with this policy to see what changes.
    *
    * @param {!WebInspector.NetworkRequest} record
    * @return {boolean}
@@ -153,7 +153,6 @@ class CacheHeaders extends ByteEfficiencyAudit {
     return (
       CACHEABLE_STATUS_CODES.has(record.statusCode) &&
       STATIC_RESOURCE_TYPES.has(record._resourceType) &&
-      !resourceUrl.includes('?') &&
       !resourceUrl.includes('data:')
     );
   }
@@ -166,6 +165,8 @@ class CacheHeaders extends ByteEfficiencyAudit {
     const devtoolsLogs = artifacts.devtoolsLogs[ByteEfficiencyAudit.DEFAULT_PASS];
     return artifacts.requestNetworkRecords(devtoolsLogs).then(records => {
       const results = [];
+      let queryStringCount = 0;
+
       for (const record of records) {
         if (!CacheHeaders.isCacheableAsset(record)) continue;
 
@@ -189,15 +190,18 @@ class CacheHeaders extends ByteEfficiencyAudit {
         cacheLifetimeInSeconds = cacheLifetimeInSeconds || 0;
 
         let cacheHitProbability = CacheHeaders.getCacheHitProbability(cacheLifetimeInSeconds);
-        if (cacheHitProbability >= IGNORE_THRESHOLD_IN_PERCENT) continue;
+        if (cacheHitProbability > IGNORE_THRESHOLD_IN_PERCENT) continue;
 
+        const url = URL.elideDataURI(record._url);
         const totalBytes = record._transferSize;
         const wastedBytes = (1 - cacheHitProbability) * totalBytes * PROBABILITY_OF_RETURN_VISIT;
         const cacheLifetimeDisplay = formatDuration(cacheLifetimeInSeconds);
         cacheHitProbability = `~${Math.round(cacheHitProbability * 100)}%`;
 
+        if (url.includes('?')) queryStringCount++;
+
         results.push({
-          url: URL.elideDataURI(record._url),
+          url,
           cacheControl,
           cacheLifetimeInSeconds,
           cacheLifetimeDisplay,
@@ -217,6 +221,7 @@ class CacheHeaders extends ByteEfficiencyAudit {
       return {
         results,
         headings,
+        extendedInfo: {queryStringCount},
       };
     });
   }
