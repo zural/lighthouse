@@ -16,36 +16,118 @@ const assert = require('assert');
 const acceptableTrace = JSON.parse(
   fs.readFileSync(__dirname + '/../fixtures/traces/progressive-app-m60.json')
 );
+const siteWithRedirectTrace = JSON.parse(
+  fs.readFileSync(__dirname + '/../fixtures/traces/site-with-redirect.json')
+);
+const loadTrace = JSON.parse(
+  fs.readFileSync(__dirname + '/../fixtures/traces/load.json')
+);
 const errorTrace = JSON.parse(
   fs.readFileSync(__dirname + '/../fixtures/traces/airhorner_no_fcp.json')
 );
 
+const acceptableTraceExpectations = {
+  'Compile Script': 25,
+  'Composite Layers': 6,
+  'DOM GC': 33,
+  'Evaluate Script': 131,
+  'Image Decode': 1,
+  'Layout': 138,
+  'Major GC': 8,
+  'Minor GC': 7,
+  'Paint': 52,
+  'Parse HTML': 14,
+  'Recalculate Style': 170,
+  'Update Layer Tree': 25,
+};
+const siteWithRedirectTraceExpectations = {
+  'Compile Script': 38,
+  'Composite Layers': 2,
+  'DOM GC': 25,
+  'Evaluate Script': 122,
+  'Image Decode': 0,
+  'Layout': 209,
+  'Major GC': 10,
+  'Minor GC': 11,
+  'Paint': 4,
+  'Parse HTML': 52,
+  'Parse Stylesheet': 51,
+  'Recalculate Style': 66,
+  'Update Layer Tree': 5,
+};
+const loadTraceExpectations = {
+  'Animation Frame Fired': 6,
+  'Composite Layers': 15,
+  'Evaluate Script': 296,
+  'Image Decode': 4,
+  'Layout': 51,
+  'Minor GC': 3,
+  'Paint': 9,
+  'Parse HTML': 25,
+  'Recalculate Style': 80,
+  'Update Layer Tree': 16,
+  'XHR Load': 19,
+  'XHR Ready State Change': 1,
+};
+
 describe('Performance: page execution timings audit', () => {
   it('should compute the correct pageExecutionTiming values', (done) => {
-    const artifacts = {
+    // acceptable trace
+    let artifacts = {
       traces: {
         [PageExecutionTimings.DEFAULT_PASS]: acceptableTrace,
       },
     };
+    let output = null;
+    const valueOf = name => Math.round(output.extendedInfo.value[name]);
 
-    const output = PageExecutionTimings.audit(artifacts);
+    output = PageExecutionTimings.audit(artifacts);
     assert.equal(output.details.items.length, 12);
     assert.equal(output.score, false);
     assert.equal(Math.round(output.rawValue), 611);
 
-    const valueOf = name => Math.round(output.extendedInfo.value[name]);
-    assert.equal(valueOf('Recalculate Style'), 170);
-    assert.equal(valueOf('Layout'), 138);
-    assert.equal(valueOf('Evaluate Script'), 131);
-    assert.equal(valueOf('Paint'), 52);
-    assert.equal(valueOf('DOM GC'), 33);
-    assert.equal(valueOf('Update Layer Tree'), 25);
-    assert.equal(valueOf('Compile Script'), 25);
-    assert.equal(valueOf('Parse HTML'), 14);
-    assert.equal(valueOf('Major GC'), 8);
-    assert.equal(valueOf('Minor GC'), 7);
-    assert.equal(valueOf('Composite Layers'), 6);
-    assert.equal(valueOf('Image Decode'), 1);
+    for (const category in output.extendedInfo.value) {
+      if (output.extendedInfo.value[category]) {
+        assert.equal(valueOf(category), acceptableTraceExpectations[category]);
+      }
+    }
+    // end acceptable trace
+
+    // siteWithRedirects trace
+    artifacts = {
+      traces: {
+        [PageExecutionTimings.DEFAULT_PASS]: siteWithRedirectTrace,
+      },
+    };
+    output = PageExecutionTimings.audit(artifacts);
+    assert.equal(output.details.items.length, 13);
+    assert.equal(output.score, false);
+    assert.equal(Math.round(output.rawValue), 596);
+
+    for (const category in output.extendedInfo.value) {
+      if (output.extendedInfo.value[category]) {
+        assert.equal(valueOf(category), siteWithRedirectTraceExpectations[category]);
+      }
+    }
+    // end siteWithRedirects trace
+
+    // load trace
+    artifacts = {
+      traces: {
+        [PageExecutionTimings.DEFAULT_PASS]: loadTrace,
+      },
+    };
+    output = PageExecutionTimings.audit(artifacts);
+    assert.equal(output.details.items.length, 12);
+    assert.equal(output.score, false);
+    assert.equal(Math.round(output.rawValue), 524);
+
+    for (const category in output.extendedInfo.value) {
+      if (output.extendedInfo.value[category]) {
+        assert.equal(valueOf(category), loadTraceExpectations[category]);
+      }
+    }
+    // end load trace
 
     done();
   });
