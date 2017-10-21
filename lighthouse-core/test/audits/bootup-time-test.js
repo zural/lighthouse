@@ -35,7 +35,7 @@ describe('Performance: bootup-time audit', () => {
 
     const valueOf = name => output.extendedInfo.value[name];
     assert.deepEqual(valueOf('https://www.google-analytics.com/analytics.js'), {'Evaluate Script': 40.1, 'Compile Script': 9.6, 'Recalculate Style': 0.2});
-    assert.deepEqual(valueOf('https://pwa.rocks/script.js'), {'Evaluate Script': 31.8,'Layout': 5.5, 'Compile Script': 1.3});
+    assert.deepEqual(valueOf('https://pwa.rocks/script.js'), {'Evaluate Script': 31.8, 'Layout': 5.5, 'Compile Script': 1.3});
     assert.deepEqual(valueOf('https://www.googletagmanager.com/gtm.js?id=GTM-Q5SW'), {'Evaluate Script': 25, 'Compile Script': 5.5, 'Recalculate Style': 1.2});
     assert.deepEqual(valueOf('https://www.google-analytics.com/plugins/ua/linkid.js'), {'Evaluate Script': 25.2, 'Compile Script': 1.2});
     assert.deepEqual(valueOf('https://www.google-analytics.com/cx/api.js?experiment=jdCfRmudTmy-0USnJ8xPbw'), {'Compile Script': 3, 'Evaluate Script': 1.2});
