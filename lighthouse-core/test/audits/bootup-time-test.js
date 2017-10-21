@@ -29,18 +29,19 @@ describe('Performance: bootup-time audit', () => {
     };
 
     const output = BootupTime.audit(artifacts);
-    assert.equal(output.details.items.length, 7);
+    assert.equal(output.details.items.length, 8);
     assert.equal(output.score, true);
-    assert.equal(Math.round(output.rawValue), 155);
+    assert.equal(Math.round(output.rawValue), 176);
 
     const valueOf = name => output.extendedInfo.value[name];
-    assert.deepEqual(valueOf('https://www.google-analytics.com/analytics.js'), {evaluate: 40.1, compile: 9.6});
-    assert.deepEqual(valueOf('https://pwa.rocks/script.js'), {evaluate: 31.8, compile: 1.3});
-    assert.deepEqual(valueOf('https://www.googletagmanager.com/gtm.js?id=GTM-Q5SW'), {evaluate: 25, compile: 5.5});
-    assert.deepEqual(valueOf('https://www.google-analytics.com/plugins/ua/linkid.js'), {evaluate: 25.2, compile: 1.2});
-    assert.deepEqual(valueOf('https://pwa.rocks/'), {evaluate: 6.1, compile: 1.2});
-    assert.deepEqual(valueOf('https://www.google-analytics.com/cx/api.js?experiment=jdCfRmudTmy-0USnJ8xPbw'), {evaluate: 1.2, compile: 3});
-    assert.deepEqual(valueOf('https://www.google-analytics.com/cx/api.js?experiment=qvpc5qIfRC2EMnbn6bbN5A'), {evaluate: 1, compile: 2.5});
+    assert.deepEqual(valueOf('https://www.google-analytics.com/analytics.js'), {'Evaluate Script': 40.1, 'Compile Script': 9.6, 'Recalculate Style': 0.2});
+    assert.deepEqual(valueOf('https://pwa.rocks/script.js'), {'Evaluate Script': 31.8,'Layout': 5.5, 'Compile Script': 1.3});
+    assert.deepEqual(valueOf('https://www.googletagmanager.com/gtm.js?id=GTM-Q5SW'), {'Evaluate Script': 25, 'Compile Script': 5.5, 'Recalculate Style': 1.2});
+    assert.deepEqual(valueOf('https://www.google-analytics.com/plugins/ua/linkid.js'), {'Evaluate Script': 25.2, 'Compile Script': 1.2});
+    assert.deepEqual(valueOf('https://www.google-analytics.com/cx/api.js?experiment=jdCfRmudTmy-0USnJ8xPbw'), {'Compile Script': 3, 'Evaluate Script': 1.2});
+    assert.deepEqual(valueOf('https://www.google-analytics.com/cx/api.js?experiment=qvpc5qIfRC2EMnbn6bbN5A'), {'Compile Script': 2.5, 'Evaluate Script': 1});
+    assert.deepEqual(valueOf('https://pwa.rocks/'), {'Parse HTML': 14.2, 'Evaluate Script': 6.1, 'Compile Script': 1.2});
+    assert.deepEqual(valueOf('https://pwa.rocks/0ff789bf.js'), {'Parse HTML': 0});
 
     done();
   });

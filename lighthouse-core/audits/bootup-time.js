@@ -10,6 +10,88 @@ const DevtoolsTimelineModel = require('../lib/traces/devtools-timeline-model');
 const WebInspector = require('../lib/web-inspector');
 const Util = require('../report/v2/renderer/util.js');
 
+const group = {
+  loading: 'Network request loading',
+  parseHTML: 'Parsing DOM',
+  styleLayout: 'Style & Layout',
+  compositing: 'Compositing',
+  painting: 'Paint',
+  gpu: 'GPU',
+  scripting: 'Script Evaluation',
+  scriptParseCompile: 'Script Parsing & Compile',
+  scriptGC: 'Garbage collection',
+  other: 'Other',
+  images: 'Images',
+};
+const taskToGroup = {
+  'Animation': group.painting,
+  'Async Task': group.other,
+  'Frame Start': group.painting,
+  'Frame Start (main thread)': group.painting,
+  'Cancel Animation Frame': group.scripting,
+  'Cancel Idle Callback': group.scripting,
+  'Compile Script': group.scriptParseCompile,
+  'Composite Layers': group.compositing,
+  'Console Time': group.scripting,
+  'Image Decode': group.images,
+  'Draw Frame': group.painting,
+  'Embedder Callback': group.scripting,
+  'Evaluate Script': group.scripting,
+  'Event': group.scripting,
+  'Animation Frame Fired': group.scripting,
+  'Fire Idle Callback': group.scripting,
+  'Function Call': group.scripting,
+  'DOM GC': group.scriptGC,
+  'GC Event': group.scriptGC,
+  'GPU': group.gpu,
+  'Hit Test': group.compositing,
+  'Invalidate Layout': group.styleLayout,
+  'JS Frame': group.scripting,
+  'Input Latency': group.scripting,
+  'Layout': group.styleLayout,
+  'Major GC': group.scriptGC,
+  'DOMContentLoaded event': group.scripting,
+  'First paint': group.painting,
+  'FMP': group.painting,
+  'FMP candidate': group.painting,
+  'Load event': group.scripting,
+  'Minor GC': group.scriptGC,
+  'Paint': group.painting,
+  'Paint Image': group.images,
+  'Paint Setup': group.painting,
+  'Parse Stylesheet': group.parseHTML,
+  'Parse HTML': group.parseHTML,
+  'Parse Script': group.scriptParseCompile,
+  'Other': group.other,
+  'Rasterize Paint': group.painting,
+  'Recalculate Style': group.styleLayout,
+  'Request Animation Frame': group.scripting,
+  'Request Idle Callback': group.scripting,
+  'Request Main Thread Frame': group.painting,
+  'Image Resize': group.images,
+  'Finish Loading': group.loading,
+  'Receive Data': group.loading,
+  'Receive Response': group.loading,
+  'Send Request': group.loading,
+  'Run Microtasks': group.scripting,
+  'Schedule Style Recalculation': group.styleLayout,
+  'Scroll': group.compositing,
+  'Task': group.other,
+  'Timer Fired': group.scripting,
+  'Install Timer': group.scripting,
+  'Remove Timer': group.scripting,
+  'Timestamp': group.scripting,
+  'Update Layer': group.compositing,
+  'Update Layer Tree': group.compositing,
+  'User Timing': group.scripting,
+  'Create WebSocket': group.scripting,
+  'Destroy WebSocket': group.scripting,
+  'Receive WebSocket Handshake': group.scripting,
+  'Send WebSocket Handshake': group.scripting,
+  'XHR Load': group.scripting,
+  'XHR Ready State Change': group.scripting,
+};
+
 class BootupTime extends Audit {
   /**
    * @return {!AuditMeta}
@@ -36,8 +118,8 @@ class BootupTime extends Audit {
     const result = new Map();
 
     bottomUpByName.children.forEach((perUrlNode, url) => {
-      // when url is "", we skip it
-      if (!url) {
+      // when url is "" or about:blank, we skip it
+      if (!url || url === 'about:blank') {
         return;
       }
 
@@ -62,22 +144,46 @@ class BootupTime extends Audit {
     const bootupTimings = BootupTime.getExecutionTimingsByURL(trace);
 
     let totalBootupTime = 0;
-
     const extendedInfo = {};
     const headings = [
       {key: 'url', itemType: 'url', text: 'URL'},
     ];
-    const results = Array.from(bootupTimings).map(([url, durations]) => {
-      totalBootupTime += durations.evaluate + durations.compile;
+
+    // Group tasks per url
+    const groupsPerUrl = Array.from(bootupTimings).map(([url, durations]) => {
       extendedInfo[url] = durations;
 
-      Object.keys(durations).forEach(key => {
-        headings.push({ key, itemType: 'text', text: key });
+      const groups = [];
+      Object.keys(durations).forEach(task => {
+        totalBootupTime += durations[task];
+        const group = taskToGroup[task];
+
+        groups[group] = groups[group] || 0;
+        groups[group] += durations[task];
+
+        if (!headings.find(heading => heading.key === group)) {
+          headings.push(
+            {key: group, itemType: 'text', text: group}
+          );
+        }
       });
 
-      return Object.assign({}, {
+      return {
         url: url,
-      }, durations);
+        groups,
+      };
+    });
+
+    // map data in correct format to create a table
+    const results = groupsPerUrl.map(({url, groups}) => {
+      const res = {};
+      headings.forEach(heading => {
+        res[heading.key] = Util.formatMilliseconds(groups[heading.key] || 0, 1);
+      });
+
+      res.url = url;
+
+      return res;
     });
 
     const tableDetails = BootupTime.makeTableDetails(headings, results);
