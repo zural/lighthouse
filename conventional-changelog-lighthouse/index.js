@@ -3,7 +3,7 @@ const readFileSync = require('fs').readFileSync;
 const resolve = require('path').resolve;
 
 const parserOpts = {
-  headerPattern: /^(\w*)(?:\((.*)\))?\: (.*)$/,
+  headerPattern: /^(\w*)(?:\((.*)\))?: (.*)$/,
   headerCorrespondence: [
     'type',
     'scope',
@@ -28,13 +28,14 @@ const writerOpts = {
   },
   groupBy: 'type',
   commitGroupsSort: (a, b) => {
+    // put new audit on the top
     if (b.title === 'New audit') {
       return 1;
     }
 
     return a.title.localeCompare(b.title);
   },
-  commitsSort: ['type', 'scope', 'message']
+  commitsSort: ['type', 'scope', 'message'],
 };
 
 const template = readFileSync(resolve(__dirname, 'templates/template.hbs')).toString();
