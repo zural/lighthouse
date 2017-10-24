@@ -17,6 +17,10 @@ const writerOpts = {
       commit.hash = commit.hash.substring(0, 7);
     }
 
+    if (commit.type === 'test') {
+      commit.type = 'tests';
+    }
+
     if (commit.type) {
       commit.type = commit.type.replace(/_/g, ' ');
       commit.type = commit.type.substring(0, 1).toUpperCase() + commit.type.substring(1);
