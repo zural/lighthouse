@@ -172,12 +172,8 @@ class CacheHeaders extends ByteEfficiencyAudit {
 
         const headers = new Map();
         for (const header of record._responseHeaders) {
-          headers.set(header.name, header.value);
+          headers.set(header.name.toLowerCase(), header.value);
         }
-
-        // Ignore assets that have an etag since the server should be sending a 304 that excludes the
-        // body on subsequent requests if the asset has not changed.
-        if (headers.has('etag')) continue;
 
         const cacheControl = parseCacheControl(headers.get('cache-control'));
         let cacheLifetimeInSeconds = CacheHeaders.computeCacheLifetimeInSeconds(
