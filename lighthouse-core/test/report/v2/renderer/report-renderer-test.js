@@ -122,20 +122,20 @@ describe('ReportRenderer V2', () => {
     });
 
     it('renders a warning section', () => {
-      const lighthouseRunWarnings = [
+      const runWarnings = [
         'Less bad thing',
         'Really bad thing',
         'LH should maybe just retire now',
       ];
-      const warningResults = Object.assign({}, sampleResults, {lighthouseRunWarnings});
+      const warningResults = Object.assign({}, sampleResults, {runWarnings});
       const container = renderer._dom._document.body;
       const output = renderer.renderReport(warningResults, container);
 
       const warningEls = output.querySelectorAll('.lh-run-warnings > ul > li');
-      assert.strictEqual(warningEls.length, lighthouseRunWarnings.length);
+      assert.strictEqual(warningEls.length, runWarnings.length);
       warningEls.forEach((warningEl, index) => {
         const warningText = warningEl.textContent;
-        assert.strictEqual(warningText, lighthouseRunWarnings[index]);
+        assert.strictEqual(warningText, runWarnings[index]);
       });
     });
 

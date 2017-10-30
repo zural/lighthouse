@@ -99,8 +99,11 @@ class GatherRunner {
     const resetStorage = !options.flags.disableStorageReset;
     // Enable emulation based on flags
     return driver.assertNoSameOriginServiceWorkerClients(options.url)
-      .then(_ => gathererResults.UserAgent = [driver.getUserAgent()])
-      .then(_ => GatherRunner.warnOnHeadless(driver, gathererResults))
+      .then(_ => driver.getUserAgent())
+      .then(userAgent => {
+        gathererResults.UserAgent = [userAgent];
+        GatherRunner.warnOnHeadless(userAgent, gathererResults);
+      })
       .then(_ => driver.beginEmulation(options.flags))
       .then(_ => driver.enableRuntimeEvents())
       .then(_ => driver.cacheNatives())
@@ -165,19 +168,15 @@ class GatherRunner {
 
   /**
    * Add run warning if running in Headless Chrome.
-   * @param {!Driver} driver
+   * @param {string} userAgent
    * @param {!GathererResults} gathererResults
-   * @return {!Promise<undefined>}
    */
-  static warnOnHeadless(driver, gathererResults) {
-    return driver.getUserAgent()
-      .then(userAgent => {
-        if (userAgent.startsWith('HeadlessChrome')) {
-          gathererResults.LighthouseRunWarnings.push('Your site\'s mobile performance may be ' +
-              'worse than the numbers presented in this report. Lighthouse could not test on a ' +
-              'mobile connection because Headless Chrome does not support network throttling.');
-        }
-      });
+  static warnOnHeadless(userAgent, gathererResults) {
+    if (userAgent.startsWith('HeadlessChrome')) {
+      gathererResults.LighthouseRunWarnings.push('Your site\'s mobile performance may be ' +
+          'worse than the numbers presented in this report. Lighthouse could not test on a ' +
+          'mobile connection because Headless Chrome does not support network throttling.');
+    }
   }
 
   /**
@@ -320,7 +319,7 @@ class GatherRunner {
     const artifacts = {};
 
     // Nest LighthouseRunWarnings, if any, so they will be collected into artifact.
-    gathererResults.LighthouseRunWarnings = [gathererResults.LighthouseRunWarnings || []];
+    gathererResults.LighthouseRunWarnings = [gathererResults.LighthouseRunWarnings];
 
     return Object.keys(gathererResults).reduce((chain, gathererName) => {
       return chain.then(_ => {

@@ -739,6 +739,8 @@ describe('GatherRunner', function() {
           Promise.reject(someOtherError),
           Promise.resolve(1729),
         ],
+
+        LighthouseRunWarnings: [],
       };
 
       return GatherRunner.collectArtifacts(gathererResults).then(artifacts => {
@@ -941,18 +943,14 @@ describe('GatherRunner', function() {
   });
 
   it('issues a lighthouseRunWarnings if running in Headless', () => {
-    const mockDriver = {
-      getUserAgent: () => Promise.resolve('HeadlessChrome/64.0.3240.0'),
-    };
+    const userAgent = 'HeadlessChrome/64.0.3240.0';
     const gathererResults = {
       LighthouseRunWarnings: [],
     };
 
-    return GatherRunner.warnOnHeadless(mockDriver, gathererResults)
-      .then(_ => {
-        assert.strictEqual(gathererResults.LighthouseRunWarnings.length, 1);
-        const warning = gathererResults.LighthouseRunWarnings[0];
-        assert.ok(/Headless Chrome/.test(warning));
-      });
+    GatherRunner.warnOnHeadless(userAgent, gathererResults);
+    assert.strictEqual(gathererResults.LighthouseRunWarnings.length, 1);
+    const warning = gathererResults.LighthouseRunWarnings[0];
+    assert.ok(/Headless Chrome/.test(warning));
   });
 });

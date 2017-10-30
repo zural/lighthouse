@@ -468,7 +468,7 @@ describe('Runner', () => {
     });
 
     return Runner.run(null, {url, config, driverMock}).then(results => {
-      assert.deepStrictEqual(results.lighthouseRunWarnings, LighthouseRunWarnings);
+      assert.deepStrictEqual(results.runWarnings, LighthouseRunWarnings);
     });
   });
 });

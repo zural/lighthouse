@@ -157,7 +157,7 @@ class Runner {
           generatedTime: (new Date()).toJSON(),
           initialUrl: opts.initialUrl,
           url: opts.url,
-          lighthouseRunWarnings,
+          runWarnings: lighthouseRunWarnings,
           audits: resultsById,
           artifacts: runResults.artifacts,
           runtimeConfig: Runner.getRuntimeConfig(opts.flags),
