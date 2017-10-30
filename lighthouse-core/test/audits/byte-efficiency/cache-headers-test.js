@@ -132,6 +132,18 @@ describe('Cache headers audit', () => {
     });
   });
 
+  it('catches records with Etags', () => {
+    networkRecords = [
+      networkRecord({headers: {etag: 'md5hashhere'}}),
+      networkRecord({headers: {'etag': 'md5hashhere', 'cache-control': 'max-age=60'}}),
+    ];
+
+    return CacheHeadersAudit.audit(artifacts).then(result => {
+      const items = result.extendedInfo.value.results;
+      assert.equal(items.length, 2);
+    });
+  });
+
   it('ignores explicit no-cache policies', () => {
     networkRecords = [
       networkRecord({headers: {expires: '-1'}}),
@@ -139,18 +151,6 @@ describe('Cache headers audit', () => {
       networkRecord({headers: {'cache-control': 'no-cache'}}),
       networkRecord({headers: {'cache-control': 'max-age=0'}}),
       networkRecord({headers: {pragma: 'no-cache'}}),
-    ];
-
-    return CacheHeadersAudit.audit(artifacts).then(result => {
-      const items = result.extendedInfo.value.results;
-      assert.equal(items.length, 0);
-    });
-  });
-
-  it('ignores records with Etags', () => {
-    networkRecords = [
-      networkRecord({headers: {etag: 'md5hashhere'}}),
-      networkRecord({headers: {'etag': 'md5hashhere', 'cache-control': 'max-age=60'}}),
     ];
 
     return CacheHeadersAudit.audit(artifacts).then(result => {
