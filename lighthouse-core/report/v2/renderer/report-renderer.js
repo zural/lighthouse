@@ -115,6 +115,26 @@ class ReportRenderer {
   }
 
   /**
+   * Returns a div with a list of top-level warnings, or null if no warnings.
+   * @param {!ReportRenderer.ReportJSON} report
+   * @return {?DocumentFragment}
+   */
+  _renderReportWarnings(report) {
+    if (!report.lighthouseRunWarnings || report.lighthouseRunWarnings.length === 0) {
+      return null;
+    }
+
+    const container = this._dom.cloneTemplate('#tmpl-lh-run-warnings', this._templateContext);
+    const warnings = this._dom.find('ul', container);
+    for (const warningString of report.lighthouseRunWarnings) {
+      const warning = warnings.appendChild(this._dom.createElement('li'));
+      warning.textContent = warningString;
+    }
+
+    return container;
+  }
+
+  /**
    * @param {!ReportRenderer.ReportJSON} report
    * @return {!Element}
    */
@@ -123,6 +143,11 @@ class ReportRenderer {
     container.appendChild(this._renderReportHeader(report)); // sticky header goes at the top.
     container.appendChild(this._renderReportNav(report));
     const reportSection = container.appendChild(this._dom.createElement('div', 'lh-report'));
+
+    const warnings = this._renderReportWarnings(report);
+    if (warnings) {
+      reportSection.appendChild(warnings);
+    }
 
     let scoreHeader;
     const isSoloCategory = report.reportCategories.length === 1;
@@ -202,6 +227,7 @@ ReportRenderer.GroupJSON; // eslint-disable-line no-unused-expressions
  *     timing: {total: number},
  *     initialUrl: string,
  *     url: string,
+ *     lighthouseRunWarnings: !Array<string>,
  *     artifacts: {traces: !Object},
  *     reportCategories: !Array<!ReportRenderer.CategoryJSON>,
  *     reportGroups: !Object<string, !ReportRenderer.GroupJSON>,

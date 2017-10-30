@@ -749,6 +749,22 @@ describe('GatherRunner', function() {
       });
     });
 
+    it('produces a LighthouseRunWarnings artifact from array of warnings', () => {
+      const LighthouseRunWarnings = [
+        'warning0',
+        'warning1',
+        'warning2',
+      ];
+
+      const gathererResults = {
+        LighthouseRunWarnings,
+      };
+
+      return GatherRunner.collectArtifacts(gathererResults).then(artifacts => {
+        assert.deepStrictEqual(artifacts.LighthouseRunWarnings, LighthouseRunWarnings);
+      });
+    });
+
     it('supports sync and async throwing of non-fatal errors from gatherers', () => {
       const gatherers = [
         // sync

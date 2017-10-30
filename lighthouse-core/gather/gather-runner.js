@@ -301,6 +301,9 @@ class GatherRunner {
   static collectArtifacts(gathererResults) {
     const artifacts = {};
 
+    // Nest LighthouseRunWarnings, if any, so they will be collected into artifact.
+    gathererResults.LighthouseRunWarnings = [gathererResults.LighthouseRunWarnings || []];
+
     return Object.keys(gathererResults).reduce((chain, gathererName) => {
       return chain.then(_ => {
         const phaseResultsPromises = gathererResults[gathererName];
@@ -349,7 +352,9 @@ class GatherRunner {
 
     passes = this.instantiateGatherers(passes, options.config.configDir);
 
-    const gathererResults = {};
+    const gathererResults = {
+      LighthouseRunWarnings: [],
+    };
 
     return driver.connect()
       .then(_ => GatherRunner.loadBlank(driver))
