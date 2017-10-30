@@ -756,10 +756,13 @@ span.lh-node:hover {
 
 .lh-run-warnings {
   font-size: var(--body-font-size);
-  margin: 0;
+  margin: var(--section-padding);
   padding: var(--section-padding);
-  border-bottom: 1px solid var(--report-border-color);
-  line-height: var(--header-line-height);
+  background-color: hsla(40, 100%, 91%, 1);
+  color: var(--secondary-text-color);
+}
+.lh-run-warnings li {
+  margin-bottom: calc(var(--header-line-height) / 2);
 }
 .lh-run-warnings::before {
   display: inline-block;
