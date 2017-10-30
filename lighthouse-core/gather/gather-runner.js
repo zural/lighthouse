@@ -100,6 +100,7 @@ class GatherRunner {
     // Enable emulation based on flags
     return driver.assertNoSameOriginServiceWorkerClients(options.url)
       .then(_ => gathererResults.UserAgent = [driver.getUserAgent()])
+      .then(_ => GatherRunner.warnOnHeadless(driver, gathererResults))
       .then(_ => driver.beginEmulation(options.flags))
       .then(_ => driver.enableRuntimeEvents())
       .then(_ => driver.cacheNatives())
@@ -160,6 +161,23 @@ class GatherRunner {
       error.code = 'PAGE_LOAD_ERROR';
       throw error;
     }
+  }
+
+  /**
+   * Add run warning if running in Headless Chrome.
+   * @param {!Driver} driver
+   * @param {!GathererResults} gathererResults
+   * @return {!Promise<undefined>}
+   */
+  static warnOnHeadless(driver, gathererResults) {
+    return driver.getUserAgent()
+      .then(userAgent => {
+        if (userAgent.startsWith('HeadlessChrome')) {
+          gathererResults.LighthouseRunWarnings.push('Your site\'s mobile performance may be ' +
+              'worse than the numbers presented in this report. Lighthouse could not test on a ' +
+              'mobile connection because Headless Chrome does not support network throttling.');
+        }
+      });
   }
 
   /**

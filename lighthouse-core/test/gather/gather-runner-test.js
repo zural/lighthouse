@@ -255,7 +255,7 @@ describe('GatherRunner', function() {
       cleanBrowserCaches: createCheck('calledCleanBrowserCaches'),
       clearDataForOrigin: createCheck('calledClearStorage'),
       blockUrlPatterns: asyncFunc,
-      getUserAgent: asyncFunc,
+      getUserAgent: () => Promise.resolve('Fake user agent'),
     };
 
     return GatherRunner.setupDriver(driver, {}, {flags: {}}).then(_ => {
@@ -313,7 +313,7 @@ describe('GatherRunner', function() {
       cleanBrowserCaches: createCheck('calledCleanBrowserCaches'),
       clearDataForOrigin: createCheck('calledClearStorage'),
       blockUrlPatterns: asyncFunc,
-      getUserAgent: asyncFunc,
+      getUserAgent: () => Promise.resolve('Fake user agent'),
     };
 
     return GatherRunner.setupDriver(driver, {}, {
@@ -938,5 +938,21 @@ describe('GatherRunner', function() {
           assert.ok(true);
         });
     });
+  });
+
+  it('issues a lighthouseRunWarnings if running in Headless', () => {
+    const mockDriver = {
+      getUserAgent: () => Promise.resolve('HeadlessChrome/64.0.3240.0'),
+    };
+    const gathererResults = {
+      LighthouseRunWarnings: [],
+    };
+
+    return GatherRunner.warnOnHeadless(mockDriver, gathererResults)
+      .then(_ => {
+        assert.strictEqual(gathererResults.LighthouseRunWarnings.length, 1);
+        const warning = gathererResults.LighthouseRunWarnings[0];
+        assert.ok(/Headless Chrome/.test(warning));
+      });
   });
 });
